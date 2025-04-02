@@ -1,0 +1,58 @@
+[package]
+name = "oxicloud-desktop"
+version = "0.1.0"
+edition = "2021"
+description = "Cliente de escritorio para OxiCloud construido con Dioxus"
+authors = ["Tu Nombre <tu@email.com>"]
+license = "MIT"
+
+[dependencies]
+# Dioxus - Framework UI
+dioxus = { version = "0.4.3", features = ["desktop", "router", "launch"] }
+dioxus-desktop = "0.4.3"
+dioxus-router = "0.4.3"
+dioxus-free-icons = { version = "0.7.0", features = ["bootstrap", "ionicons"] }
+
+# Cliente HTTP
+reqwest = { version = "0.11", features = ["json", "multipart"] }
+
+# Soporte asíncrono
+tokio = { version = "1.29", features = ["full"] }
+futures = "0.3.28"
+
+# Serialización/Deserialización
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Sistema de archivos local
+notify = "6.1.1"       # Para detectar cambios en archivos
+walkdir = "2.4.0"      # Para recorrer directorios recursivamente
+dirs = "5.0.1"         # Para directorios del sistema
+uuid = { version = "1.3", features = ["v4", "serde"] }
+
+# Almacenamiento local
+keyring = "2.0.5"      # Para almacenar credenciales de manera segura
+rusqlite = { version = "0.29.0", features = ["bundled"] } # Para base de datos local
+r2d2 = "0.8.10"        # Pool de conexiones para SQLite
+r2d2_sqlite = "0.22.0" # Adaptador R2D2 para SQLite
+
+# Utilidades
+thiserror = "1.0.40"   # Manejo de errores
+tracing = "0.1.37"     # Registro y diagnóstico
+tracing-subscriber = "0.3.17"
+chrono = { version = "0.4.26", features = ["serde"] }
+human-size = "0.4.2"   # Para mostrar tamaños en formato legible
+image = "0.24.7"       # Para procesamiento de imágenes y miniaturas
+
+[build-dependencies]
+embed-resource = "2.4.0" # Para incluir iconos en Windows
+
+[dev-dependencies]
+mockito = "1.1.0"
+tokio-test = "0.4.3"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
+strip = true
