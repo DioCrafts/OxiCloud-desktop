@@ -1,151 +1,117 @@
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
+use dioxus_free_icons::icons::bootstrap_icons::Bs;
+use dioxus_free_icons::Icon;
 
-use crate::Route;
+use crate::interfaces::app::Route;
 
+#[component]
 pub fn LoginPage(cx: Scope) -> Element {
-    let server_url = use_state(cx, || "https://".to_string());
-    let username = use_state(cx, || String::new());
-    let password = use_state(cx, || String::new());
+    let navigator = use_navigator(cx);
+    let server_url = use_state(cx, || String::from(""));
+    let username = use_state(cx, || String::from(""));
+    let password = use_state(cx, || String::from(""));
     let error = use_state(cx, || None::<String>);
     let loading = use_state(cx, || false);
     
-    let navigator = use_navigator();
+    // Form validation
+    let is_valid = !server_url.is_empty() && !username.is_empty() && !password.is_empty();
     
     let handle_login = move |_| {
-        to_owned![server_url, username, password, error, loading, navigator];
+        loading.set(true);
+        error.set(None);
         
+        // TODO: Implement the actual login logic with API service
+        // Simulating a login for now
         cx.spawn(async move {
-            loading.set(true);
-            error.set(None);
+            // Simulate API call delay
+            tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
             
-            // Validar entradas
-            if server_url.is_empty() || !server_url.starts_with("http") {
-                error.set(Some("Por favor, introduce una URL de servidor válida".to_string()));
-                loading.set(false);
-                return;
-            }
-            
-            if username.is_empty() {
-                error.set(Some("Por favor, introduce un nombre de usuario".to_string()));
-                loading.set(false);
-                return;
-            }
-            
-            if password.is_empty() {
-                error.set(Some("Por favor, introduce una contraseña".to_string()));
-                loading.set(false);
-                return;
-            }
-            
-            // Simular inicio de sesión (en una implementación real, esto sería una llamada a la API)
-            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-            
-            // En este ejemplo, siempre iniciamos sesión correctamente
+            // Simulate success for now
             loading.set(false);
+            navigator.push(Route::Files {});
             
-            // Redirigir a la página de archivos
-            navigator.push(Route::Home {});
+            // Error simulation example:
+            // error.set(Some("Invalid credentials".to_string()));
+            // loading.set(false);
         });
     };
     
-    rsx! {
-        div { 
-            class: "login-container",
-            
-            div { 
-                class: "login-box",
-                
-                div { 
-                    class: "login-header",
-                    img { 
-                        src: "../assets/oxicloud-logo.svg", 
-                        alt: "OxiCloud Logo",
-                        width: "200"
-                    }
-                    h2 { "Iniciar sesión en OxiCloud" }
+    cx.render(rsx! {
+        div { class: "login-container",
+            div { class: "login-box",
+                div { class: "login-header",
+                    h1 { "OxiCloud Desktop" }
+                    p { "Secure cloud synchronization client" }
                 }
                 
                 if let Some(err) = error.get() {
-                    div { 
-                        class: "error-message",
-                        "{err}"
+                    div { class: "error-message",
+                        Icon { icon: Bs::ExclamationTriangleFill }
+                        span { "{err}" }
                     }
                 }
                 
-                form { 
-                    class: "login-form",
+                form { class: "login-form",
                     onsubmit: move |evt| {
                         evt.prevent_default();
-                        handle_login(evt);
+                        if is_valid {
+                            handle_login(());
+                        }
                     },
                     
-                    div { 
-                        class: "form-group",
-                        label { r#for: "server", "URL del servidor" }
+                    div { class: "form-group",
+                        label { "Server URL" }
                         input {
-                            id: "server",
                             r#type: "text",
-                            value: "{server_url}",
-                            placeholder: "https://tu-servidor.com",
+                            placeholder: "https://your-oxicloud-server.com",
+                            value: server_url.get(),
                             oninput: move |evt| server_url.set(evt.value.clone()),
-                            disabled: *loading.get()
+                            disabled: *loading.get(),
                         }
                     }
                     
-                    div { 
-                        class: "form-group",
-                        label { r#for: "username", "Nombre de usuario" }
+                    div { class: "form-group",
+                        label { "Username" }
                         input {
-                            id: "username",
                             r#type: "text",
-                            value: "{username}",
-                            placeholder: "usuario",
+                            placeholder: "Username",
+                            value: username.get(),
                             oninput: move |evt| username.set(evt.value.clone()),
-                            disabled: *loading.get()
+                            disabled: *loading.get(),
                         }
                     }
                     
-                    div { 
-                        class: "form-group",
-                        label { r#for: "password", "Contraseña" }
+                    div { class: "form-group",
+                        label { "Password" }
                         input {
-                            id: "password",
                             r#type: "password",
-                            value: "{password}",
-                            placeholder: "••••••••",
+                            placeholder: "Password",
+                            value: password.get(),
                             oninput: move |evt| password.set(evt.value.clone()),
-                            disabled: *loading.get()
+                            disabled: *loading.get(),
                         }
                     }
                     
-                    button { 
+                    button {
+                        class: "btn btn-primary login-button",
                         r#type: "submit",
-                        class: "login-button",
-                        disabled: *loading.get(),
+                        disabled: !is_valid || *loading.get(),
                         
                         if *loading.get() {
-                            "Iniciando sesión..."
+                            Icon { icon: Bs::ArrowRepeat, class: "rotating" }
+                            " Logging in..."
                         } else {
-                            "Iniciar sesión"
+                            Icon { icon: Bs::BoxArrowInRight }
+                            " Login"
                         }
                     }
                 }
                 
-                div { 
-                    class: "login-footer",
-                    p { "¿Primera vez con OxiCloud? " }
-                    a { 
-                        href: "#",
-                        "Aprende más"
-                    }
+                div { class: "login-footer",
+                    span { "OxiCloud Desktop v0.1.0" }
                 }
             }
-            
-            div { 
-                class: "login-version",
-                "OxiCloud Desktop v0.1.0"
-            }
         }
-    }
+    })
 }

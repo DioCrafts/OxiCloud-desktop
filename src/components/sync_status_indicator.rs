@@ -1,90 +1,73 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::{
-    icons::bootstrap_icons::{
-        BsCloudCheckFill, BsCloudSlashFill, BsCloudUploadFill, BsPauseFill,
-    },
-    Icon,
-};
+use dioxus_free_icons::icons::bootstrap_icons::Bs;
+use dioxus_free_icons::Icon;
 
-use crate::SyncStatus;
+use crate::application::dtos::sync_dto::{SyncStateDto, SyncStatusDto};
 
-#[derive(Props)]
-pub struct SyncStatusIndicatorProps {
-    status: SyncStatus,
-    #[props(default)]
-    compact: bool,
-}
-
-pub fn SyncStatusIndicator(cx: Scope<SyncStatusIndicatorProps>) -> Element {
-    let status_class = match &cx.props.status {
-        SyncStatus::Idle => "status-idle",
-        SyncStatus::Syncing { .. } => "status-syncing",
-        SyncStatus::Error { .. } => "status-error",
-        SyncStatus::Paused => "status-paused",
+#[component]
+pub fn SyncStatusIndicator(cx: Scope) -> Element {
+    // In a real implementation, this would come from a state manager or service
+    let sync_status = use_state(cx, || SyncStatusDto {
+        state: SyncStateDto::Idle,
+        last_sync: None,
+        current_operation: None,
+        current_file: None,
+        total_files: 0,
+        processed_files: 0,
+        total_bytes: 0,
+        processed_bytes: 0,
+        error_message: None,
+    });
+    
+    let status_class = match sync_status.get().state {
+        SyncStateDto::Idle => "status-idle",
+        SyncStateDto::Syncing => "status-syncing",
+        SyncStateDto::Paused => "status-paused",
+        SyncStateDto::Error => "status-error",
     };
     
-    let status_icon = match &cx.props.status {
-        SyncStatus::Idle => rsx! { Icon { icon: BsCloudCheckFill, width: 16, height: 16 } },
-        SyncStatus::Syncing { .. } => rsx! { Icon { icon: BsCloudUploadFill, width: 16, height: 16 } },
-        SyncStatus::Error { .. } => rsx! { Icon { icon: BsCloudSlashFill, width: 16, height: 16 } },
-        SyncStatus::Paused => rsx! { Icon { icon: BsPauseFill, width: 16, height: 16 } },
-    };
-    
-    let status_text = match &cx.props.status {
-        SyncStatus::Idle => "Sincronizado",
-        SyncStatus::Syncing { progress, current_file } => if current_file.is_some() {
-            "Sincronizando..."
-        } else {
-            "Sincronizando..."
-        },
-        SyncStatus::Error { message } => "Error de sincronización",
-        SyncStatus::Paused => "Sincronización pausada",
-    };
-    
-    if cx.props.compact {
-        rsx! {
-            div {
-                class: "sync-indicator compact {status_class}",
-                title: "{status_text}",
-                {status_icon}
+    cx.render(rsx! {
+        div { class: "sync-indicator {status_class}",
+            div { class: "sync-icon",
+                match sync_status.get().state {
+                    SyncStateDto::Idle => rsx! { Icon { icon: Bs::CheckCircleFill } },
+                    SyncStateDto::Syncing => rsx! { Icon { icon: Bs::ArrowRepeat, class: "rotating" } },
+                    SyncStateDto::Paused => rsx! { Icon { icon: Bs::PauseFill } },
+                    SyncStateDto::Error => rsx! { Icon { icon: Bs::ExclamationTriangleFill } },
+                }
             }
-        }
-    } else {
-        rsx! {
-            div {
-                class: "sync-indicator {status_class}",
-                div {
-                    class: "sync-icon",
-                    {status_icon}
+            
+            div { class: "sync-details",
+                span { class: "sync-status-text",
+                    match sync_status.get().state {
+                        SyncStateDto::Idle => "All files in sync",
+                        SyncStateDto::Syncing => "Syncing files...",
+                        SyncStateDto::Paused => "Sync paused",
+                        SyncStateDto::Error => "Sync error",
+                    }
                 }
                 
-                div {
-                    class: "sync-details",
-                    span { class: "sync-status-text", "{status_text}" }
-                    
-                    if let SyncStatus::Syncing { progress, current_file } = &cx.props.status {
-                        rsx! {
-                            div {
-                                class: "sync-progress-container",
-                                div {
-                                    class: "sync-progress-bar",
-                                    style: "width: {progress * 100.0}%"
-                                }
-                            }
-                            
-                            if let Some(file) = current_file {
-                                span { class: "sync-current-file", "{file}" }
-                            }
+                if let Some(current_file) = &sync_status.get().current_file {
+                    span { class: "sync-current-file", "{current_file}" }
+                }
+                
+                if sync_status.get().state == SyncStateDto::Syncing {
+                    div { class: "sync-progress-container",
+                        div {
+                            class: "sync-progress-bar",
+                            style: "width: {sync_status.get().progress_percentage()}%"
                         }
                     }
                     
-                    if let SyncStatus::Error { message } = &cx.props.status {
-                        rsx! {
-                            span { class: "sync-error-message", "{message}" }
-                        }
+                    span { class: "sync-progress-text",
+                        "{sync_status.get().processed_files}/{sync_status.get().total_files} files"
                     }
+                }
+                
+                if let Some(error) = &sync_status.get().error_message {
+                    span { class: "sync-error-message", "{error}" }
                 }
             }
         }
-    }
+    })
 }

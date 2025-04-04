@@ -1,5 +1,6 @@
 pub mod login;
 pub mod files;
-pub mod account;
-pub mod settings;
-pub mod sync_status;
+
+// Re-export pages
+pub use login::LoginPage;
+pub use files::FilesPage;

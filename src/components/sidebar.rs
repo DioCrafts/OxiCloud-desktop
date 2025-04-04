@@ -1,95 +1,59 @@
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-use dioxus_free_icons::{
-    icons::bootstrap_icons::{
-        BsCloudUpload, BsGear, BsHouseDoor, BsPerson, BsTrash,
-    },
-    Icon,
-};
+use dioxus_free_icons::icons::bootstrap_icons::Bs;
+use dioxus_free_icons::Icon;
 
-use crate::Route;
-use crate::SyncStatus;
+use crate::interfaces::app::Route;
+use crate::components::sync_status_indicator::SyncStatusIndicator;
 
-#[derive(Props)]
-pub struct SidebarProps {
-    active_route: Option<String>,
-    sync_status: SyncStatus,
-}
-
-pub fn Sidebar(cx: Scope<SidebarProps>) -> Element {
-    let navigator = use_navigator();
+#[component]
+pub fn Sidebar(cx: Scope) -> Element {
+    let navigator = use_navigator(cx);
+    let current_route = use_route::<Route>(cx);
     
-    rsx! {
-        div { 
-            class: "sidebar",
-            div { 
-                class: "sidebar-header",
-                img { 
-                    src: "../assets/oxicloud-logo.svg", 
-                    alt: "OxiCloud Logo",
-                    width: "150"
+    cx.render(rsx! {
+        aside { class: "sidebar",
+            div { class: "sidebar-header",
+                h1 { class: "app-title", "OxiCloud" }
+            }
+            
+            nav { class: "sidebar-menu",
+                Link {
+                    to: Route::Files {},
+                    class: if matches!(current_route, Route::Files{}) { "nav-item active" } else { "nav-item" },
+                    Icon { class: "nav-item-icon", icon: Bs::FolderFill }
+                    span { "Files" }
+                }
+                
+                Link {
+                    to: Route::Settings {},
+                    class: if matches!(current_route, Route::Settings{}) { "nav-item active" } else { "nav-item" },
+                    Icon { class: "nav-item-icon", icon: Bs::GearFill }
+                    span { "Settings" }
                 }
             }
             
-            div { 
-                class: "sidebar-menu",
-                button {
-                    class: "sidebar-item {if cx.props.active_route == Some(String::from("/")) { "active" } else { "" }}",
-                    onclick: move |_| navigator.push(Route::Home {}),
-                    Icon { icon: BsHouseDoor, width: 20, height: 20 }
-                    span { "Inicio" }
-                }
+            div { class: "sidebar-footer",
+                SyncStatusIndicator {}
                 
                 button {
-                    class: "sidebar-item {if cx.props.active_route.as_ref().map_or(false, |r| r.starts_with("/files")) { "active" } else { "" }}",
-                    onclick: move |_| navigator.push(Route::Files { path: None }),
-                    Icon { icon: BsCloudUpload, width: 20, height: 20 }
-                    span { "Archivos" }
-                }
-                
-                button {
-                    class: "sidebar-item {if cx.props.active_route == Some(String::from("/account")) { "active" } else { "" }}",
-                    onclick: move |_| navigator.push(Route::Account {}),
-                    Icon { icon: BsPerson, width: 20, height: 20 }
-                    span { "Cuenta" }
-                }
-                
-                button {
-                    class: "sidebar-item {if cx.props.active_route == Some(String::from("/settings")) { "active" } else { "" }}",
-                    onclick: move |_| navigator.push(Route::Settings {}),
-                    Icon { icon: BsGear, width: 20, height: 20 }
-                    span { "Configuración" }
-                }
-            }
-            
-            // Indicador de estado de sincronización
-            div { 
-                class: "sync-status",
-                match &cx.props.sync_status {
-                    SyncStatus::Idle => rsx! {
-                        span { class: "status-badge idle", "Sincronizado" }
+                    class: "btn btn-outline sync-button",
+                    onclick: move |_| {
+                        // TODO: Implement sync start/pause logic
                     },
-                    SyncStatus::Syncing { progress, current_file } => rsx! {
-                        span { class: "status-badge syncing", 
-                            "Sincronizando {progress * 100.0}%"
-                            if let Some(file) = current_file {
-                                span { class: "current-file", "{file}" }
-                            }
-                        }
-                    },
-                    SyncStatus::Error { message } => rsx! {
-                        span { class: "status-badge error", "Error: {message}" }
-                    },
-                    SyncStatus::Paused => rsx! {
-                        span { class: "status-badge paused", "Pausado" }
-                    }
+                    "Sync Now"
                 }
-                
+
                 button {
-                    class: "sync-button",
-                    "Sincronizar ahora"
+                    class: "btn btn-outline logout-button",
+                    onclick: move |_| {
+                        // TODO: Implement logout logic
+                        navigator.push(Route::Login {});
+                    },
+                    Icon { icon: Bs::BoxArrowRight }
+                    span { "Logout" }
                 }
             }
         }
-    }
+    })
 }

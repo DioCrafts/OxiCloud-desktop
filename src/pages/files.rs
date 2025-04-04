@@ -1,193 +1,158 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::{
-    icons::bootstrap_icons::{
-        BsCloudUpload, BsFolderPlus, BsUpload,
-    },
-    Icon,
-};
+use dioxus_router::prelude::*;
+use dioxus_free_icons::icons::bootstrap_icons::Bs;
+use dioxus_free_icons::Icon;
 
-use crate::components::sidebar::Sidebar;
 use crate::components::file_list::FileList;
-use crate::models::file::{FileItem, FileType};
-use crate::SyncStatus;
+use crate::components::sidebar::Sidebar;
+use crate::application::dtos::file_dto::{FileDto, FileTypeDto, SyncStatusDto};
 
-#[derive(Props)]
-pub struct FilesPageProps {
-    path: Option<String>,
-}
-
-pub fn FilesPage(cx: Scope<FilesPageProps>) -> Element {
-    // Estado para cargar archivos
-    let loading = use_state(cx, || true);
-    let files = use_state(cx, Vec::new);
-    let current_path = use_state(cx, || cx.props.path.clone().unwrap_or_else(|| "/".to_string()));
+#[component]
+pub fn FilesPage(cx: Scope) -> Element {
+    // In a real app, this would be fetched from a service
+    let files = use_state(cx, || vec![
+        FileDto {
+            id: "1".to_string(),
+            name: "Documents".to_string(),
+            path: "/Documents".to_string(),
+            file_type: FileTypeDto::Directory,
+            size: 0,
+            mime_type: None,
+            parent_id: None,
+            created_at: chrono::Utc::now(),
+            modified_at: chrono::Utc::now(),
+            sync_status: SyncStatusDto::Synced,
+            is_favorite: false,
+            local_path: Some("/home/user/OxiCloud/Documents".to_string()),
+        },
+        FileDto {
+            id: "2".to_string(),
+            name: "Project Report.pdf".to_string(),
+            path: "/Project Report.pdf".to_string(),
+            file_type: FileTypeDto::File,
+            size: 1024 * 1024 * 2, // 2MB
+            mime_type: Some("application/pdf".to_string()),
+            parent_id: None,
+            created_at: chrono::Utc::now(),
+            modified_at: chrono::Utc::now(),
+            sync_status: SyncStatusDto::Synced,
+            is_favorite: true,
+            local_path: Some("/home/user/OxiCloud/Project Report.pdf".to_string()),
+        },
+        FileDto {
+            id: "3".to_string(),
+            name: "Presentation.pptx".to_string(),
+            path: "/Presentation.pptx".to_string(),
+            file_type: FileTypeDto::File,
+            size: 1024 * 1024 * 5, // 5MB
+            mime_type: Some("application/vnd.openxmlformats-officedocument.presentationml.presentation".to_string()),
+            parent_id: None,
+            created_at: chrono::Utc::now(),
+            modified_at: chrono::Utc::now(),
+            sync_status: SyncStatusDto::PendingUpload,
+            is_favorite: false,
+            local_path: Some("/home/user/OxiCloud/Presentation.pptx".to_string()),
+        },
+    ]);
     
-    // Estado de sincronización
-    let sync_status = use_state(cx, || SyncStatus::Idle);
+    let current_path = use_state(cx, || "/".to_string());
+    let current_folder_id = use_state(cx, || None::<String>);
     
-    // Simulación de carga de archivos (en una implementación real, esto sería una llamada a la API)
-    use_effect(cx, (), |_| {
-        to_owned![loading, files, current_path];
-        async move {
-            // Simular tiempo de carga
-            tokio::time::sleep(tokio::time::Duration::from_millis(800)).await;
-            
-            // Datos de prueba
-            let mut test_files = vec![
-                FileItem {
-                    id: "1".to_string(),
-                    name: "Documentos".to_string(),
-                    path: format!("{}/Documentos", current_path.get()),
-                    file_type: FileType::Directory,
-                    size: 0,
-                    created: chrono::Utc::now(),
-                    modified: chrono::Utc::now(),
-                    is_favorite: true,
-                    is_shared: false,
-                    sync_status: crate::models::file::FileSyncStatus::Synced,
-                    etag: Some("abc123".to_string()),
-                },
-                FileItem {
-                    id: "2".to_string(),
-                    name: "Fotos".to_string(),
-                    path: format!("{}/Fotos", current_path.get()),
-                    file_type: FileType::Directory,
-                    size: 0,
-                    created: chrono::Utc::now(),
-                    modified: chrono::Utc::now(),
-                    is_favorite: false,
-                    is_shared: true,
-                    sync_status: crate::models::file::FileSyncStatus::Synced,
-                    etag: Some("def456".to_string()),
-                },
-                FileItem {
-                    id: "3".to_string(),
-                    name: "informe.pdf".to_string(),
-                    path: format!("{}/informe.pdf", current_path.get()),
-                    file_type: FileType::File,
-                    size: 1024 * 1024 * 2, // 2MB
-                    created: chrono::Utc::now(),
-                    modified: chrono::Utc::now(),
-                    is_favorite: false,
-                    is_shared: false,
-                    sync_status: crate::models::file::FileSyncStatus::Synced,
-                    etag: Some("ghi789".to_string()),
-                },
-                FileItem {
-                    id: "4".to_string(),
-                    name: "presentacion.pptx".to_string(),
-                    path: format!("{}/presentacion.pptx", current_path.get()),
-                    file_type: FileType::File,
-                    size: 1024 * 1024 * 5, // 5MB
-                    created: chrono::Utc::now(),
-                    modified: chrono::Utc::now(),
-                    is_favorite: true,
-                    is_shared: true,
-                    sync_status: crate::models::file::FileSyncStatus::Synced,
-                    etag: Some("jkl012".to_string()),
-                },
-            ];
-            
-            // Ordenar: primero carpetas, luego archivos
-            test_files.sort_by(|a, b| {
-                if a.file_type == b.file_type {
-                    a.name.cmp(&b.name)
-                } else if a.file_type == FileType::Directory {
-                    std::cmp::Ordering::Less
-                } else {
-                    std::cmp::Ordering::Greater
-                }
-            });
-            
-            files.set(test_files);
-            loading.set(false);
-        }
-    });
+    // Breadcrumb navigation
+    let path_segments = current_path.split('/').filter(|s| !s.is_empty()).collect::<Vec<_>>();
     
-    // Manejadores de eventos
-    let handle_file_click = |file: FileItem| {
-        if file.file_type == FileType::Directory {
-            loading.set(true);
-            current_path.set(file.path);
-        } else {
-            // Abrir archivo
-            println!("Abrir archivo: {}", file.name);
-        }
+    // Event handlers
+    let on_file_click = move |file_id: String| {
+        log::info!("File clicked: {}", file_id);
+        // TODO: Implement file opening logic
     };
     
-    let handle_download = |file: FileItem| {
-        println!("Descargar archivo: {}", file.name);
-    };
-    
-    let handle_share = |file: FileItem| {
-        println!("Compartir: {}", file.name);
-    };
-    
-    let handle_favorite_toggle = |file: FileItem| {
-        println!("Alternar favorito: {}", file.name);
-    };
-    
-    rsx! {
-        div { 
-            class: "app-container",
-            
-            // Barra lateral
-            Sidebar {
-                active_route: Some(format!("/files/{}", current_path.get())),
-                sync_status: (*sync_status.get()).clone()
+    let on_folder_click = move |folder_id: String| {
+        log::info!("Folder clicked: {}", folder_id);
+        // In a real app, this would fetch contents of the clicked folder
+        current_folder_id.set(Some(folder_id));
+        
+        // Example: Update path to simulate navigation
+        for file in files.get() {
+            if file.id == folder_id && file.is_directory() {
+                current_path.set(file.path.clone());
+                break;
             }
+        }
+    };
+    
+    let on_favorite_toggle = move |file_id: String| {
+        log::info!("Favorite toggled: {}", file_id);
+        
+        // Update the file's favorite status
+        let mut updated_files = files.get().clone();
+        for file in &mut updated_files {
+            if file.id == file_id {
+                file.is_favorite = !file.is_favorite;
+                break;
+            }
+        }
+        files.set(updated_files);
+    };
+    
+    cx.render(rsx! {
+        div { class: "app-container",
+            Sidebar {}
             
-            // Contenido principal
-            div { 
-                class: "main-content",
-                
-                // Barra de herramientas
-                div { 
-                    class: "toolbar",
-                    
-                    // Botones de acción
-                    div {
-                        class: "toolbar-actions",
+            div { class: "main-content",
+                div { class: "toolbar",
+                    div { class: "breadcrumbs",
                         button {
-                            class: "toolbar-btn",
-                            Icon { icon: BsFolderPlus, width: 18, height: 18 }
-                            span { "Nueva carpeta" }
+                            class: "breadcrumb-item",
+                            onclick: move |_| {
+                                current_path.set("/".to_string());
+                                current_folder_id.set(None);
+                            },
+                            Icon { icon: Bs::HouseFill }
                         }
                         
-                        button {
-                            class: "toolbar-btn",
-                            Icon { icon: BsUpload, width: 18, height: 18 }
-                            span { "Subir archivos" }
-                        }
-                        
-                        button {
-                            class: "toolbar-btn",
-                            Icon { icon: BsCloudUpload, width: 18, height: 18 }
-                            span { "Sincronizar" }
+                        for (index, segment) in path_segments.iter().enumerate() {
+                            span { class: "breadcrumb-separator", "/" }
+                            button {
+                                class: "breadcrumb-item",
+                                onclick: move |_| {
+                                    let path = "/".to_string() + &path_segments[0..=index].join("/");
+                                    current_path.set(path);
+                                    // In a real app, we would also set the folder_id based on the path
+                                },
+                                "{segment}"
+                            }
                         }
                     }
                     
-                    // Buscador
-                    div {
-                        class: "search-box",
-                        input {
-                            r#type: "text",
-                            placeholder: "Buscar archivos...",
+                    div { class: "toolbar-actions",
+                        div { class: "search-box",
+                            input {
+                                r#type: "text",
+                                placeholder: "Search files...",
+                                // TODO: Implement search functionality
+                            }
+                        }
+                        
+                        button { class: "toolbar-btn",
+                            Icon { icon: Bs::Upload }
+                            span { "Upload" }
+                        }
+                        
+                        button { class: "toolbar-btn",
+                            Icon { icon: Bs::FolderPlus }
+                            span { "New Folder" }
                         }
                     }
                 }
                 
-                // Lista de archivos
                 FileList {
                     files: files.get().clone(),
-                    current_path: current_path.get().clone(),
-                    loading: *loading.get(),
-                    on_file_click: handle_file_click,
-                    on_download_click: handle_download,
-                    on_share_click: handle_share,
-                    on_favorite_toggle: handle_favorite_toggle,
+                    on_file_click: on_file_click,
+                    on_folder_click: on_folder_click,
+                    on_favorite_toggle: on_favorite_toggle,
                 }
             }
         }
-    }
+    })
 }

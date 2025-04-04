@@ -58,35 +58,104 @@ Configuration is stored in:
 - macOS: `~/Library/Application Support/OxiCloud/config.json`
 - Linux: `~/.config/oxicloud/config.json`
 
-## Comparison with Nextcloud Client
+## Technical Documentation
 
-Unlike the Nextcloud client which is built with C++ and Qt, OxiCloud Desktop Client leverages modern Rust with Dioxus for several advantages:
+### Architecture
 
-| Feature | OxiCloud Desktop | Nextcloud Client |
-|---------|------------------|------------------|
-| **Technology** | Rust + Dioxus | C++ + Qt |
-| **Memory Safety** | Guaranteed at compile time | Manual management |
-| **Binary Size** | ~10MB | ~100MB |
-| **Resource Usage** | Low | Moderate |
-| **UI Responsiveness** | High | Good |
-| **Concurrency Model** | Async/Await | Thread-based |
-| **Maintenance** | Modern codebase | Legacy components |
-
-## Development
-
-The project is organized using a clean architecture pattern:
+OxiCloud Desktop Client is built using a hexagonal (ports and adapters) architecture that separates core domain logic from external concerns:
 
 ```
 oxicloud-desktop/
-├── src/
-│   ├── components/     # UI components
-│   ├── models/         # Data structures
-│   ├── services/       # Business logic
-│   ├── utils/          # Helper functions
-│   └── main.rs         # Application entry
+├── domain/           # Core business logic and entities
+│   ├── entities/     # Domain models (File, User, Sync)
+│   ├── repositories/ # Repository interfaces
+│   └── services/     # Core business services
+│
+├── application/      # Application services and use cases
+│   ├── ports/        # Input/output port interfaces
+│   ├── services/     # Application-specific services
+│   └── dtos/         # Data transfer objects
+│
+├── infrastructure/   # External implementations
+│   ├── adapters/     # Adapters for external services
+│   ├── repositories/ # Repository implementations
+│   └── services/     # Infrastructure services
+│
+└── interfaces/       # User interfaces
+    ├── app.rs        # Main application entry
+    ├── pages/        # UI pages
+    └── components/   # Reusable UI components
 ```
 
-### Key commands:
+### Core Technologies
+
+- **Rust**: Memory-safe systems language for reliable performance
+- **Dioxus**: Reactive UI framework for building cross-platform interfaces
+- **SQLite**: Local database for metadata and sync state
+- **Tokio**: Asynchronous runtime for efficient I/O operations
+- **WebDAV/HTTP**: Protocols for communication with OxiCloud server
+
+### Building for Different Platforms
+
+#### Windows
+
+```bash
+# Cross-compile from Linux/macOS
+rustup target add x86_64-pc-windows-msvc
+cargo build --release --target x86_64-pc-windows-msvc
+
+# Build on Windows
+cargo build --release
+
+# Create installer using cargo-wix (on Windows)
+cargo install cargo-wix
+cargo wix
+```
+
+#### macOS
+
+```bash
+# Cross-compile from Linux/Windows
+rustup target add x86_64-apple-darwin
+cargo build --release --target x86_64-apple-darwin
+
+# Build on macOS
+cargo build --release
+
+# Create DMG package (on macOS)
+cargo install cargo-bundle
+cargo bundle --release
+```
+
+#### Linux
+
+```bash
+# Build on Linux
+cargo build --release
+
+# Create AppImage
+cargo install cargo-appimage
+cargo appimage
+```
+
+### Sync Engine
+
+The sync engine operates with these components:
+
+1. **Change Detection**: Monitors local filesystem changes
+2. **Metadata Storage**: Tracks file states and sync status
+3. **File Transfer**: Handles up/downloads with chunking for large files
+4. **Conflict Resolution**: Detects and manages conflicts between versions
+5. **Selective Sync**: Manages exclusion rules for folders
+
+### Security
+
+- All authentication credentials are stored securely using the system's keychain/credential store
+- Data is encrypted in transit using TLS
+- Local database can be encrypted for additional security
+- Tokens are refreshed automatically and stored securely
+
+### Development Workflow
 
 ```bash
 # Run in development mode
@@ -95,11 +164,11 @@ cargo run
 # Run tests
 cargo test
 
-# Check code quality
-cargo clippy
-
 # Format code
 cargo fmt
+
+# Check for issues
+cargo clippy
 ```
 
 ## Contributing
