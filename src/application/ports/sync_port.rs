@@ -16,6 +16,9 @@ pub trait SyncPort: Send + Sync + 'static {
     async fn resume_sync(&self) -> SyncResult<()>;
     async fn cancel_sync(&self) -> SyncResult<()>;
     
+    // Encryption support
+    async fn set_encryption_password(&self, password: Option<String>) -> SyncResult<()>;
+    
     // Sync status and events
     async fn get_sync_status(&self) -> SyncResult<SyncStatusDto>;
     async fn subscribe_to_events(&self) -> broadcast::Receiver<SyncEventDto>;

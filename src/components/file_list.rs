@@ -11,6 +11,8 @@ pub struct FileListProps {
     on_folder_click: EventHandler<String>,
     #[props(optional)]
     on_favorite_toggle: Option<EventHandler<String>>,
+    #[props(optional)]
+    on_context_menu: Option<EventHandler<(String, web_sys::MouseEvent)>>,
 }
 
 #[component]
@@ -47,6 +49,11 @@ pub fn FileList(cx: Scope<FileListProps>) -> Element {
                                 },
                                 onmouseover: move |_| hovered_file.set(Some(file.id.clone())),
                                 onmouseout: move |_| hovered_file.set(None),
+                                oncontextmenu: move |evt| {
+                                    if let Some(on_context_menu) = &cx.props.on_context_menu {
+                                        on_context_menu.call((file.id.clone(), evt));
+                                    }
+                                },
                                 
                                 td { class: "file-name-cell",
                                     div {

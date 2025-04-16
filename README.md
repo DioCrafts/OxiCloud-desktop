@@ -15,7 +15,7 @@ A lightweight, fast, and reliable desktop synchronization client for OxiCloud bu
 - **File On-Demand**: Access cloud files without consuming local storage
 - **Conflict Resolution**: Smart handling of file conflicts with user-friendly resolution
 - **Offline Support**: Work with files offline and sync when connection is restored
-- **Advanced Security**: Secure authentication and local data encryption
+- **Advanced Security**: End-to-end encryption with post-quantum resistance, supporting multiple algorithms (AES-256-GCM, ChaCha20-Poly1305, Kyber768, Dilithium5, and hybrid modes)
 
 ## Installation
 
@@ -57,6 +57,13 @@ Configuration is stored in:
 - Windows: `%APPDATA%\OxiCloud\config.json`
 - macOS: `~/Library/Application Support/OxiCloud/config.json`
 - Linux: `~/.config/oxicloud/config.json`
+
+You can customize application settings through the Settings page, including:
+- UI theme (Light, Dark, System)
+- Sync configuration (automatic, manual, or scheduled)
+- Network bandwidth limits
+- Performance settings
+- Advanced options (logging, crash reporting, etc.)
 
 ## Technical Documentation
 
@@ -154,6 +161,16 @@ The sync engine operates with these components:
 - Data is encrypted in transit using TLS
 - Local database can be encrypted for additional security
 - Tokens are refreshed automatically and stored securely
+- End-to-end encryption (E2EE) with post-quantum resistance
+- Support for multiple encryption algorithms (AES-256-GCM, ChaCha20-Poly1305)
+- Hybrid encryption with post-quantum algorithms (Kyber768, Dilithium5)
+- Secure key management with password-based key derivation
+- Chunked file processing with parallel encryption/decryption for large files
+- Integrity verification using authenticated encryption
+
+For detailed information about the encryption system:
+- [User Encryption Guide](docs/ENCRYPTION.md) - End-user guide to encryption features
+- [Developer Encryption Documentation](docs/DEVELOPER_ENCRYPTION.md) - Technical implementation details
 
 ### Development Workflow
 
@@ -162,7 +179,10 @@ The sync engine operates with these components:
 cargo run
 
 # Run tests
-cargo test
+cargo test                                 # Run all tests
+cargo test encryption_tests                # Run encryption unit tests
+cargo test file_encryption_tests           # Run file encryption tests
+cargo test encryption_sync_integration_tests # Run integration tests
 
 # Format code
 cargo fmt

@@ -177,15 +177,31 @@ pub trait FilePort: Send + Sync + 'static {
 
 Example implementation:
 ```rust
-// src/infrastructure/repositories/file_sqlite_repository.rs
-pub struct FileSqliteRepository {
-    connection_pool: Pool<SqliteConnectionManager>,
+// src/infrastructure/adapters/file_adapter.rs
+pub struct FileApiAdapter {
+    client: Client,
+    auth_repository: Arc<dyn AuthRepository>,
 }
 
 #[async_trait]
-impl FileRepository for FileSqliteRepository {
+impl FileRepository for FileApiAdapter {
     async fn get_file_by_id(&self, file_id: &str) -> FileResult<FileItem> {
-        // Implementation using SQLite
+        // Implementation using HTTP API
+        let server_url = self.get_server_url().await?;
+        let token = self.get_auth_token().await?;
+        
+        let api_url = format!("{}/api/files/{}", server_url.trim_end_matches('/'), file_id);
+        
+        let response = self.client
+            .get(&api_url)
+            .header("Authorization", format!("Bearer {}", token))
+            .send()
+            .await
+            .map_err(|e| FileError::NetworkError(e.to_string()))?;
+
+        // Process response...
+        
+        Ok(file_item)
     }
     // ...
 }

@@ -3,6 +3,26 @@ use std::time::Duration;
 use thiserror::Error;
 use chrono::{DateTime, Utc};
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum SyncEventType {
+    SyncRequested,
+    FileChanged(String),
+    ConflictResolved {
+        file_id: String,
+        direction: SyncDirection,
+    },
+    StateChanged,
+    Error(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SyncEvent {
+    pub event_type: SyncEventType,
+    pub file_id: Option<String>,
+    pub message: Option<String>,
+    pub timestamp: DateTime<Utc>,
+}
+
 #[derive(Debug, Error)]
 pub enum SyncError {
     #[error("Network error: {0}")]
@@ -19,6 +39,27 @@ pub enum SyncError {
     
     #[error("Synchronization error: {0}")]
     SyncError(String),
+    
+    #[error("File error: {0}")]
+    FileError(#[from] crate::domain::entities::file::FileError),
+    
+    #[error("Synchronization already in progress")]
+    AlreadySyncing,
+    
+    #[error("Synchronization service not started")]
+    NotStarted,
+    
+    #[error("File not in conflict state")]
+    NotInConflict,
+    
+    #[error("Operation error: {0}")]
+    OperationError(String),
+    
+    #[error("Encryption error: {0}")]
+    EncryptionError(String),
+    
+    #[error("IO error: {0}")]
+    IOError(String),
 }
 
 pub type SyncResult<T> = Result<T, SyncError>;
@@ -28,7 +69,8 @@ pub enum SyncState {
     Idle,
     Syncing,
     Paused,
-    Error,
+    Error(String),
+    Stopped,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -126,6 +126,11 @@ pub enum SyncEventDto {
     Cancelled,
     Error(String),
     FileChanged(FileDto),
+    EncryptionStarted(String),   // File path being encrypted
+    EncryptionCompleted(String), // File path that was encrypted  
+    DecryptionStarted(String),   // File path being decrypted
+    DecryptionCompleted(String), // File path that was decrypted
+    EncryptionError(String),     // Error message
 }
 
 fn format_bytes(bytes: u64) -> String {

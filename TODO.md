@@ -2,65 +2,78 @@
 
 This document outlines the implementation plan for the OxiCloud Desktop Client built with Dioxus and Rust.
 
+## MVP Status
+
+The Minimum Viable Product (MVP) core components have been completed:
+- [x] Authentication system with token-based auth and credential storage
+- [x] File operations and UI for basic browsing
+- [x] End-to-end encryption with post-quantum resistance
+- [x] SQLite database for local file tracking
+- [x] Bidirectional sync algorithm with conflict detection
+- [x] File system monitoring with debouncing and event filtering
+- [x] System integration with system tray, notifications and autostart
+
+The remaining tasks below are for enhancing the MVP with additional features.
+
 ## Phase 1: Core Framework and UI
 
 ### Setup & Configuration
 - [x] Create project structure
 - [x] Setup Dioxus framework
 - [x] Design basic UI layout and components
-- [ ] Implement theme system (light/dark mode)
-- [ ] Create configuration file format
-- [ ] Add settings persistence
+- [x] Implement theme system (light/dark mode)
+- [x] Create configuration file format
+- [x] Add settings persistence
 
 ### Authentication
-- [ ] Implement login screen
-- [ ] Add token-based authentication
-- [ ] Create secure credential storage (keyring)
-- [ ] Add session renewal mechanism
+- [x] Implement login screen
+- [x] Add token-based authentication
+- [x] Create secure credential storage (keyring)
+- [x] Add session renewal mechanism
 - [ ] Implement account management UI
 - [ ] Add server connection test utilities
 
 ### Basic File Operations UI
-- [ ] Implement file browser component
-- [ ] Create folder navigation system
-- [ ] Add file/folder creation UI
-- [ ] Implement file selection mechanisms
+- [x] Implement file browser component
+- [x] Create folder navigation system
+- [x] Add file/folder creation UI
+- [x] Implement file selection mechanisms
 - [ ] Add drag & drop support
-- [ ] Create context menus for file operations
+- [x] Create context menus for file operations
 - [ ] Implement progress indicators for operations
 
 ## Phase 2: Synchronization Engine
 
 ### Local Database
-- [ ] Design SQLite schema for file metadata
-- [ ] Implement database initialization
-- [ ] Create data access layer
+- [x] Design SQLite schema for file metadata
+- [x] Implement database initialization
+- [x] Create data access layer
 - [ ] Add migration system for updates
-- [ ] Implement efficient query patterns
+- [x] Implement efficient query patterns
 
 ### File System Monitoring
-- [ ] Setup filesystem watcher with notify
-- [ ] Create event filtering system
-- [ ] Implement debounce mechanism for rapid changes
-- [ ] Add exclusion pattern support
-- [ ] Create change queue system
+- [x] Setup filesystem watcher with notify
+- [x] Create event filtering system
+- [x] Implement debounce mechanism for rapid changes
+- [x] Add exclusion pattern support
+- [x] Create change queue system
 
 ### Sync Algorithm
-- [ ] Implement initial sync logic
-- [ ] Create two-way sync algorithm
-- [ ] Add conflict detection
-- [ ] Implement conflict resolution UI
-- [ ] Create sync state machine
-- [ ] Add retry mechanism for failed operations
-- [ ] Implement bandwidth limiting
+- [x] Implement initial sync logic
+- [x] Create two-way sync algorithm
+- [x] Add conflict detection
+- [x] Implement conflict resolution UI
+- [x] Create sync state machine
+- [x] Add retry mechanism for failed operations
+- [x] Implement bandwidth limiting
 
 ### API Integration
-- [ ] Create HTTP client with authentication
-- [ ] Implement file upload/download logic
-- [ ] Add folder operation support
+- [x] Create HTTP client with authentication
+- [x] Implement file upload/download logic 
+- [x] Add folder operation support
 - [ ] Implement trash bin integration
 - [ ] Create sharing API support
-- [ ] Add favorites synchronization
+- [x] Add favorites synchronization
 - [ ] Implement batch operations for efficiency
 
 ## Phase 3: Advanced Features
@@ -87,18 +100,27 @@ This document outlines the implementation plan for the OxiCloud Desktop Client b
 - [ ] Create network status monitoring
 
 ### Performance Optimizations
-- [ ] Implement chunked uploads for large files
+- [x] Implement chunked uploads for large files
+- [x] Add parallel processing for encryption/decryption
 - [ ] Add delta sync for modified files
 - [ ] Create background operation queue
 - [ ] Implement adaptive sync intervals
-- [ ] Add parallel operation support
+- [x] Add parallel operation support
+
+### Security Features
+- [x] Implement end-to-end encryption with post-quantum resistance
+- [x] Support multiple encryption algorithms (AES, ChaCha20, Kyber, Dilithium)
+- [x] Create hybrid encryption mode for defense in depth
+- [x] Add key management with password-based protection
+- [ ] Implement secure key sharing between devices
+- [ ] Add support for hardware security modules (HSMs)
 
 ## Phase 4: User Experience
 
 ### System Integration
-- [ ] Add system tray icon
-- [ ] Implement desktop notifications
-- [ ] Create startup options
+- [x] Add system tray icon
+- [x] Implement desktop notifications
+- [x] Create startup options
 - [ ] Add auto-update mechanism
 - [ ] Implement shell integration
 

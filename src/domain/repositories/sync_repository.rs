@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use std::sync::Arc;
 
-use crate::domain::entities::sync::{SyncConfig, SyncStatus, SyncResult};
-use crate::domain::entities::file::FileItem;
+use crate::domain::entities::sync::{SyncConfig, SyncEvent, SyncStatus, SyncResult};
+use crate::domain::entities::file::{FileItem, EncryptionStatus};
 
 #[async_trait]
 pub trait SyncRepository: Send + Sync + 'static {
@@ -31,6 +31,10 @@ pub trait SyncRepository: Send + Sync + 'static {
     // Conflict resolution
     async fn get_conflicts(&self) -> SyncResult<Vec<FileItem>>;
     async fn resolve_conflict(&self, file_id: &str, keep_local: bool) -> SyncResult<FileItem>;
+    
+    // Event logging
+    async fn record_event(&self, event: SyncEvent) -> SyncResult<()>;
+    async fn get_recent_events(&self, limit: usize) -> SyncResult<Vec<SyncEvent>>;
 }
 
 pub trait SyncRepositoryFactory: Send + Sync + 'static {

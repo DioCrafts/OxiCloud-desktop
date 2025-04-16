@@ -1,4 +1,5 @@
 pub mod file;
-pub mod folder;
 pub mod sync;
 pub mod user;
+pub mod encryption;
+pub mod config;

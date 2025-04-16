@@ -2,17 +2,24 @@ use dioxus::prelude::*;
 use dioxus_router::prelude::*;
 use dioxus_free_icons::icons::bootstrap_icons::Bs;
 use dioxus_free_icons::Icon;
+use std::sync::Arc;
 
 use crate::interfaces::app::Route;
+use crate::application::ports::auth_port::AuthPort;
+use crate::domain::entities::user::UserError;
 
 #[component]
 pub fn LoginPage(cx: Scope) -> Element {
     let navigator = use_navigator(cx);
-    let server_url = use_state(cx, || String::from(""));
+    let server_url = use_state(cx, || String::from("http://localhost:3000"));
     let username = use_state(cx, || String::from(""));
     let password = use_state(cx, || String::from(""));
     let error = use_state(cx, || None::<String>);
     let loading = use_state(cx, || false);
+    
+    // Get auth service from context (will be provided by the app)
+    let auth_service = use_context::<Arc<dyn AuthPort>>(cx)
+        .expect("Auth service not found in context");
     
     // Form validation
     let is_valid = !server_url.is_empty() && !username.is_empty() && !password.is_empty();
@@ -21,19 +28,29 @@ pub fn LoginPage(cx: Scope) -> Element {
         loading.set(true);
         error.set(None);
         
-        // TODO: Implement the actual login logic with API service
-        // Simulating a login for now
+        let auth_service = auth_service.clone();
+        let server = server_url.get().clone();
+        let user = username.get().clone();
+        let pass = password.get().clone();
+        let nav = navigator.clone();
+        
         cx.spawn(async move {
-            // Simulate API call delay
-            tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
-            
-            // Simulate success for now
+            match auth_service.login(&server, &user, &pass).await {
+                Ok(_) => {
+                    // Login successful
+                    nav.push(Route::Files {});
+                },
+                Err(e) => {
+                    // Login failed
+                    let error_message = match e {
+                        UserError::InvalidUsername(msg) => msg,
+                        UserError::InvalidPassword(msg) => msg,
+                        UserError::AuthenticationError(msg) => msg,
+                    };
+                    error.set(Some(error_message));
+                }
+            }
             loading.set(false);
-            navigator.push(Route::Files {});
-            
-            // Error simulation example:
-            // error.set(Some("Invalid credentials".to_string()));
-            // loading.set(false);
         });
     };
     
