@@ -176,7 +176,7 @@ jobs:
         
         [features]
         default = []
-        " | Out-File -FilePath ".cargo/config.toml" -Encoding utf8
+        "@ | Out-File -FilePath ".cargo/config.toml" -Encoding utf8
         
         # Build with restricted features to avoid pqcrypto issues
         cargo build --release --no-default-features
