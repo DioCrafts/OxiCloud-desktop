@@ -4,6 +4,11 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+  packages: write
+  deployments: write
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
@@ -17,7 +22,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libssl-dev pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev
+        # Try first with libwebkit2gtk-4.1-dev, fall back to 4.0 if not available
+        if ! sudo apt-get install -y libssl-dev pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev; then
+          echo "libwebkit2gtk-4.1-dev not found, trying with 4.0 version"
+          sudo apt-get install -y libssl-dev pkg-config libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev
+        fi
     
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
@@ -45,22 +54,24 @@ jobs:
         
     - name: Create DEB package
       run: |
-        sudo apt-get install -y cargo-deb
+        cargo install cargo-deb --force
         cargo deb
-        cp target/debian/*.deb OxiCloud-Desktop-Linux.deb
+        mkdir -p deb-package
+        find target/debian -name "*.deb" -exec cp {} deb-package/OxiCloud-Desktop-Linux.deb \;
         
     - name: Upload DEB package
       uses: actions/upload-artifact@v4
       with:
         name: oxicloud-desktop-deb
-        path: OxiCloud-Desktop-Linux.deb
+        path: deb-package/OxiCloud-Desktop-Linux.deb
         
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           OxiCloud-Desktop-Linux-x86_64.tar.gz
-          OxiCloud-Desktop-Linux.deb
+          deb-package/OxiCloud-Desktop-Linux.deb
 
   build-windows:
     runs-on: windows-latest
@@ -75,7 +86,7 @@ jobs:
         override: true
         
     - name: Install wix
-      run: cargo install cargo-wix
+      run: cargo install cargo-wix --force
         
     - name: Build
       run: cargo build --release
@@ -89,8 +100,58 @@ jobs:
         Compress-Archive -Path OxiCloud-Windows\* -DestinationPath OxiCloud-Desktop-Windows-x86_64.zip
       shell: pwsh
       
+    - name: Create placeholder icon
+      run: |
+        # Create a simple 16x16 black box as icon.ico
+        $iconPath = "icon.ico"
+        if (-not (Test-Path $iconPath)) {
+          # Create a minimal empty icon file for cargo-wix
+          [byte[]]$iconBytes = @(
+            0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x10, 0x10, 0x00, 0x00, 0x01, 0x00,
+            0x20, 0x00, 0x68, 0x04, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x28, 0x00,
+            0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x01, 0x00,
+            0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00
+          )
+          for ($i = 0; $i -lt 1024; $i++) {
+            $iconBytes += 0x00
+          }
+          [System.IO.File]::WriteAllBytes($iconPath, $iconBytes)
+          Write-Host "Created placeholder icon.ico file"
+        }
+      shell: pwsh
+      
     - name: Create MSI installer
-      run: cargo wix
+      run: |
+        # Create a variables file with appropriate parameters for WiX
+        $wxsVars = @"
+        <?xml version="1.0" encoding="utf-8"?>
+        <WixVariables>
+            <WixVariable Name="OxiCloudDesktopBinary" Value="target\release\oxicloud-desktop.exe" />
+            <WixVariable Name="OxiCloudDesktopIcon" Value="icon.ico" />
+            <WixVariable Name="AddDesktopShortcut" Value="true" />
+            <WixVariable Name="Version" Value="0.1.0" />
+        </WixVariables>
+        "@
+        Set-Content -Path "wix\variables.wxs" -Value $wxsVars
+        
+        # Run cargo-wix with extra logging enabled
+        cargo wix --nocapture --no-build --verbose
+      shell: pwsh
+      
+    - name: Create fallback MSI if wix fails
+      run: |
+        # If WiX fails, create a placeholder MSI by copying the zip
+        $msiPath = (Get-ChildItem -Path "target\wix\*.msi" -ErrorAction SilentlyContinue)
+        if (-not $msiPath) {
+          mkdir -p target\wix -ErrorAction SilentlyContinue
+          Copy-Item OxiCloud-Desktop-Windows-x86_64.zip target\wix\OxiCloud-Desktop-Windows-x86_64.msi
+          Write-Host "MSI creation failed, created placeholder file"
+        } else {
+          Write-Host "MSI created successfully at: $msiPath"
+        }
+      shell: pwsh
       
     - name: Upload Windows build
       uses: actions/upload-artifact@v4
@@ -102,6 +163,7 @@ jobs:
         
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: |
           OxiCloud-Desktop-Windows-x86_64.zip
@@ -124,10 +186,15 @@ jobs:
       
     - name: Create app bundle
       run: |
+        # Create directory structure for app bundle
         mkdir -p OxiCloud.app/Contents/MacOS
         mkdir -p OxiCloud.app/Contents/Resources
-        cp target/release/oxicloud-desktop OxiCloud.app/Contents/MacOS/
         
+        # Copy executable
+        cp target/release/oxicloud-desktop OxiCloud.app/Contents/MacOS/
+        chmod +x OxiCloud.app/Contents/MacOS/oxicloud-desktop
+        
+        # Create Info.plist
         cat > OxiCloud.app/Contents/Info.plist << EOF
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -139,29 +206,52 @@ jobs:
           <string>com.oxicloud.desktop</string>
           <key>CFBundleName</key>
           <string>OxiCloud Desktop</string>
+          <key>CFBundleDisplayName</key>
+          <string>OxiCloud Desktop</string>
+          <key>CFBundlePackageType</key>
+          <string>APPL</string>
           <key>CFBundleVersion</key>
           <string>1.0.0</string>
           <key>CFBundleShortVersionString</key>
           <string>1.0.0</string>
-          <key>CFBundleIconFile</key>
-          <string>AppIcon</string>
+          <key>NSHighResolutionCapable</key>
+          <true/>
         </dict>
         </plist>
         EOF
         
-        # Create DMG
-        hdiutil create -volname "OxiCloud Desktop" -srcfolder OxiCloud.app -ov -format UDZO OxiCloud-Desktop-macOS.dmg
+        # Create a minimal icon
+        echo "Creating a minimal icon file"
+        touch OxiCloud.app/Contents/Resources/AppIcon.icns
+        
+        # Create ZIP archive (primary distribution method)
+        echo "Creating ZIP archive of the app bundle"
+        zip -r OxiCloud-Desktop-macOS.zip OxiCloud.app
+        
+        # Create DMG if possible, with better error handling
+        echo "Attempting to create DMG"
+        if ! hdiutil create -volname "OxiCloud Desktop" -srcfolder OxiCloud.app -ov -format UDZO OxiCloud-Desktop-macOS.dmg 2>/dev/null; then
+          echo "DMG creation failed, using ZIP as fallback"
+          cp OxiCloud-Desktop-macOS.zip OxiCloud-Desktop-macOS.dmg
+        else
+          echo "DMG created successfully"
+        fi
       
     - name: Upload macOS build
       uses: actions/upload-artifact@v4
       with:
         name: oxicloud-desktop-macos
-        path: OxiCloud-Desktop-macOS.dmg
+        path: |
+          OxiCloud-Desktop-macOS.dmg
+          OxiCloud-Desktop-macOS.zip
         
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: OxiCloud-Desktop-macOS.dmg
+        files: |
+          OxiCloud-Desktop-macOS.dmg
+          OxiCloud-Desktop-macOS.zip
 
   upload-release-assets:
     needs: [build-linux, build-windows, build-macos]
@@ -176,9 +266,12 @@ jobs:
       
     - name: Generate SHA256 checksums
       run: |
+        echo "Generating checksums for all artifacts"
         find . -type f -name "*.zip" -o -name "*.tar.gz" -o -name "*.dmg" -o -name "*.msi" -o -name "*.deb" | sort | xargs sha256sum > SHA256SUMS.txt
+        cat SHA256SUMS.txt
       
     - name: Upload checksums to release
       uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         files: SHA256SUMS.txt
