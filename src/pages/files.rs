@@ -1,10 +1,11 @@
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-use dioxus_free_icons::icons::bootstrap_icons::Bs;
-use dioxus_free_icons::Icon;
+// Temporarily comment out icon imports until we can find the correct path
+// use dioxus_free_icons::bootstrap_icons as Bs;
+// use dioxus_free_icons::Icon;
 use std::sync::Arc;
 use std::path::Path;
-use web_sys::MouseEvent;
+// MouseEvent can be imported from dioxus::prelude
 
 use crate::components::file_list::FileList;
 use crate::components::sidebar::Sidebar;
@@ -14,7 +15,6 @@ use crate::components::context_menu::{ContextMenu, FileAction};
 use crate::application::dtos::file_dto::FileDto;
 use crate::application::ports::file_port::FilePort;
 
-#[component]
 pub fn FilesPage(cx: Scope) -> Element {
     // Get the file service from context
     let file_service = use_context::<Arc<dyn FilePort>>(cx)
@@ -33,7 +33,7 @@ pub fn FilesPage(cx: Scope) -> Element {
     let show_context_menu = use_state(cx, || false);
     let context_menu_position = use_state(cx, || (0, 0));
     let selected_file = use_state(cx, || None::<FileDto>);
-    let upload_input_ref = use_ref(cx, || None::<web_sys::HtmlInputElement>);
+    let upload_input_ref = use_ref(cx, || None::<()>); // Using () instead of HtmlInputElement for now
     
     // Load files when the component mounts or when the folder changes
     use_effect(cx, (current_folder_id.get().clone(),), |(folder_id,)| {
@@ -281,7 +281,8 @@ pub fn FilesPage(cx: Scope) -> Element {
                                 current_path.set("/".to_string());
                                 current_folder_id.set(None);
                             },
-                            Icon { icon: Bs::HouseFill }
+                            // Icon { icon: Bs::HouseFill }
+                            "🏠"
                         }
                         
                         for (index, segment) in path_segments.iter().enumerate() {
@@ -316,8 +317,8 @@ pub fn FilesPage(cx: Scope) -> Element {
                         button {
                             class: "toolbar-btn",
                             onclick: on_upload_click,
-                            Icon { icon: Bs::Upload }
-                            span { "Upload" }
+                            // Icon { icon: Bs::Upload }
+                            span { "⬆️ Upload" }
                         }
                         
                         // Hidden file input for uploads
@@ -325,32 +326,33 @@ pub fn FilesPage(cx: Scope) -> Element {
                             r#type: "file",
                             class: "upload-input",
                             multiple: true,
-                            onchange: on_files_selected,
-                            ref: move |el| {
-                                if let Some(input_element) = el {
-                                    *upload_input_ref.write() = Some(input_element.clone());
-                                }
-                            }
+                            onchange: on_files_selected
+                            // Comentamos la ref para evitar errores de compilación
+                            // ref: move |el| {
+                            //    if let Some(input_element) = el {
+                            //        *upload_input_ref.write() = Some(input_element.clone());
+                            //    }
+                            // }
                         }
                         
                         button {
                             class: "toolbar-btn",
                             onclick: on_new_folder_click,
-                            Icon { icon: Bs::FolderPlus }
-                            span { "New Folder" }
+                            // Icon { icon: Bs::FolderPlus }
+                            span { "📁+ New Folder" }
                         }
                     }
                 }
                 
                 if *is_loading.get() {
                     div { class: "loading-container",
-                        Icon { icon: Bs::ArrowRepeat, class: "rotating" }
-                        span { "Loading files..." }
+                        // Icon { icon: Bs::ArrowRepeat, class: "rotating" }
+                        span { class: "rotating", "↻ Loading files..." }
                     }
                 } else if let Some(err) = error.get() {
                     div { class: "error-container",
-                        Icon { icon: Bs::ExclamationTriangleFill }
-                        span { "{err}" }
+                        // Icon { icon: Bs::ExclamationTriangleFill }
+                        span { "⚠️ {err}" }
                         button {
                             onclick: move |_| {
                                 // Retry loading files
@@ -362,20 +364,20 @@ pub fn FilesPage(cx: Scope) -> Element {
                     }
                 } else if files.get().is_empty() {
                     div { class: "empty-container",
-                        Icon { icon: Bs::Folder2Open }
-                        span { "This folder is empty" }
+                        // Icon { icon: Bs::Folder2Open }
+                        span { "📂 This folder is empty" }
                         
                         div { class: "empty-actions",
                             button {
                                 onclick: on_upload_click,
-                                Icon { icon: Bs::Upload }
-                                " Upload Files"
+                                // Icon { icon: Bs::Upload }
+                                "⬆️ Upload Files"
                             }
                             
                             button {
                                 onclick: on_new_folder_click,
-                                Icon { icon: Bs::FolderPlus }
-                                " New Folder"
+                                // Icon { icon: Bs::FolderPlus }
+                                "📁+ New Folder"
                             }
                         }
                     }

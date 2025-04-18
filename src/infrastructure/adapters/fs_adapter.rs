@@ -532,6 +532,9 @@ impl FileRepository for FileSystemAdapter {
             }
         }
         
+        // Clone content early to avoid move issues
+        let content_clone = content.clone();
+        
         // If content provided, update file content
         if let Some(content_data) = content {
             let file_path = match &file.parent_id {
@@ -560,7 +563,7 @@ impl FileRepository for FileSystemAdapter {
         new_file.modified_at = Utc::now();
         
         // If content was updated, update size
-        if let Some(content_data) = &content {
+        if let Some(content_data) = &content_clone {
             new_file.size = content_data.len() as u64;
         }
         

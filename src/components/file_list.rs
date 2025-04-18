@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::icons::bootstrap_icons::Bs;
-use dioxus_free_icons::Icon;
+// Temporarily comment out icon imports until we can find the correct path
+// use dioxus_free_icons::Icon;
+// use dioxus_free_icons::bootstrap_icons as Bs;
 
 use crate::application::dtos::file_dto::{FileDto, FileTypeDto, SyncStatusDto};
 
@@ -12,11 +13,10 @@ pub struct FileListProps {
     #[props(optional)]
     on_favorite_toggle: Option<EventHandler<String>>,
     #[props(optional)]
-    on_context_menu: Option<EventHandler<(String, web_sys::MouseEvent)>>,
+    on_context_menu: Option<EventHandler<(String, MouseEvent)>>,
 }
 
-#[component]
-pub fn FileList(cx: Scope<FileListProps>) -> Element {
+pub fn FileList(cx: ScopeState) -> Element {
     let hovered_file = use_state(cx, || None::<String>);
     
     cx.render(rsx! {
@@ -60,9 +60,11 @@ pub fn FileList(cx: Scope<FileListProps>) -> Element {
                                         class: "file-name-wrapper",
                                         div { class: "file-icon",
                                             if file.is_directory() {
-                                                Icon { icon: Bs::FolderFill }
+                                                // Icon { icon: Bs::FolderFill }
+                                                "📁"
                                             } else {
-                                                get_file_icon(file)
+                                                // {get_file_icon(file)}
+                                                "📄"
                                             }
                                         }
                                         
@@ -86,7 +88,7 @@ pub fn FileList(cx: Scope<FileListProps>) -> Element {
                                 td { class: "file-date", "{file.formatted_date()}" }
                                 
                                 td { class: "file-status",
-                                    get_sync_status_badge(file)
+                                    {get_sync_status_badge(file)}
                                 }
                                 
                                 td { class: "file-actions",
@@ -96,15 +98,18 @@ pub fn FileList(cx: Scope<FileListProps>) -> Element {
                                                 class: "favorite-btn",
                                                 onclick: move |_| on_favorite_toggle.call(file.id.clone()),
                                                 if file.is_favorite {
-                                                    Icon { icon: Bs::StarFill, width: 16, height: 16 }
+                                                    // Icon { icon: Bs::StarFill, width: 16, height: 16 }
+                                                    "⭐"
                                                 } else {
-                                                    Icon { icon: Bs::Star, width: 16, height: 16 }
+                                                    // Icon { icon: Bs::Star, width: 16, height: 16 }
+                                                    "☆"
                                                 }
                                             }
                                         }
                                         
                                         button { class: "action-btn",
-                                            Icon { icon: Bs::ThreeDotsVertical, width: 16, height: 16 }
+                                            // Icon { icon: Bs::ThreeDotsVertical, width: 16, height: 16 }
+                                            "⋮"
                                         }
                                     }
                                 }
@@ -117,6 +122,8 @@ pub fn FileList(cx: Scope<FileListProps>) -> Element {
     })
 }
 
+// Commented out until icons are fixed
+/*
 fn get_file_icon(file: &FileDto) -> Element {
     let ext = file.extension().unwrap_or("").to_lowercase();
     
@@ -135,49 +142,50 @@ fn get_file_icon(file: &FileDto) -> Element {
         _ => rsx! { Icon { icon: Bs::FileFill } }
     }
 }
+*/
 
 fn get_sync_status_badge(file: &FileDto) -> Element {
     match file.sync_status {
         SyncStatusDto::Synced => rsx! {
             span { class: "status-badge status-synced", 
-                Icon { icon: Bs::CheckCircleFill, width: 12, height: 12 }
-                " Synced"
+                // Icon { icon: Bs::CheckCircleFill, width: 12, height: 12 }
+                "✓ Synced"
             }
         },
         SyncStatusDto::Syncing => rsx! {
             span { class: "status-badge status-syncing",
-                Icon { icon: Bs::ArrowRepeat, width: 12, height: 12 }
-                " Syncing"
+                // Icon { icon: Bs::ArrowRepeat, width: 12, height: 12 }
+                "↻ Syncing"
             }
         },
         SyncStatusDto::PendingUpload => rsx! {
             span { class: "status-badge status-pending",
-                Icon { icon: Bs::CloudUpload, width: 12, height: 12 }
-                " Pending Upload"
+                // Icon { icon: Bs::CloudUpload, width: 12, height: 12 }
+                "↑ Pending Upload"
             }
         },
         SyncStatusDto::PendingDownload => rsx! {
             span { class: "status-badge status-pending",
-                Icon { icon: Bs::CloudDownload, width: 12, height: 12 }
-                " Pending Download"
+                // Icon { icon: Bs::CloudDownload, width: 12, height: 12 }
+                "↓ Pending Download"
             }
         },
         SyncStatusDto::Error => rsx! {
             span { class: "status-badge status-error",
-                Icon { icon: Bs::ExclamationTriangleFill, width: 12, height: 12 }
-                " Error"
+                // Icon { icon: Bs::ExclamationTriangleFill, width: 12, height: 12 }
+                "⚠ Error"
             }
         },
         SyncStatusDto::Conflicted => rsx! {
             span { class: "status-badge status-conflict",
-                Icon { icon: Bs::ExclamationCircleFill, width: 12, height: 12 }
-                " Conflict"
+                // Icon { icon: Bs::ExclamationCircleFill, width: 12, height: 12 }
+                "! Conflict"
             }
         },
         SyncStatusDto::Ignored => rsx! {
             span { class: "status-badge status-ignored",
-                Icon { icon: Bs::SlashCircleFill, width: 12, height: 12 }
-                " Ignored"
+                // Icon { icon: Bs::SlashCircleFill, width: 12, height: 12 }
+                "⌀ Ignored"
             }
         },
     }

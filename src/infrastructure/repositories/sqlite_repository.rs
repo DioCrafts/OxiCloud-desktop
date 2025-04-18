@@ -4,6 +4,9 @@ use rusqlite::{Connection, Result as SqliteResult};
 use std::fs;
 use std::path::Path;
 
+/// Type alias for a SQLite connection pool
+pub type ConnectionPool = Pool<SqliteConnectionManager>;
+
 /// Creates a SQLite connection pool
 pub fn create_connection_pool(db_name: &str) -> Result<Pool<SqliteConnectionManager>, r2d2::Error> {
     // Get the application data directory

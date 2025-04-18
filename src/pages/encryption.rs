@@ -1,11 +1,12 @@
 use dioxus::prelude::*;
+use dioxus_router::prelude::*;
 use crate::domain::entities::encryption::{EncryptionSettings, EncryptionAlgorithm, KeyStorageMethod};
 use crate::application::ports::encryption_port::EncryptionPort;
 use std::sync::Arc;
 use tracing::{info, error};
 
 pub fn EncryptionPage(cx: Scope) -> Element {
-    let encryption_service = use_shared_state::<Arc<dyn EncryptionPort>>(cx).unwrap();
+    let encryption_service = use_context::<Arc<dyn EncryptionPort>>(cx).unwrap();
     
     let settings = use_state(cx, || EncryptionSettings::default());
     let password = use_state(cx, String::new);
@@ -16,9 +17,11 @@ pub fn EncryptionPage(cx: Scope) -> Element {
     
     // Load settings on first render
     use_effect(cx, (), |_| {
-        to_owned![encryption_service, settings, error_message];
+        let encryption_service = encryption_service.clone();
+        let settings = settings.clone();
+        let error_message = error_message.clone();
         async move {
-            match encryption_service.read().get_encryption_settings().await {
+            match encryption_service.get_encryption_settings().await {
                 Ok(loaded_settings) => {
                     settings.set(loaded_settings);
                 },
@@ -65,18 +68,21 @@ pub fn EncryptionPage(cx: Scope) -> Element {
     };
     
     let save_settings = move |_| {
-        to_owned![
-            encryption_service, settings, password, confirm_password, 
-            is_loading, error_message, success_message
-        ];
+        let encryption_service = encryption_service.clone();
+        let settings = settings.clone();
+        let password = password.clone();
+        let confirm_password = confirm_password.clone();
+        let is_loading = is_loading.clone();
+        let error_message = error_message.clone();
+        let success_message = success_message.clone();
         
         cx.spawn(async move {
-            if password.current().is_empty() {
+            if password.get().is_empty() {
                 error_message.set(Some("Password is required".to_string()));
                 return;
             }
             
-            if settings.read().enabled && password.current() != confirm_password.current() {
+            if settings.get().enabled && password.get() != confirm_password.get() {
                 error_message.set(Some("Passwords do not match".to_string()));
                 return;
             }
@@ -85,19 +91,17 @@ pub fn EncryptionPage(cx: Scope) -> Element {
             error_message.set(None);
             success_message.set(None);
             
-            let current_settings = settings.read().clone();
+            let current_settings = settings.get().clone();
             
             let result = if current_settings.enabled && !current_settings.key_id.is_some() {
                 // Initialize encryption (first-time setup)
                 encryption_service
-                    .read()
-                    .initialize_encryption(&password.current(), &current_settings)
+                    .initialize_encryption(&password.get(), &current_settings)
                     .await
             } else {
                 // Update existing settings
                 encryption_service
-                    .read()
-                    .update_encryption_settings(&password.current(), &current_settings)
+                    .update_encryption_settings(&password.get(), &current_settings)
                     .await
                     .map(|_| current_settings)
             };

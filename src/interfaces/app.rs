@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+// Import hooks directly from prelude
 use dioxus_desktop::{Config, WindowBuilder};
 use dioxus_router::prelude::*;
 use std::sync::Arc;
@@ -10,6 +11,9 @@ use crate::application::ports::encryption_port::EncryptionPort;
 use crate::application::ports::config_port::ConfigPort;
 use crate::infrastructure::di::ServiceProvider;
 use crate::interfaces::pages;
+
+/// Create type alias for Scope to avoid import issues
+pub type ScopeDef<T = ()> = dioxus::core::ScopeState<T>;
 
 /// Main application router defining page routes
 #[derive(Routable, Clone)]
@@ -49,15 +53,14 @@ pub fn run() {
         .with_custom_head("".into());
 
     // Launch the app
-    dioxus_desktop::launch_with_props(
-        app,
-        AppProps {
+    dioxus_desktop::launch::launch(
+        || app(AppProps {
             auth_service: service_provider.get_auth_service(),
             file_service: service_provider.get_file_service(),
             sync_service: service_provider.get_sync_service(),
             encryption_service: service_provider.get_encryption_service(),
             config_service: service_provider.get_config_service(),
-        }, 
+        }), 
         config
     );
 }
@@ -73,7 +76,7 @@ pub struct AppProps {
 }
 
 /// Root application component
-pub fn app(cx: Scope<AppProps>) -> Element {
+pub fn app(cx: Box<ScopeState<AppProps>>) -> Element {
     // Get theme from config (fallback to light theme)
     let theme = use_state(cx, || "light".to_string());
     
@@ -137,7 +140,7 @@ pub fn app(cx: Scope<AppProps>) -> Element {
     });
 
     cx.render(rsx! {
-        style { include_str!("../assets/css/app.css") },
+        style { "{include_str!(\"../assets/css/app.css\")}" },
         div {
             class: "app {theme}",
             Router::<Route> {

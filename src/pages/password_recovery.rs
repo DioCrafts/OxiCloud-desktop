@@ -22,7 +22,7 @@ pub struct PasswordRecoveryProps {
 }
 
 pub fn PasswordRecoveryPage(cx: Scope<PasswordRecoveryProps>) -> Element {
-    let encryption_service = use_shared_state::<Arc<dyn EncryptionPort>>(cx).unwrap();
+    let encryption_service = use_context::<Arc<dyn EncryptionPort>>(cx).unwrap();
     
     let step = use_state(cx, || RecoveryStep::ChooseMethod);
     let selected_method = use_state(cx, || None::<RecoveryMethod>);
@@ -113,7 +113,10 @@ pub fn PasswordRecoveryPage(cx: Scope<PasswordRecoveryProps>) -> Element {
         },
         RecoveryStep::SecurityQuestions => {
             let verify_answers = move |_| {
-                to_owned![step, is_loading, question_answers, encryption_service];
+                let step = step.clone();
+                let is_loading = is_loading.clone();
+                let question_answers = question_answers.clone();
+                let encryption_service = encryption_service.clone();
                 
                 cx.spawn(async move {
                     is_loading.set(true);
@@ -206,7 +209,11 @@ pub fn PasswordRecoveryPage(cx: Scope<PasswordRecoveryProps>) -> Element {
         },
         RecoveryStep::RecoveryKey => {
             let verify_key = move |_| {
-                to_owned![step, is_loading, recovery_key_id, verification_code, encryption_service];
+                let step = step.clone();
+                let is_loading = is_loading.clone();
+                let recovery_key_id = recovery_key_id.clone();
+                let verification_code = verification_code.clone();
+                let encryption_service = encryption_service.clone();
                 
                 cx.spawn(async move {
                     is_loading.set(true);
@@ -267,7 +274,11 @@ pub fn PasswordRecoveryPage(cx: Scope<PasswordRecoveryProps>) -> Element {
         },
         RecoveryStep::SetNewPassword => {
             let reset_password = move |_| {
-                to_owned![step, is_loading, new_password, confirm_password, encryption_service];
+                let step = step.clone();
+                let is_loading = is_loading.clone();
+                let new_password = new_password.clone();
+                let confirm_password = confirm_password.clone();
+                let encryption_service = encryption_service.clone();
                 
                 cx.spawn(async move {
                     is_loading.set(true);

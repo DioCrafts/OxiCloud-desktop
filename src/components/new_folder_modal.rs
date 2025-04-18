@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::icons::bootstrap_icons::Bs;
-use dioxus_free_icons::Icon;
+// Temporarily comment out icon imports until we can find the correct path
+// use dioxus_free_icons::bootstrap_icons as Bs;
+// use dioxus_free_icons::Icon;
 
 #[derive(Props)]
 pub struct NewFolderModalProps {
@@ -10,7 +11,6 @@ pub struct NewFolderModalProps {
     on_create: EventHandler<String>,
 }
 
-#[component]
 pub fn NewFolderModal(cx: Scope<NewFolderModalProps>) -> Element {
     let folder_name = use_state(cx, || String::new());
     let error = use_state(cx, || None::<String>);
@@ -74,7 +74,8 @@ pub fn NewFolderModal(cx: Scope<NewFolderModalProps>) -> Element {
                     button {
                         class: "close-btn",
                         onclick: move |_| cx.props.on_close.call(()),
-                        Icon { icon: Bs::X }
+                        // Icon { icon: Bs::X }
+                        "✖"
                     }
                 }
                 

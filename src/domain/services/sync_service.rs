@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
 
-use crate::domain::entities::sync::{SyncConfig, SyncDirection, SyncResult, SyncState, SyncStatus};
+use crate::domain::entities::sync::{SyncConfig, SyncDirection, SyncResult, SyncState, SyncStatus, SyncError};
 use crate::domain::entities::file::{FileItem, SyncStatus as FileSyncStatus, EncryptionStatus};
 use crate::domain::repositories::sync_repository::SyncRepository;
 use crate::domain::repositories::file_repository::FileRepository;

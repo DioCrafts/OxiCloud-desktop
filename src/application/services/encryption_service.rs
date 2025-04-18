@@ -10,6 +10,7 @@ use std::fs;
 use std::io::{Read, Write};
 use async_trait::async_trait;
 use tracing::{info, error, debug};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
 pub struct EncryptionApplicationService {
     encryption_service: Arc<dyn EncryptionService>,
@@ -69,7 +70,7 @@ impl EncryptionPort for EncryptionApplicationService {
             "version": 1,
             "iv": iv,
             "metadata": metadata,
-            "encrypted_data": base64::Engine as _::encode(&encrypted_data),
+            "encrypted_data": BASE64.encode(&encrypted_data),
         });
         
         // Write encrypted data to file

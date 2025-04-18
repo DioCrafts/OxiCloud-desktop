@@ -2,7 +2,8 @@ use crate::domain::entities::encryption::{
     EncryptionError, EncryptionResult, EncryptionMetadata
 };
 use crate::domain::entities::file::{FileError, FileResult, FileItem, EncryptionStatus};
-use crate::domain::services::error_recovery_service::ErrorRecoveryService;
+// RecoveryService trait
+use crate::domain::services::recovery_service::RecoveryService;
 use crate::domain::services::encryption_service::EncryptionService;
 
 use std::path::PathBuf;
@@ -83,13 +84,13 @@ pub trait CorruptionDetector: Send + Sync + 'static {
 
 pub struct CorruptionDetectorImpl {
     encryption_service: Arc<dyn EncryptionService>,
-    error_recovery_service: Arc<dyn ErrorRecoveryService>,
+    error_recovery_service: Arc<dyn RecoveryService>,
 }
 
 impl CorruptionDetectorImpl {
     pub fn new(
         encryption_service: Arc<dyn EncryptionService>,
-        error_recovery_service: Arc<dyn ErrorRecoveryService>,
+        error_recovery_service: Arc<dyn RecoveryService>,
     ) -> Self {
         Self {
             encryption_service,

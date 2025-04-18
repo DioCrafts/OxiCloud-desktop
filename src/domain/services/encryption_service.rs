@@ -40,4 +40,23 @@ pub trait EncryptionService: Send + Sync + 'static {
     
     /// Verify if the password is correct
     async fn verify_password(&self, password: &str) -> EncryptionResult<bool>;
+    
+    /// Process a file for encryption or decryption
+    async fn process_file(&self, 
+                       password: &str, 
+                       source_path: &PathBuf, 
+                       destination_path: &PathBuf,
+                       encrypt: bool) -> EncryptionResult<()>;
+    
+    /// Encrypt a file to a destination path
+    async fn encrypt_file(&self, 
+                       password: &str, 
+                       source_path: &PathBuf, 
+                       destination_path: &PathBuf) -> EncryptionResult<()>;
+    
+    /// Decrypt a file to a destination path
+    async fn decrypt_file(&self, 
+                       password: &str, 
+                       source_path: &PathBuf, 
+                       destination_path: &PathBuf) -> EncryptionResult<()>;
 }

@@ -406,6 +406,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "base64ct"
+version = "1.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89e25b6adfb930f02d1981565a6e5d9c547ac15a96606256d3b59040e5cd4ca3"
+
+[[package]]
 name = "bit_field"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3543,7 +3549,7 @@ dependencies = [
  "hyper 1.6.0",
  "hyper-util",
  "log",
- "rand 0.9.0",
+ "rand 0.9.1",
  "regex",
  "serde_json",
  "serde_urlencoded",
@@ -4091,6 +4097,7 @@ dependencies = [
  "dioxus",
  "dioxus-desktop",
  "dioxus-free-icons",
+ "dioxus-hooks",
  "dioxus-router",
  "dirs 5.0.1",
  "embed-resource",
@@ -4108,6 +4115,7 @@ dependencies = [
  "pqcrypto",
  "pqcrypto-dilithium",
  "pqcrypto-kyber",
+ "pqcrypto-traits",
  "r2d2",
  "r2d2_sqlite",
  "rand 0.8.5",
@@ -4182,6 +4190,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "password-hash"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "346f04948ba92c43e8469c1ee6736c7563d71012b17d40745260fe106aac2166"
+dependencies = [
+ "base64ct",
+ "rand_core 0.6.4",
+ "subtle",
+]
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
+
+[[package]]
 name = "pbkdf2"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4189,6 +4214,8 @@ checksum = "f8ed6a7761f76e3b9f92dfb0a60a6a6477c61024b775147ff0973a02653abaf2"
 dependencies = [
  "digest",
  "hmac",
+ "password-hash",
+ "sha2",
 ]
 
 [[package]]
@@ -4441,29 +4468,24 @@ dependencies = [
 
 [[package]]
 name = "pqcrypto"
-version = "0.14.2"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9da39bd0587bff4189521766c34f3203263926f7527906578a96d22a81a700d5"
+checksum = "0d68436754ef6cd65bc7e8c050a05f429efce86b5107cd71b5a4aa81171c69bc"
 dependencies = [
  "pqcrypto-classicmceliece",
- "pqcrypto-dilithium",
  "pqcrypto-falcon",
- "pqcrypto-frodo",
  "pqcrypto-hqc",
- "pqcrypto-kyber",
- "pqcrypto-ntru",
- "pqcrypto-ntruprime",
- "pqcrypto-rainbow",
- "pqcrypto-saber",
+ "pqcrypto-mldsa",
+ "pqcrypto-mlkem",
  "pqcrypto-sphincsplus",
  "pqcrypto-traits",
 ]
 
 [[package]]
 name = "pqcrypto-classicmceliece"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "058221b011ba4e1665060ee46c76a262fc0483219e284b83761f7cd0602da2aa"
+checksum = "020d75adba68e21bcd1a6268a7145bff549fe7559e75a122e19f6f00bfb896d7"
 dependencies = [
  "cc",
  "glob",
@@ -4487,22 +4509,9 @@ dependencies = [
 
 [[package]]
 name = "pqcrypto-falcon"
-version = "0.2.10"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b6ee639378f80f29c4d9a14b7098f1d80c4d65b43f27d2bcfc87285a380f169"
-dependencies = [
- "cc",
- "glob",
- "libc",
- "pqcrypto-internals",
- "pqcrypto-traits",
-]
-
-[[package]]
-name = "pqcrypto-frodo"
-version = "0.4.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65122d9fc0f4c0bd4fe8d51caa2c662d0b43d1af8576eae3331ec6ea2240b5d2"
+checksum = "6fbfa4d6a6d74ec89d69deeaed335829c030ddc1f76b2ef92f72519f6e7d466c"
 dependencies = [
  "cc",
  "glob",
@@ -4513,9 +4522,9 @@ dependencies = [
 
 [[package]]
 name = "pqcrypto-hqc"
-version = "0.1.6"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ebcff96429b9db09e9c206b8f93a19da2790b917d79b9d06b1fe4a99c47c3dc"
+checksum = "cc3ad83e5e3ac38133ee64e6a7c398e827cedaa513cc9e08ebe9571782566691"
 dependencies = [
  "cc",
  "glob",
@@ -4538,9 +4547,9 @@ dependencies = [
 
 [[package]]
 name = "pqcrypto-kyber"
-version = "0.7.9"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c32fe9d5c9913b1aed1ba92b3449eb2d7cf7ca29741b11455dfa34c711b95776"
+checksum = "15c00293cf898859d0c771455388054fd69ab712263c73fdc7f287a39b1ba000"
 dependencies = [
  "cc",
  "glob",
@@ -4550,49 +4559,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "pqcrypto-ntru"
-version = "0.5.8"
+name = "pqcrypto-mldsa"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd7546c95224f2b1bf24694f8270a4caff92f87c26d4e1602ca32488e3cd872"
+checksum = "6bd3ecb90717f6bda0ad327703be9e899cdfa88f7ce05563bfd7016f8742bad6"
 dependencies = [
  "cc",
  "glob",
  "libc",
+ "paste",
  "pqcrypto-internals",
  "pqcrypto-traits",
 ]
 
 [[package]]
-name = "pqcrypto-ntruprime"
-version = "0.1.6"
+name = "pqcrypto-mlkem"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9efad3ff41ac31e389e1e4577a7962ad382d14715cf19a127ec39170d231b0ae"
-dependencies = [
- "cc",
- "glob",
- "libc",
- "pqcrypto-internals",
- "pqcrypto-traits",
-]
-
-[[package]]
-name = "pqcrypto-rainbow"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6619f31525daf7da6c0d185412987adaa7492e7aac25c936b263b8d7ad75d307"
-dependencies = [
- "cc",
- "glob",
- "libc",
- "pqcrypto-internals",
- "pqcrypto-traits",
-]
-
-[[package]]
-name = "pqcrypto-saber"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7453b631d7bd268fffadf70514cdf05c9e9fd9574e26eafb85b5b86402e34c5b"
+checksum = "219656f3ee9d9892e8ee475e7d8c35612fcec0ac2a18f847cca12b1affddb540"
 dependencies = [
  "cc",
  "glob",
@@ -4603,9 +4587,9 @@ dependencies = [
 
 [[package]]
 name = "pqcrypto-sphincsplus"
-version = "0.6.4"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b1ac9adfc6a5f52ca8dc4fef14a808386975e3ff82145ce0a21cbc3c5632946"
+checksum = "798d17f2175adcde1fffd0262a8d1935fdd397516ef9a921cdc552fe6780861a"
 dependencies = [
  "cc",
  "glob",
@@ -4800,13 +4784,12 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.9.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3779b94aeb87e8bd4e834cee3650289ee9e0d5677f976ecdb6d219e5f4f6cd94"
+checksum = "9fbfd9d094a40bf3ae768db9361049ace4c0e04a4fd6b359518bd7b73a73dd97"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.3",
- "zerocopy 0.8.24",
 ]
 
 [[package]]
@@ -6200,7 +6183,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
 dependencies = [
  "getrandom 0.3.2",
- "rand 0.9.0",
+ "rand 0.9.1",
  "serde",
 ]
 

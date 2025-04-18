@@ -3,7 +3,7 @@ use reqwest::{Client, StatusCode};
 use std::sync::Arc;
 use serde::{Serialize, Deserialize};
 use tokio::sync::Mutex;
-use keyring::Keyring;
+use keyring::Entry as Keyring;
 
 use crate::domain::entities::user::{User, UserRole, UserResult, UserError};
 use crate::domain::repositories::auth_repository::AuthRepository;

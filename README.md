@@ -104,7 +104,20 @@ oxicloud-desktop/
 
 ### Building for Different Platforms
 
-#### Windows
+#### Automated Builds
+
+OxiCloud Desktop uses GitHub Actions for automated builds on all platforms. When a new release is created on GitHub:
+
+1. The workflow automatically builds binaries for Windows, macOS, and Linux
+2. Installers are created for each platform (.msi for Windows, .dmg for macOS, .deb for Linux)
+3. Both installers and portable versions are uploaded to the GitHub release
+4. SHA256 checksums are generated for verification
+
+You can download the latest builds from the [Releases page](https://github.com/yourusername/oxicloud-desktop/releases).
+
+#### Manual Building
+
+##### Windows
 
 ```bash
 # Cross-compile from Linux/macOS
@@ -119,7 +132,7 @@ cargo install cargo-wix
 cargo wix
 ```
 
-#### macOS
+##### macOS
 
 ```bash
 # Cross-compile from Linux/Windows
@@ -130,19 +143,26 @@ cargo build --release --target x86_64-apple-darwin
 cargo build --release
 
 # Create DMG package (on macOS)
-cargo install cargo-bundle
-cargo bundle --release
+mkdir -p OxiCloud.app/Contents/MacOS
+cp target/release/oxicloud-desktop OxiCloud.app/Contents/MacOS/
+hdiutil create -volname "OxiCloud Desktop" -srcfolder OxiCloud.app -ov -format UDZO OxiCloud-Desktop.dmg
 ```
 
-#### Linux
+##### Linux
 
 ```bash
 # Build on Linux
 cargo build --release
 
-# Create AppImage
-cargo install cargo-appimage
-cargo appimage
+# Create DEB package
+cargo install cargo-deb
+cargo deb
+
+# Create tarball
+mkdir -p OxiCloud-Linux
+cp target/release/oxicloud-desktop OxiCloud-Linux/
+cp README.md LICENSE OxiCloud-Linux/
+tar -czvf OxiCloud-Desktop-Linux.tar.gz OxiCloud-Linux
 ```
 
 ### Sync Engine

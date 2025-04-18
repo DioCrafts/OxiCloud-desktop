@@ -66,11 +66,14 @@ impl SqliteSyncRepository {
         let processed_bytes: i64 = row.get(7)?;
         let error_message: Option<String> = row.get(8)?;
         
+        // Clone the error message to avoid move issues
+        let error_msg_clone = error_message.clone();
+        
         let state = match state_str.as_str() {
             "Syncing" => SyncState::Syncing,
             "Paused" => SyncState::Paused,
             "Stopped" => SyncState::Stopped,
-            "Error" => SyncState::Error(error_message.unwrap_or_else(|| "Unknown error".to_string())),
+            "Error" => SyncState::Error(error_msg_clone.unwrap_or_else(|| "Unknown error".to_string())),
             _ => SyncState::Idle,
         };
         

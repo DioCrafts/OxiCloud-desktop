@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::icons::bootstrap_icons::Bs;
-use dioxus_free_icons::Icon;
+// Temporarily comment out icon imports until we can find the correct path
+// use dioxus_free_icons::Icon;
+// use dioxus_free_icons::bootstrap_icons as Bs;
 use std::sync::Arc;
 
 use crate::application::dtos::sync_dto::{SyncStateDto, SyncStatusDto};
 use crate::application::ports::sync_port::SyncPort;
 
-#[component]
 pub fn SyncStatusIndicator(cx: Scope) -> Element {
     // Get the sync service from context
     let sync_service = use_context::<Arc<dyn SyncPort>>(cx)
@@ -97,10 +97,10 @@ pub fn SyncStatusIndicator(cx: Scope) -> Element {
         div { class: "sync-indicator {status_class}",
             div { class: "sync-icon",
                 match sync_status.get().state {
-                    SyncStateDto::Idle => rsx! { Icon { icon: Bs::CheckCircleFill } },
-                    SyncStateDto::Syncing => rsx! { Icon { icon: Bs::ArrowRepeat, class: "rotating" } },
-                    SyncStateDto::Paused => rsx! { Icon { icon: Bs::PauseFill } },
-                    SyncStateDto::Error => rsx! { Icon { icon: Bs::ExclamationTriangleFill } },
+                    SyncStateDto::Idle => rsx! { span { "✓" } },
+                    SyncStateDto::Syncing => rsx! { span { class: "rotating", "↻" } },
+                    SyncStateDto::Paused => rsx! { span { "⏸" } },
+                    SyncStateDto::Error => rsx! { span { "⚠" } },
                 }
             }
             

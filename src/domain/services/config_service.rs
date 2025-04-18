@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use crate::domain::entities::config::{
     ApplicationConfig, ConfigResult, Theme, SyncMode, UpdateCheck,
 };
-use crate::domain::repositories::config_repository::ConfigRepository;
+use crate::domain::entities::config::ConfigRepository;
 
 /// Service for managing application configuration
 #[async_trait]

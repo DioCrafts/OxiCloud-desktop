@@ -5,10 +5,40 @@ edition = "2021"
 description = "Cliente de escritorio para OxiCloud construido con Dioxus"
 authors = ["Tu Nombre <tu@email.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://oxicloud.com"
+repository = "https://github.com/yourname/OxiCloud-desktop"
+
+# Configuración para cargo-deb (generación de paquetes Debian)
+[package.metadata.deb]
+maintainer = "OxiCloud Team <info@oxicloud.com>"
+copyright = "2023, OxiCloud Team <info@oxicloud.com>"
+license-file = ["LICENSE", "4"]
+extended-description = """
+Cliente de escritorio seguro para sincronización con OxiCloud.
+Proporciona encriptación tanto clásica como post-cuántica para
+proteger tus archivos tanto en reposo como en tránsito.
+"""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/oxicloud-desktop", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/oxicloud-desktop/README", "644"],
+    ["LICENSE", "usr/share/doc/oxicloud-desktop/LICENSE", "644"],
+]
+
+# Configuración para cargo-wix (generación de instaladores MSI para Windows)
+[package.metadata.wix]
+upgrade-guid = "12345678-1234-1234-1234-123456789012"
+path-guid = "12345678-1234-1234-1234-123456789012"
+license = false
+eula = false
 
 [dependencies]
 # Dioxus - Framework UI
-dioxus = "0.6.3"
+dioxus = { version = "0.6.3", features = ["hooks", "macro"] }
+dioxus-hooks = "0.6.2"
 dioxus-desktop = "0.6.3"
 dioxus-router = "0.6.3"
 dioxus-free-icons = { version = "0.9.0", features = ["bootstrap", "ionicons"] }
@@ -53,14 +83,15 @@ image = "0.24.7"       # Para procesamiento de imágenes y miniaturas
 # Encryption - Classical
 aes-gcm = "0.10.3"     # AES-GCM encryption
 chacha20poly1305 = "0.10.1" # ChaCha20-Poly1305 encryption
-pbkdf2 = "0.12.2"      # Password-based key derivation
+pbkdf2 = { version = "0.12.2", features = ["simple"] }      # Password-based key derivation
 sha2 = "0.10.8"        # SHA-2 hash functions
 rand = "0.8.5"         # Random number generation
 base64 = "0.21.5"      # Base64 encoding/decoding
 
 # Post-quantum cryptography
-pqcrypto = "0.14.0"    # Meta-package for post-quantum cryptography
-pqcrypto-kyber = "0.7.0"  # Kyber KEM implementation
+pqcrypto = "0.18.1"    # Meta-package for post-quantum cryptography
+pqcrypto-traits = "0.3.5"    # Traits for post-quantum cryptography
+pqcrypto-kyber = "0.8.1"  # Kyber KEM implementation
 pqcrypto-dilithium = "0.4.6"  # Dilithium signature scheme
 kmip-ttlv = "0.3.1"    # KMIP protocol support
 

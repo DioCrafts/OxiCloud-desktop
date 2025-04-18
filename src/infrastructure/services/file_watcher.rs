@@ -193,16 +193,19 @@ impl FileWatcher {
                                     Self::should_exclude(to, &excluded_paths.read().await)
                                 },
                                 FileSystemEvent::Multiple(events) => {
+                                    // Get the excluded paths first
+                                    let excluded_paths_value = excluded_paths.read().await;
+                                    
                                     events.iter().any(|e| {
                                         match e {
                                             FileSystemEvent::Created(path) | 
                                             FileSystemEvent::Modified(path) | 
                                             FileSystemEvent::Deleted(path) => {
-                                                Self::should_exclude(path, &excluded_paths.read().await)
+                                                Self::should_exclude(path, &excluded_paths_value)
                                             },
                                             FileSystemEvent::Renamed(from, to) => {
-                                                Self::should_exclude(from, &excluded_paths.read().await) || 
-                                                Self::should_exclude(to, &excluded_paths.read().await)
+                                                Self::should_exclude(from, &excluded_paths_value) || 
+                                                Self::should_exclude(to, &excluded_paths_value)
                                             },
                                             _ => false,
                                         }

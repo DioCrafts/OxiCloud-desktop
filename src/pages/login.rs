@@ -1,14 +1,14 @@
 use dioxus::prelude::*;
 use dioxus_router::prelude::*;
-use dioxus_free_icons::icons::bootstrap_icons::Bs;
-use dioxus_free_icons::Icon;
+// Temporarily comment out icon imports until we can find the correct path
+// use dioxus_free_icons::bootstrap_icons as Bs;
+// use dioxus_free_icons::Icon;
 use std::sync::Arc;
 
 use crate::interfaces::app::Route;
 use crate::application::ports::auth_port::AuthPort;
 use crate::domain::entities::user::UserError;
 
-#[component]
 pub fn LoginPage(cx: Scope) -> Element {
     let navigator = use_navigator(cx);
     let server_url = use_state(cx, || String::from("http://localhost:3000"));
@@ -64,8 +64,8 @@ pub fn LoginPage(cx: Scope) -> Element {
                 
                 if let Some(err) = error.get() {
                     div { class: "error-message",
-                        Icon { icon: Bs::ExclamationTriangleFill }
-                        span { "{err}" }
+                        // Icon { icon: Bs::ExclamationTriangleFill }
+                        span { "⚠ {err}" }
                     }
                 }
                 
@@ -116,11 +116,11 @@ pub fn LoginPage(cx: Scope) -> Element {
                         disabled: !is_valid || *loading.get(),
                         
                         if *loading.get() {
-                            Icon { icon: Bs::ArrowRepeat, class: "rotating" }
-                            " Logging in..."
+                            // Icon { icon: Bs::ArrowRepeat, class: "rotating" }
+                            "↻ Logging in..."
                         } else {
-                            Icon { icon: Bs::BoxArrowInRight }
-                            " Login"
+                            // Icon { icon: Bs::BoxArrowInRight }
+                            "➡️ Login"
                         }
                     }
                 }

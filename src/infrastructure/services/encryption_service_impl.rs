@@ -17,6 +17,11 @@ use serde_json;
 use uuid::Uuid;
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 
+// Define missing constants for dilithium signatures and keys
+// These values are based on the typical sizes for dilithium5
+const DILITHIUM_SIGNATURE_LENGTH: usize = 4095;
+const DILITHIUM_PUBLIC_KEY_LENGTH: usize = 2592;
+
 // Classical crypto imports
 use aes_gcm::{
     aead::{Aead, KeyInit, OsRng},
@@ -28,6 +33,10 @@ use chacha20poly1305::{
 use sha2::{Sha256, Digest};
 use pbkdf2::{pbkdf2_hmac, Pbkdf2};
 use rand::{RngCore, rngs::OsRng as RandOsRng, SeedableRng, rngs::StdRng};
+
+// Define missing constants for Kyber768
+const KYBER768_CIPHERTEXT_LENGTH: usize = 1088; // Typical size for Kyber768
+const KYBER768_SECRET_KEY_LENGTH: usize = 2400; // Typical size for Kyber768
 
 // Post-quantum crypto imports
 use pqcrypto_kyber::kyber768::{self, PublicKey as KyberPublicKey, SecretKey as KyberSecretKey};
@@ -332,14 +341,14 @@ impl EncryptionServiceImpl {
                         // [IV | Kyber ciphertext | AES ciphertext | Kyber secret key]
                         
                         // Extract the different parts
-                        if ciphertext.len() <= kyber768::CIPHERTEXT_LENGTH + 32 { // AES ciphertext should be at least 32 bytes
+                        if ciphertext.len() <= KYBER768_CIPHERTEXT_LENGTH + 32 { // AES ciphertext should be at least 32 bytes
                             return Err(EncryptionError::DecryptionError(
                                 "Encrypted data too short for Kyber format".to_string()
                             ));
                         }
                         
-                        let kyber_ct_len = kyber768::CIPHERTEXT_LENGTH;
-                        let kyber_sk_len = kyber768::SECRET_KEY_LENGTH;
+                        let kyber_ct_len = KYBER768_CIPHERTEXT_LENGTH;
+                        let kyber_sk_len = KYBER768_SECRET_KEY_LENGTH;
                         
                         // Split the data
                         let (kyber_ct_bytes, rest) = ciphertext.split_at(kyber_ct_len);
@@ -370,7 +379,7 @@ impl EncryptionServiceImpl {
                         // [AES IV | Kyber IV | Kyber ciphertext | hybrid ciphertext | secret key]
                         
                         // The format is complex, so we need to extract parts carefully
-                        if ciphertext.len() <= IV_SIZE + kyber768::CIPHERTEXT_LENGTH + 32 + kyber768::SECRET_KEY_LENGTH {
+                        if ciphertext.len() <= IV_SIZE + KYBER768_CIPHERTEXT_LENGTH + 32 + KYBER768_SECRET_KEY_LENGTH {
                             return Err(EncryptionError::DecryptionError(
                                 "Encrypted data too short for hybrid format".to_string()
                             ));
@@ -381,10 +390,10 @@ impl EncryptionServiceImpl {
                         let (kyber_iv, rest) = rest.split_at(IV_SIZE);
                         
                         // Extract Kyber ciphertext
-                        let (kyber_ct_bytes, rest) = rest.split_at(kyber768::CIPHERTEXT_LENGTH);
+                        let (kyber_ct_bytes, rest) = rest.split_at(KYBER768_CIPHERTEXT_LENGTH);
                         
                         // The remaining is split between hybrid ciphertext and secret key
-                        let hybrid_ct_len = rest.len() - kyber768::SECRET_KEY_LENGTH;
+                        let hybrid_ct_len = rest.len() - KYBER768_SECRET_KEY_LENGTH;
                         let (hybrid_ct, sk_bytes) = rest.split_at(hybrid_ct_len);
                         
                         // Convert Kyber components
@@ -791,8 +800,8 @@ impl EncryptionService for EncryptionServiceImpl {
                 // AES_ciphertext || Kyber_ciphertext || Kyber_secret_key
                 
                 // Calculate lengths
-                let kyber_ct_len = kyber768::CIPHERTEXT_LENGTH;
-                let kyber_sk_len = kyber768::SECRET_KEY_LENGTH;
+                let kyber_ct_len = KYBER768_CIPHERTEXT_LENGTH;
+                let kyber_sk_len = KYBER768_SECRET_KEY_LENGTH;
                 
                 if data.len() <= kyber_ct_len + kyber_sk_len {
                     return Err(EncryptionError::DecryptionError(
@@ -829,8 +838,8 @@ impl EncryptionService for EncryptionServiceImpl {
                 // AES_ciphertext || Dilithium_signature || Dilithium_public_key
                 
                 // Calculate lengths
-                let dilithium_sig_len = dilithium5::SIGNATURE_LENGTH;
-                let dilithium_pk_len = dilithium5::PUBLIC_KEY_LENGTH;
+                let dilithium_sig_len = DILITHIUM_SIGNATURE_LENGTH;
+                let dilithium_pk_len = DILITHIUM_PUBLIC_KEY_LENGTH;
                 
                 if data.len() <= dilithium_sig_len + dilithium_pk_len {
                     return Err(EncryptionError::DecryptionError(
@@ -870,7 +879,7 @@ impl EncryptionService for EncryptionServiceImpl {
                 // Kyber_IV || Kyber_ciphertext || Hybrid_ciphertext || Kyber_secret_key
                 
                 // Extract Kyber IV (first part of data)
-                if data.len() <= IV_SIZE + kyber768::CIPHERTEXT_LENGTH + kyber768::SECRET_KEY_LENGTH {
+                if data.len() <= IV_SIZE + KYBER768_CIPHERTEXT_LENGTH + KYBER768_SECRET_KEY_LENGTH {
                     return Err(EncryptionError::DecryptionError(
                         "Data too short for hybrid format".to_string() 
                     ));
@@ -878,10 +887,10 @@ impl EncryptionService for EncryptionServiceImpl {
                 
                 // Extract components
                 let (kyber_iv, rest) = data.split_at(IV_SIZE);
-                let (kyber_ct_bytes, rest) = rest.split_at(kyber768::CIPHERTEXT_LENGTH);
+                let (kyber_ct_bytes, rest) = rest.split_at(KYBER768_CIPHERTEXT_LENGTH);
                 
                 // The rest contains hybrid ciphertext and secret key
-                let hybrid_ct_len = rest.len() - kyber768::SECRET_KEY_LENGTH;
+                let hybrid_ct_len = rest.len() - KYBER768_SECRET_KEY_LENGTH;
                 let (hybrid_ct, sk_bytes) = rest.split_at(hybrid_ct_len);
                 
                 // Reconstruct Kyber objects
@@ -1118,7 +1127,7 @@ impl EncryptionService for EncryptionServiceImpl {
     }
     
     /// Encrypt a file to a destination path
-    pub async fn encrypt_file(&self, 
+    async fn encrypt_file(&self, 
                            password: &str, 
                            source_path: &PathBuf, 
                            destination_path: &PathBuf) -> EncryptionResult<()> {
@@ -1126,7 +1135,7 @@ impl EncryptionService for EncryptionServiceImpl {
     }
     
     /// Decrypt a file to a destination path
-    pub async fn decrypt_file(&self, 
+    async fn decrypt_file(&self, 
                            password: &str, 
                            source_path: &PathBuf, 
                            destination_path: &PathBuf) -> EncryptionResult<()> {

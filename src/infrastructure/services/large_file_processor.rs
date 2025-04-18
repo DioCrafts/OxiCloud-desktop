@@ -13,6 +13,7 @@ use tokio::task;
 use tokio::fs;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::mpsc;
+use async_trait::async_trait;
 use tracing::{info, error, warn, debug, instrument};
 use futures::stream::{self, StreamExt};
 use uuid::Uuid;
@@ -161,7 +162,7 @@ impl LargeFileProcessor {
         // Mime type from extension
         let mime_type = file_path.extension()
             .and_then(|ext| ext.to_str())
-            .map(|ext| mime_guess::from_extension(ext).first_or_octet_stream().to_string());
+            .map(|ext| mime_guess::from_path(file_path).first_or_octet_stream().to_string());
         
         // Validate that all chunks are present and sorted properly
         if chunks.len() == 0 {
