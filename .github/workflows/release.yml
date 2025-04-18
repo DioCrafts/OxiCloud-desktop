@@ -22,6 +22,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
+        # Install build-essential package for ld linker and other build tools
+        sudo apt-get install -y build-essential
+        # Install SQLite and other required dependencies
+        sudo apt-get install -y libsqlite3-dev
         # Try first with libwebkit2gtk-4.1-dev, fall back to 4.0 if not available
         if ! sudo apt-get install -y libssl-dev pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev gcc; then
           echo "libwebkit2gtk-4.1-dev not found, trying with 4.0 version"
@@ -85,8 +89,37 @@ jobs:
         toolchain: stable
         override: true
         
-    - name: Install wix
-      run: cargo install cargo-wix --force
+    - name: Install WiX Toolset and cargo-wix
+      run: |
+        # Install WiX Toolset - required for cargo-wix to work
+        Write-Host "Downloading WiX Toolset..."
+        Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" -OutFile "wix-binaries.zip"
+        Write-Host "Extracting WiX Toolset..."
+        Expand-Archive -Path "wix-binaries.zip" -DestinationPath "wix-binaries"
+        
+        # Add WiX binaries to PATH - make sure to use absolute path
+        $wixBinPath = Resolve-Path "wix-binaries"
+        Write-Host "WiX binaries path: $wixBinPath"
+        $env:PATH = "$env:PATH;$wixBinPath"
+        [Environment]::SetEnvironmentVariable("Path", $env:PATH, "Machine")
+        
+        # Verify WiX Toolset is installed
+        Write-Host "Verifying WiX Toolset installation..."
+        try {
+            $candleVersion = & "$wixBinPath\candle.exe" -? | Select-String -Pattern "Windows Installer XML Toolset Compiler"
+            Write-Host "WiX Toolset candle.exe found: $candleVersion"
+            
+            $lightVersion = & "$wixBinPath\light.exe" -? | Select-String -Pattern "Windows Installer XML Toolset Linker"
+            Write-Host "WiX Toolset light.exe found: $lightVersion"
+        } catch {
+            Write-Host "Error verifying WiX tools: $_"
+            exit 1
+        }
+        
+        # Install cargo-wix
+        Write-Host "Installing cargo-wix..."
+        cargo install cargo-wix --force
+      shell: pwsh
         
     - name: Build
       run: cargo build --release
@@ -122,8 +155,25 @@ jobs:
         }
       shell: pwsh
       
-    - name: Create MSI installer
+    - name: Initialize and build MSI installer
       run: |
+        # Ensure WiX binaries are in the PATH
+        $wixBinPath = Resolve-Path "wix-binaries"
+        $env:PATH = "$env:PATH;$wixBinPath"
+        
+        # List WiX tools to verify they're accessible
+        Write-Host "WiX tools available:"
+        Get-ChildItem -Path $wixBinPath -Filter "*.exe" | ForEach-Object { Write-Host "- $($_.Name)" }
+        
+        # Initialize the WiX configuration if needed
+        if (-not (Test-Path "wix\main.wxs")) {
+          Write-Host "Initializing WiX configuration..."
+          cargo wix init --force
+        }
+        
+        # Verify the wix directory exists and has necessary files
+        Get-ChildItem -Path "wix" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "WiX config file: $($_.Name)" }
+        
         # Create a variables file with appropriate parameters for WiX
         $wxsVars = @"
         <?xml version="1.0" encoding="utf-8"?>
@@ -136,8 +186,29 @@ jobs:
         "@
         Set-Content -Path "wix\variables.wxs" -Value $wxsVars
         
-        # Run cargo-wix with extra logging enabled
-        cargo wix --nocapture --no-build --verbose
+        # Set environment variables for cargo-wix
+        Write-Host "Setting up cargo-wix environment variables..."
+        $env:CARGO_WIX_SKIP_BUILD = "true"  # Skip rebuild since we already built
+        $env:CARGO_WIX_VERBOSE = "true"     # Enable verbose output
+        $env:CARGO_WIX_NOCAPTURE = "true"   # Don't capture output
+        
+        # Run cargo-wix with detailed debugging
+        Write-Host "Running cargo-wix to build MSI..."
+        try {
+            cargo wix --nocapture --no-build --verbose
+            Write-Host "cargo-wix command completed"
+        } catch {
+            Write-Host "Error running cargo-wix: $_"
+            # Continue even if it fails, as we have a fallback
+        }
+        
+        # Verify MSI creation
+        $msiPath = Get-ChildItem -Path "target\wix\*.msi" -ErrorAction SilentlyContinue
+        if ($msiPath) {
+          Write-Host "MSI created successfully at: $msiPath"
+        } else {
+          Write-Host "MSI creation failed. Continuing to fallback..."
+        }
       shell: pwsh
       
     - name: Create fallback MSI if wix fails
