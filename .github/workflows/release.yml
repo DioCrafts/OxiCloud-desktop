@@ -60,17 +60,21 @@ jobs:
         # Build with explicit target
         cargo build --release --target x86_64-unknown-linux-gnu
         
-        # Create symlink to make paths consistent with rest of workflow
+        # Copy file instead of symlink to make paths consistent
         mkdir -p target/release
-        ln -sf target/x86_64-unknown-linux-gnu/release/oxicloud-desktop target/release/
+        cp target/x86_64-unknown-linux-gnu/release/oxicloud-desktop target/release/
       
     - name: Create tarball
       run: |
         mkdir -p OxiCloud-Linux
-        # Create symlink if it doesn't exist
-        if [ ! -f "target/release/oxicloud-desktop" ]; then
-          echo "Binary not found at target/release/oxicloud-desktop"
-          echo "Checking target/x86_64-unknown-linux-gnu/release/oxicloud-desktop..."
+        # Check for binary and copy directly from architecture-specific folder if needed
+        if [ ! -f "target/release/oxicloud-desktop" ] || [ ! -s "target/release/oxicloud-desktop" ]; then
+          echo "Binary not found or empty at target/release/oxicloud-desktop"
+          echo "Checking architecture-specific folder..."
+          
+          # Remove any existing files or broken symlinks
+          rm -f target/release/oxicloud-desktop
+          
           if [ -f "target/x86_64-unknown-linux-gnu/release/oxicloud-desktop" ]; then
             echo "Binary found at target/x86_64-unknown-linux-gnu/release/oxicloud-desktop"
             mkdir -p target/release
@@ -158,15 +162,37 @@ jobs:
         
     - name: Build for Windows
       run: |
-        # Install Windows GNU target (cross-platform compatible)
-        rustup target add x86_64-pc-windows-gnu
+        # Install Windows MSVC target (native Windows target)
+        rustup target add x86_64-pc-windows-msvc
         
-        # Build with explicit target
-        cargo build --release --target x86_64-pc-windows-gnu
+        # Create .cargo/config.toml to disable problematic features
+        mkdir -p .cargo
+        @"
+        [build]
+        target = "x86_64-pc-windows-msvc"
+
+        [target.x86_64-pc-windows-msvc]
+        rustflags = ["-C", "target-feature=+crt-static"]
+        
+        [features]
+        default = []
+        " | Out-File -FilePath ".cargo/config.toml" -Encoding utf8
+        
+        # Build with restricted features to avoid pqcrypto issues
+        cargo build --release --no-default-features
         
         # Ensure path exists for the rest of workflow
         mkdir -p target\release -ErrorAction SilentlyContinue
-        Copy-Item -Path "target\x86_64-pc-windows-gnu\release\oxicloud-desktop.exe" -Destination "target\release\" -ErrorAction SilentlyContinue
+        
+        # Copy from MSVC target directory since we're using that target now
+        if (Test-Path "target\x86_64-pc-windows-msvc\release\oxicloud-desktop.exe") {
+            Copy-Item -Path "target\x86_64-pc-windows-msvc\release\oxicloud-desktop.exe" -Destination "target\release\"
+        } elseif (Test-Path "target\release\oxicloud-desktop.exe") {
+            Write-Host "Executable already in target\release"
+        } else {
+            Write-Host "WARNING: Executable not found in expected location. Searching..."
+            Get-ChildItem -Path "target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host $_.FullName }
+        }
       shell: pwsh
       
     - name: Create zip
