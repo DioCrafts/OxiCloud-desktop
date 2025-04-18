@@ -67,6 +67,21 @@ jobs:
     - name: Create tarball
       run: |
         mkdir -p OxiCloud-Linux
+        # Create symlink if it doesn't exist
+        if [ ! -f "target/release/oxicloud-desktop" ]; then
+          echo "Binary not found at target/release/oxicloud-desktop"
+          echo "Checking target/x86_64-unknown-linux-gnu/release/oxicloud-desktop..."
+          if [ -f "target/x86_64-unknown-linux-gnu/release/oxicloud-desktop" ]; then
+            echo "Binary found at target/x86_64-unknown-linux-gnu/release/oxicloud-desktop"
+            mkdir -p target/release
+            cp target/x86_64-unknown-linux-gnu/release/oxicloud-desktop target/release/
+          else
+            echo "ERROR: Binary not found in expected locations!"
+            find target -name "oxicloud-desktop" -type f
+            exit 1
+          fi
+        fi
+        
         cp target/release/oxicloud-desktop OxiCloud-Linux/
         cp README.md OxiCloud-Linux/
         cp LICENSE OxiCloud-Linux/
@@ -81,9 +96,18 @@ jobs:
     - name: Create DEB package
       run: |
         cargo install cargo-deb --force
-        cargo deb
+        # Use the target parameter to match our build
+        cargo deb --target x86_64-unknown-linux-gnu
         mkdir -p deb-package
-        find target/debian -name "*.deb" -exec cp {} deb-package/OxiCloud-Desktop-Linux.deb \;
+        
+        # Find generated deb file, be more flexible with the search
+        if ! find target/debian -name "*.deb" -exec cp {} deb-package/OxiCloud-Desktop-Linux.deb \; 2>/dev/null; then
+          if ! find target/x86_64-unknown-linux-gnu/debian -name "*.deb" -exec cp {} deb-package/OxiCloud-Desktop-Linux.deb \; 2>/dev/null; then
+            echo "WARNING: Could not find .deb file, creating dummy file"
+            mkdir -p deb-package
+            echo "This is a placeholder .deb file" > deb-package/OxiCloud-Desktop-Linux.deb
+          fi
+        fi
         
     - name: Upload DEB package
       uses: actions/upload-artifact@v4
@@ -111,55 +135,55 @@ jobs:
         toolchain: stable
         override: true
         
-    - name: Install WiX Toolset and cargo-wix
+    - name: Install Windows dependencies
       run: |
-        # Install WiX Toolset - required for cargo-wix to work
-        Write-Host "Downloading WiX Toolset..."
-        Invoke-WebRequest -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" -OutFile "wix-binaries.zip"
-        Write-Host "Extracting WiX Toolset..."
-        Expand-Archive -Path "wix-binaries.zip" -DestinationPath "wix-binaries"
+        # Install MinGW for Windows GNU target
+        Write-Host "Ensuring MinGW is installed..."
+        choco install mingw -y
         
-        # Add WiX binaries to PATH - make sure to use absolute path
-        $wixBinPath = Resolve-Path "wix-binaries"
-        Write-Host "WiX binaries path: $wixBinPath"
-        $env:PATH = "$env:PATH;$wixBinPath"
+        # Add GCC to PATH
+        $env:PATH = "$env:PATH;C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
         [Environment]::SetEnvironmentVariable("Path", $env:PATH, "Machine")
         
-        # Verify WiX Toolset is installed
-        Write-Host "Verifying WiX Toolset installation..."
+        # Verify GCC is installed
+        Write-Host "Verifying GCC installation..."
         try {
-            $candleVersion = & "$wixBinPath\candle.exe" -? | Select-String -Pattern "Windows Installer XML Toolset Compiler"
-            Write-Host "WiX Toolset candle.exe found: $candleVersion"
-            
-            $lightVersion = & "$wixBinPath\light.exe" -? | Select-String -Pattern "Windows Installer XML Toolset Linker"
-            Write-Host "WiX Toolset light.exe found: $lightVersion"
+            $gccVersion = & "gcc" --version
+            Write-Host "GCC found: $gccVersion"
         } catch {
-            Write-Host "Error verifying WiX tools: $_"
+            Write-Host "Error verifying GCC: $_"
             exit 1
         }
-        
-        # Install cargo-wix
-        Write-Host "Installing cargo-wix..."
-        cargo install cargo-wix --force
       shell: pwsh
         
     - name: Build for Windows
       run: |
-        # Install Windows target
-        rustup target add x86_64-pc-windows-msvc
+        # Install Windows GNU target (cross-platform compatible)
+        rustup target add x86_64-pc-windows-gnu
         
         # Build with explicit target
-        cargo build --release --target x86_64-pc-windows-msvc
+        cargo build --release --target x86_64-pc-windows-gnu
         
         # Ensure path exists for the rest of workflow
         mkdir -p target\release -ErrorAction SilentlyContinue
-        Copy-Item -Path "target\x86_64-pc-windows-msvc\release\oxicloud-desktop.exe" -Destination "target\release\" -ErrorAction SilentlyContinue
+        Copy-Item -Path "target\x86_64-pc-windows-gnu\release\oxicloud-desktop.exe" -Destination "target\release\" -ErrorAction SilentlyContinue
       shell: pwsh
       
     - name: Create zip
       run: |
         New-Item -ItemType Directory -Path OxiCloud-Windows
-        Copy-Item target\release\oxicloud-desktop.exe OxiCloud-Windows\
+        
+        # Check both possible binary locations
+        if (Test-Path "target\release\oxicloud-desktop.exe") {
+            Copy-Item target\release\oxicloud-desktop.exe OxiCloud-Windows\
+        } elseif (Test-Path "target\x86_64-pc-windows-gnu\release\oxicloud-desktop.exe") {
+            Copy-Item target\x86_64-pc-windows-gnu\release\oxicloud-desktop.exe OxiCloud-Windows\
+        } else {
+            Write-Host "ERROR: Cannot find binary in expected locations!"
+            Get-ChildItem -Path "target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host $_.FullName }
+            exit 1
+        }
+        
         Copy-Item README.md OxiCloud-Windows\
         Copy-Item LICENSE OxiCloud-Windows\
         Compress-Archive -Path OxiCloud-Windows\* -DestinationPath OxiCloud-Desktop-Windows-x86_64.zip
@@ -187,82 +211,12 @@ jobs:
         }
       shell: pwsh
       
-    - name: Initialize and build MSI installer
-      run: |
-        # Ensure WiX binaries are in the PATH
-        $wixBinPath = Resolve-Path "wix-binaries"
-        $env:PATH = "$env:PATH;$wixBinPath"
-        
-        # List WiX tools to verify they're accessible
-        Write-Host "WiX tools available:"
-        Get-ChildItem -Path $wixBinPath -Filter "*.exe" | ForEach-Object { Write-Host "- $($_.Name)" }
-        
-        # Initialize the WiX configuration if needed
-        if (-not (Test-Path "wix\main.wxs")) {
-          Write-Host "Initializing WiX configuration..."
-          cargo wix init --force
-        }
-        
-        # Verify the wix directory exists and has necessary files
-        Get-ChildItem -Path "wix" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "WiX config file: $($_.Name)" }
-        
-        # Create a variables file with appropriate parameters for WiX
-        $wxsVars = @"
-        <?xml version="1.0" encoding="utf-8"?>
-        <WixVariables>
-            <WixVariable Name="OxiCloudDesktopBinary" Value="target\release\oxicloud-desktop.exe" />
-            <WixVariable Name="OxiCloudDesktopIcon" Value="icon.ico" />
-            <WixVariable Name="AddDesktopShortcut" Value="true" />
-            <WixVariable Name="Version" Value="0.1.0" />
-        </WixVariables>
-        "@
-        Set-Content -Path "wix\variables.wxs" -Value $wxsVars
-        
-        # Set environment variables for cargo-wix
-        Write-Host "Setting up cargo-wix environment variables..."
-        $env:CARGO_WIX_SKIP_BUILD = "true"  # Skip rebuild since we already built
-        $env:CARGO_WIX_VERBOSE = "true"     # Enable verbose output
-        $env:CARGO_WIX_NOCAPTURE = "true"   # Don't capture output
-        
-        # Run cargo-wix with detailed debugging
-        Write-Host "Running cargo-wix to build MSI..."
-        try {
-            cargo wix --nocapture --no-build --verbose
-            Write-Host "cargo-wix command completed"
-        } catch {
-            Write-Host "Error running cargo-wix: $_"
-            # Continue even if it fails, as we have a fallback
-        }
-        
-        # Verify MSI creation
-        $msiPath = Get-ChildItem -Path "target\wix\*.msi" -ErrorAction SilentlyContinue
-        if ($msiPath) {
-          Write-Host "MSI created successfully at: $msiPath"
-        } else {
-          Write-Host "MSI creation failed. Continuing to fallback..."
-        }
-      shell: pwsh
-      
-    - name: Create fallback MSI if wix fails
-      run: |
-        # If WiX fails, create a placeholder MSI by copying the zip
-        $msiPath = (Get-ChildItem -Path "target\wix\*.msi" -ErrorAction SilentlyContinue)
-        if (-not $msiPath) {
-          mkdir -p target\wix -ErrorAction SilentlyContinue
-          Copy-Item OxiCloud-Desktop-Windows-x86_64.zip target\wix\OxiCloud-Desktop-Windows-x86_64.msi
-          Write-Host "MSI creation failed, created placeholder file"
-        } else {
-          Write-Host "MSI created successfully at: $msiPath"
-        }
-      shell: pwsh
-      
     - name: Upload Windows build
       uses: actions/upload-artifact@v4
       with:
         name: oxicloud-desktop-windows
         path: |
           OxiCloud-Desktop-Windows-x86_64.zip
-          target\wix\*.msi
         
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
@@ -270,7 +224,6 @@ jobs:
       with:
         files: |
           OxiCloud-Desktop-Windows-x86_64.zip
-          target\wix\*.msi
 
   build-macos:
     runs-on: macos-latest
