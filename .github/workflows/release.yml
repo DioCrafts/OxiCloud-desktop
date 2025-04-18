@@ -166,7 +166,9 @@ jobs:
         rustup target add x86_64-pc-windows-msvc
         
         # Create .cargo/config.toml to disable problematic features
-        mkdir -p .cargo
+        # Using -Force to ignore errors if directory already exists
+        New-Item -Path ".cargo" -ItemType Directory -Force
+        
         @"
         [build]
         target = "x86_64-pc-windows-msvc"
