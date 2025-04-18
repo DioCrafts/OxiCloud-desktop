@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='windows-1252'?>
+<!--
+  Copyright (C) 2023 OxiCloud Team
+
+  This file is part of the OxiCloud Desktop Client.
+-->
+
+<!--
+  This is an example WiX that does a few things:
+  * Shows the required boilerplate using wix 4
+  * Adds entries to registry
+  * Creates an installer that installs a binary (with an icon) to Program Files with an uninstaller
+  * Optionally adds a desktop shortcut
+  * Adds application to the Start Menu (and uninstaller)
+  * Creates a GUI installer (you can use -dui to override but is not recommended)
+
+  This file is a great place to start to figure out how wix can be used.
+-->
+<?if $(sys.BUILDARCH) = x64 ?>
+    <?define ProductName = "OxiCloud Desktop (64 bit)" ?>
+    <?define UpgradeCode = "12345678-1234-1234-1234-123456789012" ?>
+    <?define ProgramFilesFolder = "ProgramFiles64Folder" ?>
+<?else ?>
+    <?define ProductName = "OxiCloud Desktop" ?>
+    <?define UpgradeCode = "12345678-1234-1234-1234-123456789012" ?>
+    <?define ProgramFilesFolder = "ProgramFilesFolder" ?>
+<?endif ?>
+
+<Wix xmlns='http://wixtoolset.org/schemas/v4/wxs'>
+   <Package Name='$(ProductName)' 
+            UpgradeCode='$(UpgradeCode)'
+            Language='1033'
+            Codepage='1252' 
+            Version='$(var.Version)' 
+            Manufacturer='OxiCloud Team'>
+
+      <SummaryInformation Keywords='Installer' Description='OxiCloud Desktop Client Installer' />
+
+      <MajorUpgrade AllowSameVersionUpgrades='yes' DowngradeErrorMessage='A newer version of [ProductName] is already installed. Setup will now exit.' />
+
+      <Media Id='1' Cabinet='media1.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1' />
+      <Property Id='DiskPrompt' Value='OxiCloud Desktop Client Installation' />
+
+      <Feature Id='Complete' Level='1'>
+         <ComponentRef Id='MainExecutable' />
+         <ComponentRef Id='ProgramMenuDir' />
+         <ComponentRef Id='RegistryEntries' />
+         <?if $(var.AddDesktopShortcut) = true ?>
+            <ComponentRef Id='DesktopShortcut' />
+         <?endif ?>
+      </Feature>
+
+      <StandardDirectory Id='$(ProgramFilesFolder)'>
+         <Directory Id='INSTALLDIR' Name='OxiCloud'>
+            <Component Id='MainExecutable' Guid='*'>
+               <File Id='OxiCloudDesktopEXE' Name='oxicloud-desktop.exe' DiskId='1' Source='$(var.OxiCloudDesktopBinary)' KeyPath='yes'>
+                  <Shortcut Id="startmenuOxiCloudDesktop" Directory="ProgramMenuDir" Name="OxiCloud Desktop" WorkingDirectory='INSTALLDIR' Advertise="yes" Icon="icon.ico" />
+               </File>
+            </Component>
+         </Directory>
+      </StandardDirectory>
+
+      <StandardDirectory Id='ProgramMenuFolder' Name='Programs'>
+         <Directory Id='ProgramMenuDir' Name='OxiCloud Desktop'>
+            <Component Id='ProgramMenuDir' Guid='*'>
+               <RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+               <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Type='string' Value='' KeyPath='yes' />
+            </Component>
+         </Directory>
+      </StandardDirectory>
+
+      <?if $(var.AddDesktopShortcut) = true ?>
+      <StandardDirectory Id='DesktopFolder' Name='Desktop'>
+         <Component Id='DesktopShortcut' Guid='*'>
+            <Shortcut Id='desktopSC' Name='OxiCloud Desktop' Target='[#OxiCloudDesktopEXE]' WorkingDirectory='INSTALLDIR' Icon='icon.ico' />
+            <RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Name='Desktop Shortcut' Type='integer' Value='1' KeyPath='yes' />
+         </Component>
+      </StandardDirectory>
+      <?endif ?>
+
+      <Component Id='RegistryEntries' Guid='*' Directory='INSTALLDIR'>
+         <RegistryKey Root='HKCU' Key='Software\OxiCloud\DesktopClient'>
+            <RegistryValue Type='string' Name='InstallPath' Value='[INSTALLDIR]' KeyPath='yes' />
+            <RegistryValue Type='string' Name='Version' Value='$(var.Version)' />
+            <RegistryValue Type='integer' Name='StartWithWindows' Value='1' />
+            <RegistryValue Type='string' Name='Language' Value='en-US' />
+         </RegistryKey>
+      </Component>
+
+      <Icon Id='icon.ico' SourceFile='$(var.OxiCloudDesktopIcon)' />
+      <Property Id='ARPPRODUCTICON' Value='icon.ico' />
+
+      <UIRef Id='WixUI_Minimal' />
+   </Package>
+</Wix>
