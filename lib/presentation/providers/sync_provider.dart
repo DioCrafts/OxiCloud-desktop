@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:oxicloud_desktop/application/services/sync_service.dart';
 import 'package:oxicloud_desktop/core/di/dependency_injection.dart';
+import 'package:oxicloud_desktop/domain/entities/conflict_resolution.dart';
 
 /// Provider for sync status
 final syncStatusProvider = StreamProvider<SyncStatus>((ref) {

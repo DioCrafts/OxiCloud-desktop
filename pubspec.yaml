@@ -44,6 +44,9 @@ dependencies:
   path: ^1.8.3
   collection: ^1.17.2
   crypto: ^3.0.3
+  process_run: ^0.13.3
+  url_launcher: ^6.2.5
+  go_router: ^12.0.0
   
   # Background processing
   workmanager: ^0.5.2

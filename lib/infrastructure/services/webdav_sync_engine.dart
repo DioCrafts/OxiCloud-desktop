@@ -2,8 +2,10 @@ import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/network/connectivity_service.dart';
+import 'package:oxicloud_desktop/domain/entities/conflict_resolution.dart';
 import 'package:oxicloud_desktop/domain/entities/file.dart' as file_entity;
 import 'package:oxicloud_desktop/domain/entities/folder.dart';
+import 'package:oxicloud_desktop/domain/entities/sync_conflict.dart';
 import 'package:oxicloud_desktop/domain/repositories/sync_repository.dart';
 import 'package:oxicloud_desktop/infrastructure/adapters/webdav_file_adapter.dart';
 import 'package:oxicloud_desktop/infrastructure/adapters/webdav_folder_adapter.dart';
@@ -515,23 +517,8 @@ class WebDAVSyncEngine implements SyncRepository {
     }
   }
   
-  /// Conflict information
-  class _Conflict {
-    final String itemId;
-    final bool isFolder;
-    final dynamic localVersion;
-    final dynamic remoteVersion;
-    
-    _Conflict({
-      required this.itemId,
-      required this.isFolder,
-      required this.localVersion,
-      required this.remoteVersion,
-    });
-  }
-  
   /// Get conflict information
-  _Conflict? _getConflict(String itemId) {
+  SyncConflict? _getConflict(String itemId) {
     // In a real implementation, you would store and retrieve
     // conflicts from a local database
     return null;

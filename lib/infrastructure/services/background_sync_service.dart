@@ -5,6 +5,8 @@ import 'package:oxicloud_desktop/application/services/sync_service.dart';
 import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/network/connectivity_service.dart';
 import 'package:oxicloud_desktop/core/platform/battery_service.dart';
+import 'package:oxicloud_desktop/domain/entities/network_type.dart';
+import 'package:oxicloud_desktop/domain/entities/sync_conditions.dart';
 import 'package:oxicloud_desktop/infrastructure/services/resource_manager.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter/foundation.dart';
@@ -220,17 +222,6 @@ class BackgroundSyncService {
     
     // Update sync service
     _syncService.updateSyncInterval();
-  }
-  
-  /// Result of checking sync conditions
-  class SyncConditions {
-    final bool canSync;
-    final String reason;
-    
-    SyncConditions({
-      required this.canSync,
-      this.reason = '',
-    });
   }
   
   /// Check if sync conditions are met

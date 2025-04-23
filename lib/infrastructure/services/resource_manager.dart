@@ -71,6 +71,12 @@ class ResourceProfile {
   /// Whether to use delta sync
   final bool useDeltaSync;
   
+  /// Whether background sync is enabled
+  final bool enableBackgroundSync;
+  
+  /// Whether syncing should only happen on WiFi
+  final bool syncOnWifiOnly;
+  
   const ResourceProfile({
     required this.deviceClass,
     required this.networkType,
@@ -86,6 +92,8 @@ class ResourceProfile {
     required this.autoDownload,
     required this.useCompression,
     required this.useDeltaSync,
+    this.enableBackgroundSync = true,
+    this.syncOnWifiOnly = true,
   });
   
   @override
@@ -208,6 +216,8 @@ class ResourceManager {
       autoDownload: _shouldAutoDownload(usageMode, networkType),
       useCompression: _shouldUseCompression(usageMode, networkType),
       useDeltaSync: _shouldUseDeltaSync(usageMode),
+      enableBackgroundSync: usageMode != UsageMode.critical && usageMode != UsageMode.minimal,
+      syncOnWifiOnly: usageMode == UsageMode.dataSave || networkType.isMetered,
     );
     
     // Notify listeners

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:oxicloud_desktop/application/services/file_service.dart';
 import 'package:oxicloud_desktop/application/services/folder_service.dart';

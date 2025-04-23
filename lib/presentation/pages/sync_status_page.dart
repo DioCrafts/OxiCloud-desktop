@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:oxicloud_desktop/application/services/sync_service.dart';
 import 'package:oxicloud_desktop/core/network/connectivity_service.dart';
+import 'package:oxicloud_desktop/core/network/network_info.dart';
 import 'package:oxicloud_desktop/core/platform/battery_service.dart';
 import 'package:oxicloud_desktop/infrastructure/services/background_sync_service.dart';
 import 'package:oxicloud_desktop/presentation/providers/sync_provider.dart';

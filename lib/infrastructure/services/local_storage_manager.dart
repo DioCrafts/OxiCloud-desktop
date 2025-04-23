@@ -502,6 +502,26 @@ class LocalStorageManager {
     }
   }
   
+  /// Get the path to the sync folder
+  Future<String> getSyncFolderPath() async {
+    try {
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final syncDir = p.join(appDocDir.path, 'oxicloud_sync');
+      
+      // Create directory if it doesn't exist
+      final dir = Directory(syncDir);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+      
+      return syncDir;
+    } catch (e) {
+      _logger.severe('Failed to get sync folder path: $e');
+      // Return a fallback path
+      return p.join((await getTemporaryDirectory()).path, 'oxicloud_sync');
+    }
+  }
+  
   /// Close the storage manager
   Future<void> close() async {
     try {
