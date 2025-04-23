@@ -25,14 +25,21 @@ jobs:
       - name: Enable Windows desktop support
         run: flutter config --enable-windows-desktop
       
-      - name: Create Windows project files if needed
+      - name: Setup Windows project
         run: |
           flutter config --enable-windows-desktop
-          if (-not (Test-Path 'windows/CMakeLists.txt')) {
-            mkdir -Force windows/runner
-            # Mínimo necesario para construir
-            echo "# Placeholder CMakeLists.txt" > windows/CMakeLists.txt
+          # Crear un proyecto temporal con soporte para Windows
+          mkdir -p temp_project
+          cd temp_project
+          flutter create --platforms=windows --project-name oxicloud_desktop --org com.oxicloud .
+          # Copiar los archivos de windows al proyecto principal
+          cd ..
+          if (Test-Path 'windows') {
+            rm -r -Force windows
           }
+          cp -r temp_project/windows .
+          # Limpiar
+          rm -r -Force temp_project
       
       - name: Build Windows app
         run: flutter build windows --release || (echo "::warning::Build failed but continuing" && exit 0)
@@ -75,10 +82,21 @@ jobs:
       - name: Enable Linux desktop support
         run: flutter config --enable-linux-desktop
       
-      - name: Create Linux project files if needed
+      - name: Setup Linux project
         run: |
           flutter config --enable-linux-desktop
-          mkdir -p linux
+          # Crear un proyecto temporal con soporte para Linux
+          mkdir -p temp_project
+          cd temp_project
+          flutter create --platforms=linux --project-name oxicloud_desktop --org com.oxicloud .
+          # Copiar los archivos de linux al proyecto principal
+          cd ..
+          if [ -d "linux" ]; then
+            rm -rf linux
+          fi
+          cp -r temp_project/linux .
+          # Limpiar
+          rm -rf temp_project
       
       - name: Build Linux app
         run: flutter build linux --release || echo "::warning::Build failed but continuing"
@@ -117,10 +135,21 @@ jobs:
       - name: Enable macOS desktop support
         run: flutter config --enable-macos-desktop
       
-      - name: Create macOS project files if needed
+      - name: Setup macOS project
         run: |
           flutter config --enable-macos-desktop
-          mkdir -p macos
+          # Crear un proyecto temporal con soporte para macOS
+          mkdir -p temp_project
+          cd temp_project
+          flutter create --platforms=macos --project-name oxicloud_desktop --org com.oxicloud .
+          # Copiar los archivos de macos al proyecto principal
+          cd ..
+          if [ -d "macos" ]; then
+            rm -rf macos
+          fi
+          cp -r temp_project/macos .
+          # Limpiar
+          rm -rf temp_project
       
       - name: Build macOS app
         run: flutter build macos --release || echo "::warning::Build failed but continuing"

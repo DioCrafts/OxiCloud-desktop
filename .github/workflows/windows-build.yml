@@ -25,14 +25,21 @@ jobs:
       - name: Enable Windows desktop support
         run: flutter config --enable-windows-desktop
       
-      - name: Create Windows project files if needed
+      - name: Setup Windows project
         run: |
           flutter config --enable-windows-desktop
-          if (-not (Test-Path 'windows/CMakeLists.txt')) {
-            mkdir -Force windows/runner
-            # Mínimo necesario para construir
-            echo "# Placeholder CMakeLists.txt" > windows/CMakeLists.txt
+          # Crear un proyecto temporal con soporte para Windows
+          mkdir -p temp_project
+          cd temp_project
+          flutter create --platforms=windows --project-name oxicloud_desktop --org com.oxicloud .
+          # Copiar los archivos de windows al proyecto principal
+          cd ..
+          if (Test-Path 'windows') {
+            rm -r -Force windows
           }
+          cp -r temp_project/windows .
+          # Limpiar
+          rm -r -Force temp_project
       
       - name: Build Windows app
         run: flutter build windows --release || (echo "::warning::Build failed but continuing" && exit 0)
