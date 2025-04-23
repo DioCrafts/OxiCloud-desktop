@@ -1,230 +1,330 @@
 # OxiCloud Desktop Client
 
-A lightweight, fast, and reliable desktop synchronization client for OxiCloud built with Rust and Dioxus.
+Cliente de escritorio multiplataforma para OxiCloud, implementado con Flutter utilizando arquitectura hexagonal.
 
-<p align="center">
-  <img src="./screenshots/app-preview.png" alt="OxiCloud Desktop Client" width="700">
-</p>
+## Características
 
-## Features
+- Sincronización de archivos eficiente con servidor OxiCloud
+- Disponible para Windows, macOS, Linux, Android e iOS
+- Soporte offline y sincronización inteligente basada en recursos
+- Interfaz de usuario optimizada para escritorio y dispositivos móviles
+- Papelera de reciclaje para recuperación de archivos eliminados
+- Integración con sistemas de archivos nativos
+- Visor de archivos integrado para formatos comunes
+- Soporte para múltiples cuentas
+- Temas claros y oscuros
 
-- **Native Performance**: Built with Rust for exceptional speed and reliability
-- **Efficient Synchronization**: Smart sync algorithm minimizes bandwidth and storage usage
-- **Cross-Platform**: Works on Windows, macOS, and Linux with native look and feel
-- **Selective Sync**: Choose which folders to sync to save local disk space
-- **File On-Demand**: Access cloud files without consuming local storage
-- **Conflict Resolution**: Smart handling of file conflicts with user-friendly resolution
-- **Offline Support**: Work with files offline and sync when connection is restored
-- **Advanced Security**: End-to-end encryption with post-quantum resistance, supporting multiple algorithms (AES-256-GCM, ChaCha20-Poly1305, Kyber768, Dilithium5, and hybrid modes)
+## Requisitos del Sistema
 
-## Installation
+### Windows
+- Windows 10 (1809) o superior
+- 2 GB de RAM mínimo
+- 200 MB de espacio en disco para la aplicación
+- WinFsp 1.9 o superior (para integración nativa de archivos)
 
-### Pre-built Packages
+### macOS
+- macOS 10.15 (Catalina) o superior
+- 2 GB de RAM mínimo
+- 200 MB de espacio en disco para la aplicación
+- macFUSE 4.0 o superior (para integración nativa de archivos)
 
-Download the latest release for your platform:
+### Linux
+- Ubuntu 20.04 LTS, Fedora 34 o posterior
+- 2 GB de RAM mínimo
+- 200 MB de espacio en disco para la aplicación
+- FUSE 2.9 o superior (para integración nativa de archivos)
 
-- [Windows Installer](https://github.com/yourusername/oxicloud-desktop/releases/latest)
-- [macOS DMG](https://github.com/yourusername/oxicloud-desktop/releases/latest)
-- [Linux AppImage](https://github.com/yourusername/oxicloud-desktop/releases/latest)
+### Android
+- Android 6.0 (API 23) o superior
+- 3 GB de RAM recomendado
+- 100 MB de espacio en disco para la aplicación
 
-### Build from Source
+### iOS
+- iOS 13.0 o superior
+- 3 GB de RAM recomendado
+- 100 MB de espacio en disco para la aplicación
 
-Requirements:
-- Rust 1.70 or higher
-- pkg-config (on Linux)
-- OpenSSL development libraries
+## Compilación desde Código Fuente
 
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/oxicloud-desktop.git
-cd oxicloud-desktop
+Este documento explica cómo compilar el cliente OxiCloud para diferentes plataformas y crear instaladores/paquetes de distribución.
 
-# Build the application
-cargo build --release
+### Configuración del Entorno de Desarrollo
 
-# Run the application
-cargo run --release
+1. **Instalar Flutter SDK**:
+   ```bash
+   git clone https://github.com/flutter/flutter.git
+   cd flutter
+   git checkout 3.10.0  # Recomendamos usar esta versión
+   export PATH="$PATH:`pwd`/bin"  # Agregar Flutter al PATH
+   ```
+
+2. **Verificar dependencias**:
+   ```bash
+   flutter doctor
+   ```
+   Sigue las instrucciones para instalar las dependencias faltantes.
+
+3. **Clonar el repositorio**:
+   ```bash
+   git clone https://github.com/yourusername/oxicloud-desktop.git
+   cd oxicloud-desktop
+   ```
+
+4. **Instalar dependencias**:
+   ```bash
+   flutter pub get
+   ```
+
+### Compilación para Windows
+
+#### Requisitos Previos
+- Windows 10/11
+- Visual Studio 2019 o 2022 con "Desktop development with C++"
+- Git para Windows
+
+#### Pasos para compilar
+1. Asegúrate de tener Flutter configurado para Windows:
+   ```bash
+   flutter config --enable-windows-desktop
+   ```
+
+2. Compilar en modo debug:
+   ```bash
+   flutter build windows --debug
+   ```
+
+3. Compilar en modo release:
+   ```bash
+   flutter build windows --release
+   ```
+   El ejecutable se creará en `build\windows\runner\Release\`.
+
+#### Crear Instalador
+1. Instalar [Inno Setup](https://jrsoftware.org/isdl.php).
+
+2. Usar el script de Inno Setup en `windows/inno_setup.iss`:
+   ```bash
+   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" windows/inno_setup.iss
+   ```
+   El instalador se creará en `build\windows\installer\`.
+
+### Compilación para macOS
+
+#### Requisitos Previos
+- macOS 10.15 o superior
+- Xcode 13 o superior
+- Cocoapods
+
+#### Pasos para compilar
+1. Asegúrate de tener Flutter configurado para macOS:
+   ```bash
+   flutter config --enable-macos-desktop
+   ```
+
+2. Compilar en modo debug:
+   ```bash
+   flutter build macos --debug
+   ```
+
+3. Compilar en modo release:
+   ```bash
+   flutter build macos --release
+   ```
+   La aplicación se creará en `build/macos/Build/Products/Release/`.
+
+#### Crear DMG
+1. Instalar [create-dmg](https://github.com/sindresorhus/create-dmg):
+   ```bash
+   brew install create-dmg
+   ```
+
+2. Crear el DMG:
+   ```bash
+   create-dmg \
+     --volname "OxiCloud" \
+     --volicon "assets/icons/macos/AppIcon.icns" \
+     --window-pos 200 120 \
+     --window-size 800 400 \
+     --icon-size 100 \
+     --icon "OxiCloud.app" 200 190 \
+     --hide-extension "OxiCloud.app" \
+     --app-drop-link 600 185 \
+     "build/OxiCloud.dmg" \
+     "build/macos/Build/Products/Release/OxiCloud.app"
+   ```
+
+### Compilación para Linux
+
+#### Requisitos Previos
+- Ubuntu 20.04 LTS o cualquier distribución compatible
+- Dependencias necesarias:
+  ```bash
+  sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libfuse-dev
+  ```
+
+#### Pasos para compilar
+1. Asegúrate de tener Flutter configurado para Linux:
+   ```bash
+   flutter config --enable-linux-desktop
+   ```
+
+2. Compilar en modo debug:
+   ```bash
+   flutter build linux --debug
+   ```
+
+3. Compilar en modo release:
+   ```bash
+   flutter build linux --release
+   ```
+   El ejecutable se creará en `build/linux/x64/release/bundle/`.
+
+#### Crear Paquetes de Distribución
+
+##### Crear .deb (Debian/Ubuntu)
+1. Instalar herramientas de empaquetado:
+   ```bash
+   sudo apt-get install debhelper
+   ```
+
+2. Utilizar el script de creación de paquetes:
+   ```bash
+   cd packaging/linux
+   ./create_deb.sh
+   ```
+   El paquete .deb se creará en `packaging/linux/build/`.
+
+##### Crear .rpm (Fedora/RHEL)
+1. Instalar herramientas de empaquetado:
+   ```bash
+   sudo dnf install rpm-build
+   ```
+
+2. Utilizar el script de creación de paquetes:
+   ```bash
+   cd packaging/linux
+   ./create_rpm.sh
+   ```
+   El paquete .rpm se creará en `packaging/linux/build/`.
+
+##### Crear AppImage
+1. Descargar linuxdeploy y plugin AppImage:
+   ```bash
+   cd packaging/linux
+   wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+   wget https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage
+   chmod +x linuxdeploy-x86_64.AppImage
+   chmod +x linuxdeploy-plugin-appimage-x86_64.AppImage
+   ```
+
+2. Crear AppImage:
+   ```bash
+   ./create_appimage.sh
+   ```
+   El AppImage se creará en `packaging/linux/build/`.
+
+### Compilación para Android
+
+#### Requisitos Previos
+- Android Studio
+- JDK 11
+- Android SDK
+
+#### Pasos para compilar
+1. Configurar la firma de la aplicación:
+   - Crear archivo `android/key.properties` con información de la keystore
+   - Configurar la keystore como se describe en [documentación de Flutter](https://flutter.dev/docs/deployment/android#signing-the-app)
+
+2. Compilar APK:
+   ```bash
+   flutter build apk --release
+   ```
+   El APK se creará en `build/app/outputs/flutter-apk/app-release.apk`.
+
+3. Compilar Bundle (recomendado para Google Play):
+   ```bash
+   flutter build appbundle --release
+   ```
+   El bundle se creará en `build/app/outputs/bundle/release/app-release.aab`.
+
+### Compilación para iOS
+
+#### Requisitos Previos
+- macOS con Xcode 13 o superior
+- Cuenta de desarrollador de Apple
+
+#### Pasos para compilar
+1. Configurar perfiles de aprovisionamiento en Xcode:
+   - Abrir el proyecto iOS: `open ios/Runner.xcworkspace`
+   - Configurar los perfiles de firma en Xcode
+
+2. Compilar para dispositivos:
+   ```bash
+   flutter build ios --release --no-codesign
+   ```
+
+3. Archivar y distribuir a través de Xcode:
+   - En Xcode, seleccionar `Product > Archive`
+   - Usar el Organizador para validar y distribuir el IPA
+
+## Optimizaciones de Rendimiento
+
+### Batería
+- Sincronización adaptativa según nivel de batería y estado de carga
+- Suspensión de procesos no críticos en batería baja
+- Monitoreo de consumo energético
+
+### Red
+- Sincronización delta (solo se envían los cambios)
+- Compresión adaptativa según tipo de conexión
+- Priorización de tráfico según importancia
+- Estrategias de reconexión con backoff exponencial
+
+### Almacenamiento
+- Caché inteligente con priorización basada en uso
+- Limpieza automática según límites configurables
+- Gestión eficiente de archivos temporales
+- Algoritmos de detección de cambios optimizados
+
+### Memoria
+- Liberación proactiva de recursos
+- Carga diferida de datos y componentes
+- Algoritmos de paginación eficientes
+- Monitoreo y optimización del uso de memoria
+
+## Estructura del Proyecto
+
+El proyecto sigue una arquitectura hexagonal (puertos y adaptadores) para una clara separación de responsabilidades:
+
+```
+desktop_client/
+├── lib/
+│   ├── core/                    # Configuración y utilidades core
+│   ├── domain/                  # Capa de dominio 
+│   │   ├── entities/            # Entidades de dominio
+│   │   ├── repositories/        # Interfaces de repositorios
+│   │   └── services/            # Servicios de dominio
+│   ├── application/             # Capa de aplicación
+│   │   ├── dtos/                # Data Transfer Objects
+│   │   ├── ports/               # Puertos (interfaces para adaptadores)
+│   │   └── services/            # Casos de uso de la aplicación
+│   ├── infrastructure/          # Capa de infraestructura
+│   │   ├── adapters/            # Adaptadores de puertos
+│   │   ├── repositories/        # Implementaciones de repositorios
+│   │   └── services/            # Servicios de infraestructura
+│   └── presentation/            # Capa de presentación (UI)
+│       ├── pages/               # Páginas de la aplicación
+│       ├── widgets/             # Widgets reutilizables
+│       ├── providers/           # Proveedores de estado
+│       └── routes/              # Definición de rutas
+├── assets/                      # Recursos (imágenes, fuentes, etc.)
+└── test/                        # Pruebas automatizadas
 ```
 
-## Configuration
+## Contribuir
 
-On first run, you'll be prompted to enter your OxiCloud server details:
+Consulta [CONTRIBUTING.md](CONTRIBUTING.md) para obtener información sobre cómo contribuir al proyecto.
 
-- Server URL: The URL of your OxiCloud server (e.g., https://oxicloud.example.com)
-- Username and Password: Your OxiCloud credentials
+## Licencia
 
-Configuration is stored in:
-- Windows: `%APPDATA%\OxiCloud\config.json`
-- macOS: `~/Library/Application Support/OxiCloud/config.json`
-- Linux: `~/.config/oxicloud/config.json`
-
-You can customize application settings through the Settings page, including:
-- UI theme (Light, Dark, System)
-- Sync configuration (automatic, manual, or scheduled)
-- Network bandwidth limits
-- Performance settings
-- Advanced options (logging, crash reporting, etc.)
-
-## Technical Documentation
-
-### Architecture
-
-OxiCloud Desktop Client is built using a hexagonal (ports and adapters) architecture that separates core domain logic from external concerns:
-
-```
-oxicloud-desktop/
-├── domain/           # Core business logic and entities
-│   ├── entities/     # Domain models (File, User, Sync)
-│   ├── repositories/ # Repository interfaces
-│   └── services/     # Core business services
-│
-├── application/      # Application services and use cases
-│   ├── ports/        # Input/output port interfaces
-│   ├── services/     # Application-specific services
-│   └── dtos/         # Data transfer objects
-│
-├── infrastructure/   # External implementations
-│   ├── adapters/     # Adapters for external services
-│   ├── repositories/ # Repository implementations
-│   └── services/     # Infrastructure services
-│
-└── interfaces/       # User interfaces
-    ├── app.rs        # Main application entry
-    ├── pages/        # UI pages
-    └── components/   # Reusable UI components
-```
-
-### Core Technologies
-
-- **Rust**: Memory-safe systems language for reliable performance
-- **Dioxus**: Reactive UI framework for building cross-platform interfaces
-- **SQLite**: Local database for metadata and sync state
-- **Tokio**: Asynchronous runtime for efficient I/O operations
-- **WebDAV/HTTP**: Protocols for communication with OxiCloud server
-
-### Building for Different Platforms
-
-#### Automated Builds
-
-OxiCloud Desktop uses GitHub Actions for automated builds on all platforms. When a new release is created on GitHub:
-
-1. The workflow automatically builds binaries for Windows, macOS, and Linux
-2. Installers are created for each platform (.msi for Windows, .dmg for macOS, .deb for Linux)
-3. Both installers and portable versions are uploaded to the GitHub release
-4. SHA256 checksums are generated for verification
-
-You can download the latest builds from the [Releases page](https://github.com/yourusername/oxicloud-desktop/releases).
-
-#### Manual Building
-
-##### Windows
-
-```bash
-# Cross-compile from Linux/macOS
-rustup target add x86_64-pc-windows-msvc
-cargo build --release --target x86_64-pc-windows-msvc
-
-# Build on Windows
-cargo build --release
-
-# Create installer using cargo-wix (on Windows)
-cargo install cargo-wix
-cargo wix
-```
-
-##### macOS
-
-```bash
-# Cross-compile from Linux/Windows
-rustup target add x86_64-apple-darwin
-cargo build --release --target x86_64-apple-darwin
-
-# Build on macOS
-cargo build --release
-
-# Create DMG package (on macOS)
-mkdir -p OxiCloud.app/Contents/MacOS
-cp target/release/oxicloud-desktop OxiCloud.app/Contents/MacOS/
-hdiutil create -volname "OxiCloud Desktop" -srcfolder OxiCloud.app -ov -format UDZO OxiCloud-Desktop.dmg
-```
-
-##### Linux
-
-```bash
-# Build on Linux
-cargo build --release
-
-# Create DEB package
-cargo install cargo-deb
-cargo deb
-
-# Create tarball
-mkdir -p OxiCloud-Linux
-cp target/release/oxicloud-desktop OxiCloud-Linux/
-cp README.md LICENSE OxiCloud-Linux/
-tar -czvf OxiCloud-Desktop-Linux.tar.gz OxiCloud-Linux
-```
-
-### Sync Engine
-
-The sync engine operates with these components:
-
-1. **Change Detection**: Monitors local filesystem changes
-2. **Metadata Storage**: Tracks file states and sync status
-3. **File Transfer**: Handles up/downloads with chunking for large files
-4. **Conflict Resolution**: Detects and manages conflicts between versions
-5. **Selective Sync**: Manages exclusion rules for folders
-
-### Security
-
-- All authentication credentials are stored securely using the system's keychain/credential store
-- Data is encrypted in transit using TLS
-- Local database can be encrypted for additional security
-- Tokens are refreshed automatically and stored securely
-- End-to-end encryption (E2EE) with post-quantum resistance
-- Support for multiple encryption algorithms (AES-256-GCM, ChaCha20-Poly1305)
-- Hybrid encryption with post-quantum algorithms (Kyber768, Dilithium5)
-- Secure key management with password-based key derivation
-- Chunked file processing with parallel encryption/decryption for large files
-- Integrity verification using authenticated encryption
-
-For detailed information about the encryption system:
-- [User Encryption Guide](docs/ENCRYPTION.md) - End-user guide to encryption features
-- [Developer Encryption Documentation](docs/DEVELOPER_ENCRYPTION.md) - Technical implementation details
-
-### Development Workflow
-
-```bash
-# Run in development mode
-cargo run
-
-# Run tests
-cargo test                                 # Run all tests
-cargo test encryption_tests                # Run encryption unit tests
-cargo test file_encryption_tests           # Run file encryption tests
-cargo test encryption_sync_integration_tests # Run integration tests
-
-# Format code
-cargo fmt
-
-# Check for issues
-cargo clippy
-```
-
-## Contributing
-
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## Roadmap
-
-See our [TODO.md](TODO.md) file for the development plan.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Dioxus](https://dioxuslabs.com/) - for the reactive UI framework
-- [Rust](https://www.rust-lang.org/) - for the incredible language
-- [OxiCloud](https://github.com/yourusername/OxiCloud) - for the server implementation
+Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.

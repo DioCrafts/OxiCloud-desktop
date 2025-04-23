@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<WixVariables>
-    <WixVariable Name="OxiCloudDesktopBinary" Value="target\release\oxicloud-desktop.exe" />
-    <WixVariable Name="OxiCloudDesktopIcon" Value="icon.ico" />
-    <WixVariable Name="AddDesktopShortcut" Value="true" />
-    <WixVariable Name="Version" Value="0.1.0" />
-</WixVariables>
