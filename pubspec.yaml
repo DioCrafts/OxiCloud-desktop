@@ -27,14 +27,12 @@ dependencies:
   dio: ^5.3.2
   http: ^1.1.0
   webdav_client: ^1.2.0
-  webdav_client_plus: ^1.0.0  # Extended version with additional functionality
   connectivity_plus: ^5.0.0
   
   # Storage & persistence
   hive_flutter: ^1.1.0
   path_provider: ^2.1.4
   flutter_secure_storage: ^9.0.0
-  libsecret: ^0.2.2  # Required for Linux secure storage
   shared_preferences: ^2.2.0
   sqflite: ^2.3.0
   file_picker: ^6.0.0

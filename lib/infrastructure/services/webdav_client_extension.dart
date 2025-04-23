@@ -1,24 +1,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:webdav_client/webdav_client.dart' as base;
-import 'package:xml/xml.dart';
+import 'package:webdav_client/webdav_client.dart';
 
-/// Extended WebDAV client implementation with additional features
-class Client extends base.Client {
-  /// Default headers for requests
-  Map<String, String> defaultHeaders = {};
+/// Extension methods for WebDAV Client
+extension WebDavClientExtension on Client {
+  /// Headers for requests
+  Map<String, String> headers = {};
   
-  /// Creates a client from a base client
-  Client.fromClient(base.Client baseClient) : super(baseClient.baseUrl) {
-    this.httpClient = baseClient.httpClient;
-    this.webdavServerUrl = baseClient.webdavServerUrl;
-    this.credentials = baseClient.credentials;
-    this.protocol = baseClient.protocol;
+  /// Update authorization token
+  void updateAuthorization(String token) {
+    headers['Authorization'] = 'Bearer $token';
   }
   
   /// Gets file properties
-  Future<base.File> getFileProps(String path) async {
+  Future<File> getFileProps(String path) async {
     final response = await propfind(path, depth: '0');
     final files = baseResponseParser(response, path);
     if (files.isEmpty) {
@@ -37,8 +33,8 @@ class Client extends base.Client {
     }
     
     // Add custom headers
-    if (defaultHeaders.isNotEmpty) {
-      request.headers.addAll(defaultHeaders);
+    if (headers.isNotEmpty) {
+      request.headers.addAll(headers);
     }
     
     final streamResponse = await httpClient.send(request);
@@ -66,8 +62,8 @@ class Client extends base.Client {
     }
     
     // Add custom headers
-    if (defaultHeaders.isNotEmpty) {
-      request.headers.addAll(defaultHeaders);
+    if (headers.isNotEmpty) {
+      request.headers.addAll(headers);
     }
     
     request.bodyBytes = data;
@@ -83,7 +79,7 @@ class Client extends base.Client {
   /// Downloads a file to local path
   Future<void> download(String remotePath, String localPath) async {
     final data = await readBinary(remotePath);
-    await base.File(localPath).writeAsBytes(data);
+    await File(localPath).writeAsBytes(data);
   }
   
   /// Creates a collection (directory)
@@ -96,8 +92,8 @@ class Client extends base.Client {
     }
     
     // Add custom headers
-    if (defaultHeaders.isNotEmpty) {
-      request.headers.addAll(defaultHeaders);
+    if (headers.isNotEmpty) {
+      request.headers.addAll(headers);
     }
     
     final streamResponse = await httpClient.send(request);
@@ -124,8 +120,8 @@ class Client extends base.Client {
     request.headers['Overwrite'] = overwrite ? 'T' : 'F';
     
     // Add custom headers
-    if (defaultHeaders.isNotEmpty) {
-      request.headers.addAll(defaultHeaders);
+    if (headers.isNotEmpty) {
+      request.headers.addAll(headers);
     }
     
     final streamResponse = await httpClient.send(request);
@@ -135,14 +131,4 @@ class Client extends base.Client {
       throw Exception('Failed to rename file: ${response.statusCode} ${response.reasonPhrase}');
     }
   }
-}
-
-/// Creates a new client
-Client newClient({
-  required String baseUrl,
-  http.Client? httpClient,
-  base.Credentials? credentials,
-}) {
-  final baseClient = base.newClient(baseUrl, httpClient: httpClient, credentials: credentials);
-  return Client.fromClient(baseClient);
 }

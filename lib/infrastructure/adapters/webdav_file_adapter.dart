@@ -6,8 +6,8 @@ import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
 import 'package:oxicloud_desktop/domain/entities/file.dart';
 import 'package:oxicloud_desktop/domain/repositories/file_repository.dart';
-import 'package:webdav_client/webdav_client.dart' as webdav hide Client;
-import 'package:oxicloud_desktop/infrastructure/services/webdav_client_plus.dart';
+import 'package:webdav_client/webdav_client.dart';
+import 'package:oxicloud_desktop/infrastructure/services/webdav_client_extension.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 
@@ -32,11 +32,11 @@ class WebDAVFileAdapter implements FileRepository {
     
     // Create client with token auth
     _client = newClient(
-      baseUrl: serverUrl,
+      serverUrl,
       httpClient: http.Client(),
     );
     
-    _client.defaultHeaders = {
+    _client.headers = {
       'Authorization': 'Bearer $token',
     };
     
@@ -49,9 +49,9 @@ class WebDAVFileAdapter implements FileRepository {
     final token = await _secureStorage.getToken();
     
     // If token is different, update client
-    if (token != null && _client.defaultHeaders['Authorization'] != 'Bearer $token') {
-      _client.defaultHeaders = {
-        ..._client.defaultHeaders,
+    if (token != null && _client.headers['Authorization'] != 'Bearer $token') {
+      _client.headers = {
+        ..._client.headers,
         'Authorization': 'Bearer $token',
       };
     }
