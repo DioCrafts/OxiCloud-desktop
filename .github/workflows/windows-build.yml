@@ -22,6 +22,12 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
+      
+      - name: Create Windows project files
+        run: flutter create --platforms=windows .
+      
       - name: Build Windows app
         run: flutter build windows --release
       

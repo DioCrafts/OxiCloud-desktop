@@ -22,6 +22,12 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows-desktop
+      
+      - name: Create Windows project files
+        run: flutter create --platforms=windows .
+      
       - name: Build Windows app
         run: flutter build windows --release
       
@@ -56,6 +62,12 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       
+      - name: Enable Linux desktop support
+        run: flutter config --enable-linux-desktop
+      
+      - name: Create Linux project files
+        run: flutter create --platforms=linux .
+      
       - name: Build Linux app
         run: flutter build linux --release
       
@@ -83,6 +95,12 @@ jobs:
       
       - name: Get dependencies
         run: flutter pub get
+      
+      - name: Enable macOS desktop support
+        run: flutter config --enable-macos-desktop
+      
+      - name: Create macOS project files
+        run: flutter create --platforms=macos .
       
       - name: Build macOS app
         run: flutter build macos --release
