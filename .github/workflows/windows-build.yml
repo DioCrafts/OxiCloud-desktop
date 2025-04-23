@@ -1,0 +1,38 @@
+name: Windows Build
+
+on:
+  push:
+    branches: [ main, feature/flutter ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Para poder ejecutar manualmente desde GitHub
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build Windows app
+        run: flutter build windows --release
+      
+      - name: Zip release build
+        uses: papeloto/action-zip@v1
+        with:
+          files: build/windows/runner/Release/
+          dest: OxiCloud-desktop-windows.zip
+      
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-release
+          path: OxiCloud-desktop-windows.zip

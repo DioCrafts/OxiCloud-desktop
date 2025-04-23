@@ -1,0 +1,99 @@
+name: Multi-Platform Build
+
+on:
+  push:
+    branches: [ main, feature/flutter ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Para poder ejecutar manualmente desde GitHub
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build Windows app
+        run: flutter build windows --release
+      
+      - name: Zip release build
+        uses: papeloto/action-zip@v1
+        with:
+          files: build/windows/runner/Release/
+          dest: OxiCloud-desktop-windows.zip
+      
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-release
+          path: OxiCloud-desktop-windows.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y ninja-build libgtk-3-dev libblkid-dev liblzma-dev
+      
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build Linux app
+        run: flutter build linux --release
+      
+      - name: Zip release build
+        run: |
+          cd build/linux/x64/release/bundle/
+          zip -r ../../../../../OxiCloud-desktop-linux.zip .
+      
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-release
+          path: OxiCloud-desktop-linux.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+      
+      - name: Get dependencies
+        run: flutter pub get
+      
+      - name: Build macOS app
+        run: flutter build macos --release
+      
+      - name: Zip release build
+        run: |
+          cd build/macos/Build/Products/Release/
+          zip -r ../../../../../OxiCloud-desktop-macos.zip OxiCloud-desktop.app
+      
+      - name: Upload Release
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-release
+          path: OxiCloud-desktop-macos.zip

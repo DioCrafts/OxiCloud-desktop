@@ -31,7 +31,7 @@ dependencies:
   
   # Storage & persistence
   hive_flutter: ^1.1.0
-  path_provider: ^2.2.0
+  path_provider: ^2.1.4
   flutter_secure_storage: ^9.0.0
   shared_preferences: ^2.2.0
   sqflite: ^2.3.0
