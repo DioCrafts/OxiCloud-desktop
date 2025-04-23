@@ -32,7 +32,7 @@ jobs:
           dest: OxiCloud-desktop-windows.zip
       
       - name: Upload Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-release
           path: OxiCloud-desktop-windows.zip

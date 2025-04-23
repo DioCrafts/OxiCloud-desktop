@@ -32,7 +32,7 @@ jobs:
           dest: OxiCloud-desktop-windows.zip
       
       - name: Upload Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-release
           path: OxiCloud-desktop-windows.zip
@@ -65,7 +65,7 @@ jobs:
           zip -r ../../../../../OxiCloud-desktop-linux.zip .
       
       - name: Upload Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-release
           path: OxiCloud-desktop-linux.zip
@@ -93,7 +93,7 @@ jobs:
           zip -r ../../../../../OxiCloud-desktop-macos.zip OxiCloud-desktop.app
       
       - name: Upload Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-release
           path: OxiCloud-desktop-macos.zip
