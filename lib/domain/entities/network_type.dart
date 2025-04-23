@@ -1,5 +1,8 @@
-/// Network connection type
-enum NetworkType {
+/// Network connection type for app usage
+/// 
+/// This is used to represent the network connection throughout the app
+/// and should not be confused with the NetworkType from workmanager
+enum AppNetworkType {
   none,
   mobile,
   wifi,
@@ -8,5 +11,5 @@ enum NetworkType {
   other;
   
   /// Whether this network type is considered high-speed
-  bool get isHighSpeed => this == NetworkType.wifi || this == NetworkType.ethernet;
+  bool get isHighSpeed => this == AppNetworkType.wifi || this == AppNetworkType.ethernet;
 }

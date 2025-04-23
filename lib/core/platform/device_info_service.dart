@@ -99,7 +99,7 @@ class DeviceInfoService {
     final androidInfo = await _deviceInfo.androidInfo;
     
     // Calculate RAM in bytes (some devices might not report correctly)
-    int totalRam = androidInfo.totalMemory ?? 2 * 1024 * 1024 * 1024; // 2GB default
+    int totalRam = 2 * 1024 * 1024 * 1024; // 2GB default
     
     // Get CPU cores (physical cores if available)
     int cpuCores = androidInfo.supportedAbis?.length ?? 2;
@@ -136,7 +136,13 @@ class DeviceInfoService {
     final model = iosInfo.model ?? '';
     final majorVersion = int.tryParse(iosInfo.systemVersion.split('.').first) ?? 0;
     
-    if (model.contains('iPhone') && int.tryParse(model.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0 >= 11) {
+    bool isNewerIPhone = false;
+    if (model.contains('iPhone')) {
+      int? phoneNumber = int.tryParse(model.replaceAll(RegExp(r'[^0-9]'), ''));
+      isNewerIPhone = (phoneNumber != null && phoneNumber >= 11);
+    }
+    
+    if (isNewerIPhone) {
       deviceClass = DeviceClass.high;
       totalRam = 6 * 1024 * 1024 * 1024; // 6GB estimate for newer iPhones
       cpuCores = 6;
@@ -205,9 +211,9 @@ class DeviceInfoService {
       totalRam: totalRam,
       cpuCores: cpuCores,
       deviceClass: DeviceClass.medium,
-      modelName: windowsInfo.computerName,
+      modelName: windowsInfo.computerName ?? "Windows",
       osName: 'Windows',
-      osVersion: windowsInfo.buildNumber,
+      osVersion: windowsInfo.buildNumber.toString(),
     );
   }
   

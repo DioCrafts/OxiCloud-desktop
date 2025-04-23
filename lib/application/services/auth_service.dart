@@ -132,6 +132,11 @@ class AuthService {
     return url != null && url.isNotEmpty;
   }
   
+  /// Check if the user is logged in
+  Future<bool> isLoggedIn() async {
+    return _authRepository.isLoggedIn();
+  }
+  
   /// Dispose resources
   void dispose() {
     _authStateController.close();

@@ -245,7 +245,7 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
                   } else {
                     if (context.mounted) {
                       showPlatformAdaptiveAlert(
-                        context,
+                        context: context,
                         title: 'Not Mounted',
                         content: 'The virtual drive is not currently mounted.',
                         actions: [
@@ -301,7 +301,7 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
               title: const Text('Change mount location'),
               subtitle: const Text('Set where the virtual drive appears on your system'),
               trailing: const Icon(Icons.folder_open),
-              onPressed: () => _showChangeMountPointDialog(context, ref),
+              onTap: () => _showChangeMountPointDialog(context, ref),
             ),
           ],
         ),
@@ -362,7 +362,7 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
       ref.refresh(nativeFsMountedProvider);
     } else if (context.mounted) {
       showPlatformAdaptiveAlert(
-        context,
+        context: context,
         title: 'Mount Failed',
         content: 'Failed to mount the virtual drive. Please check that your system '
                 'meets all requirements and try again.',
@@ -383,7 +383,7 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
       ref.refresh(nativeFsMountedProvider);
     } else if (context.mounted) {
       showPlatformAdaptiveAlert(
-        context,
+        context: context,
         title: 'Unmount Failed',
         content: 'Failed to unmount the virtual drive. Please make sure there are no '
                 'open files or applications using the drive and try again.',
@@ -397,21 +397,21 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
     }
   }
   
-  void _showChangeMountPointDialog(BuildContext context, WidgetRef ref) {
+  Future<void> _showChangeMountPointDialog(BuildContext context, WidgetRef ref) async {
     final controller = TextEditingController();
     
-    FutureBuilder<String?>(
-      future: getIt<NativeFileSystemService>().getVirtualDriveMountPoint(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-          controller.text = snapshot.data!;
-        } else {
-          controller.text = _getDefaultMountPoint();
-        }
-        
-        return showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
+    // Get current mount point
+    final currentMountPoint = await getIt<NativeFileSystemService>().getVirtualDriveMountPoint();
+    if (currentMountPoint != null) {
+      controller.text = currentMountPoint;
+    } else {
+      controller.text = _getDefaultMountPoint();
+    }
+    
+    if (context.mounted) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
             title: const Text('Change Mount Location'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
@@ -465,9 +465,10 @@ class NativeFileSystemSettingsPage extends ConsumerWidget {
   }
   
   String _getDefaultMountPoint() {
-    if (TargetPlatform.windows == defaultTargetPlatform) {
+    final platform = Theme.of(context).platform;
+    if (TargetPlatform.windows == platform) {
       return 'X:';
-    } else if (TargetPlatform.macOS == defaultTargetPlatform) {
+    } else if (TargetPlatform.macOS == platform) {
       return '/Volumes/OxiCloud';
     } else {
       return '~/OxiCloud';

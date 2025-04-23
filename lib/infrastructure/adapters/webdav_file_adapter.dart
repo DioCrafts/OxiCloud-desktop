@@ -6,13 +6,14 @@ import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
 import 'package:oxicloud_desktop/domain/entities/file.dart';
 import 'package:oxicloud_desktop/domain/repositories/file_repository.dart';
-import 'package:webdav_client/webdav_client.dart' as webdav;
+import 'package:webdav_client/webdav_client.dart' as webdav hide Client;
+import 'package:oxicloud_desktop/infrastructure/services/webdav_client_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 
 /// WebDAV adapter for file operations
 class WebDAVFileAdapter implements FileRepository {
-  late final webdav.Client _client;
+  late final Client _client;
   final AppConfig _appConfig;
   final SecureStorage _secureStorage;
   final Logger _logger = LoggingManager.getLogger('WebDAVFileAdapter');
@@ -30,13 +31,14 @@ class WebDAVFileAdapter implements FileRepository {
     final token = await _secureStorage.getToken();
     
     // Create client with token auth
-    _client = webdav.newClient(
-      serverUrl,
+    _client = newClient(
+      baseUrl: serverUrl,
       httpClient: http.Client(),
-      defaultHeaders: {
-        'Authorization': 'Bearer $token',
-      },
     );
+    
+    _client.defaultHeaders = {
+      'Authorization': 'Bearer $token',
+    };
     
     _logger.info('WebDAV client initialized with server: $serverUrl');
   }

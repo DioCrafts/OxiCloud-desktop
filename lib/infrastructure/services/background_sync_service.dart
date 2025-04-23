@@ -8,7 +8,8 @@ import 'package:oxicloud_desktop/core/platform/battery_service.dart';
 import 'package:oxicloud_desktop/domain/entities/network_type.dart';
 import 'package:oxicloud_desktop/domain/entities/sync_conditions.dart';
 import 'package:oxicloud_desktop/infrastructure/services/resource_manager.dart';
-import 'package:workmanager/workmanager.dart';
+import 'package:workmanager/workmanager.dart' hide NetworkType;
+import 'package:workmanager/workmanager.dart' as wm show NetworkType;
 import 'package:flutter/foundation.dart';
 
 /// Background service for synchronization
@@ -80,8 +81,8 @@ class BackgroundSyncService {
   }
   
   /// Handle connectivity change
-  void _handleConnectivityChange(NetworkType networkType) {
-    if (networkType != NetworkType.none) {
+  void _handleConnectivityChange(AppNetworkType networkType) {
+    if (networkType != AppNetworkType.none) {
       // We have connectivity, maybe trigger a sync
       _logger.info('Connectivity changed to $networkType, checking if sync needed');
       _checkAndSyncIfNeeded();
@@ -96,8 +97,8 @@ class BackgroundSyncService {
     }
     
     // Check if background sync is enabled
-    final isBackgroundSyncEnabled = await isBackgroundSyncEnabled();
-    if (!isBackgroundSyncEnabled) {
+    final bgSyncEnabled = await isBackgroundSyncEnabled();
+    if (!bgSyncEnabled) {
       return;
     }
     
@@ -157,7 +158,7 @@ class BackgroundSyncService {
         _syncTaskName,
         frequency: Duration(minutes: syncIntervalMinutes),
         constraints: Constraints(
-          networkType: NetworkType.connected,
+          networkType: wm.NetworkType.connected,
           requiresBatteryNotLow: true,
         ),
         existingWorkPolicy: ExistingWorkPolicy.replace,
@@ -247,7 +248,7 @@ class BackgroundSyncService {
     }
     
     // Check if sync should only happen on WiFi
-    if (profile.syncOnWifiOnly && !networkType.isHighSpeed) {
+    if (profile.syncOnWifiOnly && !networkType.toAppNetworkType().isHighSpeed) {
       return SyncConditions(
         canSync: false,
         reason: 'Sync only allowed on WiFi',

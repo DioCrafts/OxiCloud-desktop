@@ -23,12 +23,8 @@ class SecureStorage {
     mOptions: MacOsOptions(
       accessibility: KeychainAccessibility.first_unlock,
     ),
-    lOptions: LinuxOptions(
-      encryptionAlgorithm: LinuxEncryptionAlgorithm.aes256Gcm,
-    ),
-    wOptions: WindowsOptions(
-      useProtectedUserDataPath: true,
-    ),
+    lOptions: LinuxOptions(),
+    wOptions: WindowsOptions(),
   );
   
   /// Save auth token
@@ -130,6 +126,48 @@ class SecureStorage {
       await _storage.deleteAll();
     } catch (e) {
       _logger.severe('Failed to clear all secure storage', e);
+      rethrow;
+    }
+  }
+  
+  /// Get a boolean value
+  Future<bool?> getBool(String key) async {
+    try {
+      final value = await _storage.read(key: key);
+      if (value == null) return null;
+      return value.toLowerCase() == 'true';
+    } catch (e) {
+      _logger.severe('Failed to get boolean value for key: $key', e);
+      return null;
+    }
+  }
+  
+  /// Set a boolean value
+  Future<void> setBool(String key, bool value) async {
+    try {
+      await _storage.write(key: key, value: value.toString());
+    } catch (e) {
+      _logger.severe('Failed to set boolean value for key: $key', e);
+      rethrow;
+    }
+  }
+  
+  /// Get a string value
+  Future<String?> getString(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } catch (e) {
+      _logger.severe('Failed to get string value for key: $key', e);
+      return null;
+    }
+  }
+  
+  /// Set a string value
+  Future<void> setString(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } catch (e) {
+      _logger.severe('Failed to set string value for key: $key', e);
       rethrow;
     }
   }
