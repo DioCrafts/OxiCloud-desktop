@@ -48,7 +48,14 @@ Future<void> setupDependencies() async {
   await getIt.isReady<AppConfig>();
   
   // Storage
-  getIt.registerLazySingleton<SecureStorage>(() => SecureStorage());
+  getIt.registerSingletonAsync<SecureStorage>(() async {
+    final storage = SecureStorage();
+    await storage.initialize();
+    return storage;
+  });
+  
+  // Wait for secure storage to be initialized
+  await getIt.isReady<SecureStorage>();
   
   // Client services
   getIt.registerLazySingleton<OxiHttpClient>(() => OxiHttpClient(
