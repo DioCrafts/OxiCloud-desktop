@@ -1,18 +1,16 @@
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:logging/logging.dart';
 import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/network/network_info.dart';
 
-/// Service for monitoring network connectivity
+/// Stub service for monitoring network connectivity without connectivity_plus
+/// This version just assumes we have a WiFi connection
 class ConnectivityService {
-  final Connectivity _connectivity = Connectivity();
   final Logger _logger = LoggingManager.getLogger('ConnectivityService');
   
-  StreamController<NetworkType> _connectionController = StreamController<NetworkType>.broadcast();
-  StreamSubscription? _connectivitySubscription;
+  final StreamController<NetworkType> _connectionController = StreamController<NetworkType>.broadcast();
   
-  NetworkType _lastKnownNetworkType = NetworkType.unknown;
+  NetworkType _lastKnownNetworkType = NetworkType.wifi; // Always assume WiFi
   
   /// Stream of network connection changes
   Stream<NetworkType> get connectionStream => _connectionController.stream;
@@ -26,85 +24,28 @@ class ConnectivityService {
   }
   
   void _initialize() {
-    // Get initial connectivity state
-    _connectivity.checkConnectivity().then(_updateConnectionStatus);
-    
-    // Listen for connectivity changes
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    
-    _logger.info('Connectivity service initialized');
-  }
-  
-  /// Update connection status when it changes
-  void _updateConnectionStatus(ConnectivityResult result) {
-    final previousType = _lastKnownNetworkType;
-    
-    switch (result) {
-      case ConnectivityResult.wifi:
-        _lastKnownNetworkType = NetworkType.wifi;
-        break;
-      case ConnectivityResult.mobile:
-        _lastKnownNetworkType = NetworkType.mobile;
-        break;
-      case ConnectivityResult.ethernet:
-        _lastKnownNetworkType = NetworkType.ethernet;
-        break;
-      case ConnectivityResult.bluetooth:
-        _lastKnownNetworkType = NetworkType.other;
-        break;
-      case ConnectivityResult.vpn:
-        // Don't change the type based on VPN as it's an overlay connection
-        break;
-      case ConnectivityResult.none:
-        _lastKnownNetworkType = NetworkType.none;
-        break;
-      default:
-        _lastKnownNetworkType = NetworkType.unknown;
-    }
-    
-    // Only notify if the type has changed
-    if (previousType != _lastKnownNetworkType) {
-      _logger.info('Network connectivity changed: $previousType -> $_lastKnownNetworkType');
-      _connectionController.add(_lastKnownNetworkType);
-    }
+    // Simulate a WiFi connection in this stub implementation
+    _connectionController.add(_lastKnownNetworkType);
+    _logger.info('Stub connectivity service initialized, assuming WiFi connection');
   }
   
   /// Check if device is currently connected to any network
   Future<bool> isConnected() async {
-    final result = await _connectivity.checkConnectivity();
-    return result != ConnectivityResult.none;
+    return true; // Always assume connected
   }
   
   /// Check if device is currently connected to WiFi
   Future<bool> isWifiConnected() async {
-    final result = await _connectivity.checkConnectivity();
-    return result == ConnectivityResult.wifi || result == ConnectivityResult.ethernet;
+    return true; // Always assume WiFi
   }
   
   /// Get the current connection type
   Future<NetworkType> getConnectionType() async {
-    final result = await _connectivity.checkConnectivity();
-    
-    switch (result) {
-      case ConnectivityResult.wifi:
-        return NetworkType.wifi;
-      case ConnectivityResult.mobile:
-        return NetworkType.mobile;
-      case ConnectivityResult.ethernet:
-        return NetworkType.ethernet;
-      case ConnectivityResult.bluetooth:
-      case ConnectivityResult.vpn:
-        return NetworkType.other;
-      case ConnectivityResult.none:
-        return NetworkType.none;
-      default:
-        return NetworkType.unknown;
-    }
+    return NetworkType.wifi; // Always return WiFi
   }
   
   /// Dispose resources
   void dispose() {
-    _connectivitySubscription?.cancel();
     _connectionController.close();
   }
 }

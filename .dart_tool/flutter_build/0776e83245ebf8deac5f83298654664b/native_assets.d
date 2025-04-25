@@ -1,0 +1,1 @@
+ /home/torrefacto/OxiCloud-desktop/.dart_tool/flutter_build/0776e83245ebf8deac5f83298654664b/native_assets.yaml: 

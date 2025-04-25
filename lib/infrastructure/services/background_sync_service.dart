@@ -55,7 +55,13 @@ class BackgroundSyncService {
       _setupForegroundSync();
       
       // Listen for connectivity changes
-      _connectivityService.connectionStream.listen(_handleConnectivityChange);
+      _connectivityService.connectionStream.listen((networkType) {
+        // Convert NetworkType to AppNetworkType if needed
+        final appNetworkType = networkType is AppNetworkType 
+            ? networkType 
+            : (networkType as dynamic).toAppNetworkType();
+        _handleConnectivityChange(appNetworkType);
+      });
       
       _logger.info('Background sync service initialized');
     } catch (e) {
@@ -248,7 +254,10 @@ class BackgroundSyncService {
     }
     
     // Check if sync should only happen on WiFi
-    if (profile.syncOnWifiOnly && !networkType.toAppNetworkType().isHighSpeed) {
+    final appNetworkType = networkType is AppNetworkType
+        ? networkType
+        : (networkType as dynamic).toAppNetworkType();
+    if (profile.syncOnWifiOnly && !appNetworkType.isHighSpeed) {
       return SyncConditions(
         canSync: false,
         reason: 'Sync only allowed on WiFi',

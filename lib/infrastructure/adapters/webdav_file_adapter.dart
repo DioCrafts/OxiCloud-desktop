@@ -4,16 +4,16 @@ import 'package:logging/logging.dart';
 import 'package:oxicloud_desktop/core/config/app_config.dart';
 import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
-import 'package:oxicloud_desktop/domain/entities/file.dart';
+import 'package:oxicloud_desktop/domain/entities/file.dart' as domain;
 import 'package:oxicloud_desktop/domain/repositories/file_repository.dart';
-import 'package:webdav_client/webdav_client.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
 import 'package:oxicloud_desktop/infrastructure/services/webdav_client_extension.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 
 /// WebDAV adapter for file operations
 class WebDAVFileAdapter implements FileRepository {
-  late final Client _client;
+  late final EnhancedWebDavClient _client;
   final AppConfig _appConfig;
   final SecureStorage _secureStorage;
   final Logger _logger = LoggingManager.getLogger('WebDAVFileAdapter');
@@ -31,14 +31,10 @@ class WebDAVFileAdapter implements FileRepository {
     final token = await _secureStorage.getToken();
     
     // Create client with token auth
-    _client = newClient(
+    _client = EnhancedWebDavClient(
       serverUrl,
-      httpClient: http.Client(),
+      token: token,
     );
-    
-    _client.headers = {
-      'Authorization': 'Bearer $token',
-    };
     
     _logger.info('WebDAV client initialized with server: $serverUrl');
   }
@@ -49,32 +45,29 @@ class WebDAVFileAdapter implements FileRepository {
     final token = await _secureStorage.getToken();
     
     // If token is different, update client
-    if (token != null && _client.headers['Authorization'] != 'Bearer $token') {
-      _client.headers = {
-        ..._client.headers,
-        'Authorization': 'Bearer $token',
-      };
+    if (token != null) {
+      _client.updateAuthorization(token);
     }
   }
   
   /// Convert WebDAV file to domain File
-  File _convertWebDavFile(webdav.File webdavFile) {
-    final name = p.basename(webdavFile.path);
+  domain.File _convertWebDavFile(webdav.File webdavFile) {
+    final name = p.basename(webdavFile.path ?? '');
     
-    return File(
-      id: webdavFile.path,
+    return domain.File(
+      id: webdavFile.path ?? '',
       name: name,
-      path: webdavFile.path,
-      size: webdavFile.size,
-      modifiedAt: webdavFile.mTime,
+      path: webdavFile.path ?? '',
+      size: webdavFile.size ?? 0,
+      modifiedAt: webdavFile.mTime ?? DateTime.now(),
       mimeType: webdavFile.mimeType ?? 'application/octet-stream',
       isShared: false, // WebDAV doesn't provide this info directly
-      etag: webdavFile.eTag,
+      etag: webdavFile.eTag ?? '',
     );
   }
   
   @override
-  Future<File> getFile(String fileId) async {
+  Future<domain.File> getFile(String fileId) async {
     try {
       await _ensureAuthenticated();
       
@@ -87,14 +80,14 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<List<File>> listFiles(String folderId) async {
+  Future<List<domain.File>> listFiles(String folderId) async {
     try {
       await _ensureAuthenticated();
       
       final items = await _client.readDir(folderId);
       
       // Filter out directories
-      final files = items.where((item) => !item.isDir);
+      final files = items.where((item) => !(item.isDir ?? false));
       
       return files.map(_convertWebDavFile).toList();
     } catch (e) {
@@ -104,7 +97,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<File> uploadFile({
+  Future<domain.File> uploadFile({
     required String parentFolderId,
     required String name,
     required Uint8List data,
@@ -141,7 +134,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<File> updateFile({
+  Future<domain.File> updateFile({
     required String fileId,
     required Uint8List data,
   }) async {
@@ -196,7 +189,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<File> renameFile(String fileId, String newName) async {
+  Future<domain.File> renameFile(String fileId, String newName) async {
     try {
       await _ensureAuthenticated();
       
@@ -223,7 +216,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<File> moveFile(String fileId, String newParentFolderId) async {
+  Future<domain.File> moveFile(String fileId, String newParentFolderId) async {
     try {
       await _ensureAuthenticated();
       
@@ -265,7 +258,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<File> markAsFavorite(String fileId, bool favorite) async {
+  Future<domain.File> markAsFavorite(String fileId, bool favorite) async {
     try {
       await _ensureAuthenticated();
       
@@ -305,7 +298,7 @@ class WebDAVFileAdapter implements FileRepository {
     
     final token = await _secureStorage.getToken();
     
-    final response = await http.send(http.Request('PROPPATCH', uri)
+    final response = await http.Client().send(http.Request('PROPPATCH', uri)
       ..headers['Authorization'] = 'Bearer $token'
       ..headers['Content-Type'] = 'application/xml'
       ..body = body);
@@ -345,7 +338,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<List<File>> searchFiles(String query) async {
+  Future<List<domain.File>> searchFiles(String query) async {
     try {
       await _ensureAuthenticated();
       
@@ -363,7 +356,7 @@ class WebDAVFileAdapter implements FileRepository {
         final searchResults = jsonDecode(response.body) as Map<String, dynamic>;
         final results = searchResults['results'] as List<dynamic>;
         
-        final files = <File>[];
+        final files = <domain.File>[];
         
         for (final result in results) {
           final resultMap = result as Map<String, dynamic>;
@@ -386,7 +379,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<List<File>> getSharedFiles() async {
+  Future<List<domain.File>> getSharedFiles() async {
     try {
       await _ensureAuthenticated();
       
@@ -404,7 +397,7 @@ class WebDAVFileAdapter implements FileRepository {
         final sharesData = jsonDecode(response.body) as Map<String, dynamic>;
         final shares = sharesData['shares'] as List<dynamic>;
         
-        final files = <File>[];
+        final files = <domain.File>[];
         
         for (final share in shares) {
           final shareMap = share as Map<String, dynamic>;
@@ -432,7 +425,7 @@ class WebDAVFileAdapter implements FileRepository {
   }
   
   @override
-  Future<List<File>> getRecentFiles({int limit = 10}) async {
+  Future<List<domain.File>> getRecentFiles({int limit = 10}) async {
     try {
       await _ensureAuthenticated();
       
@@ -450,7 +443,7 @@ class WebDAVFileAdapter implements FileRepository {
         final recentData = jsonDecode(response.body) as Map<String, dynamic>;
         final items = recentData['items'] as List<dynamic>;
         
-        final files = <File>[];
+        final files = <domain.File>[];
         
         for (final item in items) {
           final itemMap = item as Map<String, dynamic>;

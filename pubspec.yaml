@@ -78,11 +78,12 @@ flutter:
     - assets/images/
     - assets/icons/
 
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Regular.ttf
-        - asset: assets/fonts/Roboto-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Roboto-Bold.ttf
-          weight: 700
+# Desactivar fuentes hasta que estén disponibles
+#  fonts:
+#    - family: Roboto
+#      fonts:
+#        - asset: assets/fonts/Roboto-Regular.ttf
+#        - asset: assets/fonts/Roboto-Medium.ttf
+#          weight: 500
+#        - asset: assets/fonts/Roboto-Bold.ttf
+#          weight: 700

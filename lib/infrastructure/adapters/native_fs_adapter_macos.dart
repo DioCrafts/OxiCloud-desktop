@@ -5,7 +5,7 @@ import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
 import 'package:oxicloud_desktop/infrastructure/adapters/native_fs_adapter_base.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_run/process_run.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 
 /// macOS implementation for native file system integration
 class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
@@ -53,7 +53,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       }
       
       // Check if we should auto-mount
-      if (_autoMount) {
+      if (await getAutoMount()) {
         final mountPoint = await _secureStorage.getString(_configKeyMountPoint) ?? 
                            path.join('/Volumes', _volumeName);
         return await mountVirtualDrive(mountPoint);
@@ -70,7 +70,8 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   Future<bool> mountVirtualDrive(String mountPoint) async {
     try {
       if (await isVirtualDriveMounted()) {
-        _logger.info('Virtual drive already mounted at $_mountPoint');
+        final currentMountPoint = await getVirtualDriveMountPoint();
+        _logger.info('Virtual drive already mounted at $currentMountPoint');
         return true;
       }
       
@@ -86,7 +87,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       }
       
       // Use macFUSE via our helper app to mount the folder
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         _helperAppPath,
         ['mount', mountPoint, _localSyncFolder]
       );
@@ -122,7 +123,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       }
       
       // Use macFUSE via our helper app to unmount
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'umount',
         [mountPoint]
       );
@@ -173,8 +174,9 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   @override
   Future<bool> openFileWithDefaultAppInternal(File file) async {
     try {
-      final Uri uri = Uri.file(file.path);
-      return await launchUrl(uri);
+      // URL Launcher disabled for Linux compilation
+      _logger.info('URL Launcher disabled, unable to launch file');
+      return false;
     } catch (e) {
       _logger.warning('Failed to open file: ${file.path} - $e');
       return false;
@@ -185,7 +187,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   Future<bool> revealInFileExplorer(String filePath) async {
     try {
       // Use NSWorkspace to reveal the file in Finder
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'open',
         ['-R', filePath]
       );
@@ -245,24 +247,27 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   
   @override
   Future<void> persistConfiguration() async {
-    await _secureStorage.setBool(_configKeyAutoMount, _autoMount);
-    if (_mountPoint != null) {
-      await _secureStorage.setString(_configKeyMountPoint, _mountPoint!);
+    final autoMount = await getAutoMount();
+    await _secureStorage.setBool(_configKeyAutoMount, autoMount);
+    final mountPoint = await getVirtualDriveMountPoint();
+    if (mountPoint != null) {
+      await _secureStorage.setString(_configKeyMountPoint, mountPoint);
     }
     
     // Set up launch agent for auto-start if needed
-    await _setupLaunchAgent(_autoMount);
+    await _setupLaunchAgent(autoMount);
   }
   
   @override
   Future<void> loadConfiguration() async {
-    _autoMount = await _secureStorage.getBool(_configKeyAutoMount) ?? false;
-    _mountPoint = await _secureStorage.getString(_configKeyMountPoint);
+    final autoMount = await _secureStorage.getBool(_configKeyAutoMount) ?? false;
+    await setAutoMount(autoMount);
+    final mountPoint = await _secureStorage.getString(_configKeyMountPoint);
     
     // Check if the mount point is actually mounted
-    if (_mountPoint != null) {
-      final mounted = await _isPathMounted(_mountPoint!);
-      setMountedState(mounted, mounted ? _mountPoint : null);
+    if (mountPoint != null) {
+      final mounted = await _isPathMounted(mountPoint);
+      setMountedState(mounted, mounted ? mountPoint : null);
     }
   }
   
@@ -293,7 +298,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   /// Check if a path is currently mounted
   Future<bool> _isPathMounted(String mountPath) async {
     try {
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'mount',
         []
       );
@@ -321,7 +326,7 @@ class MacOSNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
     <array>
         <string>${_helperAppPath}</string>
         <string>mount</string>
-        <string>${_mountPoint ?? path.join('/Volumes', _volumeName)}</string>
+        <string>${await getVirtualDriveMountPoint() ?? path.join('/Volumes', _volumeName)}</string>
         <string>${_localSyncFolder}</string>
     </array>
     <key>RunAtLoad</key>

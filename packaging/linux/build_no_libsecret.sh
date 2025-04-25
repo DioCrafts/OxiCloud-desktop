@@ -16,9 +16,18 @@ flutter clean || true
 echo "Getting dependencies..."
 flutter pub get
 
+# Create special platform_plugins.yaml to exclude flutter_secure_storage on Linux
+echo "Configuring build to exclude flutter_secure_storage on Linux..."
+
+# Create the exclude directory if it doesn't exist
+mkdir -p .flutter-plugins-dependencies
+
+# Copy our exclusion file
+cp flutter_exclude_plugins.yaml .flutter-plugins-dependencies/exclude_linux.yaml
+
 # Build the Linux version
 echo "Building for Linux..."
-flutter build linux --release
+EXCLUDE_PLUGINS=true flutter build linux --release
 
 # If successful, create a tar.gz distribution
 if [ $? -eq 0 ]; then

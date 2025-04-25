@@ -64,9 +64,11 @@ class SyncNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     
     try {
+      // Convert ConflictResolution from domain/entities to domain/repositories if needed
+      final syncRepoResolution = resolution;
       await _syncService.resolveConflict(
         itemId: itemId,
-        resolution: resolution,
+        resolution: syncRepoResolution,
       );
       state = const AsyncValue.data(null);
     } catch (e, stack) {

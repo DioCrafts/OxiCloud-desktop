@@ -1,0 +1,11 @@
+# This file excludes specific plugins from being compiled for certain platforms
+# We're excluding flutter_secure_storage for Linux to avoid the libsecret dependency
+# and url_launcher to avoid compilation issues
+
+exclude_linux:
+  - flutter_secure_storage
+  - url_launcher
+  - url_launcher_linux
+  - connectivity_plus
+  - workmanager
+  - flutter_secure_storage_linux

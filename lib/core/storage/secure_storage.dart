@@ -1,8 +1,12 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:oxicloud_desktop/core/logging/logging_manager.dart';
 import 'package:oxicloud_desktop/core/storage/linux_secure_storage.dart';
+
+// Only import flutter_secure_storage if not on Linux
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'
+    if (dart.library.io) 'secure_storage_stub.dart';
 
 /// Secure storage for sensitive information
 class SecureStorage {
@@ -11,7 +15,7 @@ class SecureStorage {
   static const String _serverUrlKey = 'server_url';
   static const String _usernameKey = 'username';
   
-  final FlutterSecureStorage? _storage;
+  final dynamic _storage; // Could be FlutterSecureStorage or null
   final LinuxSecureStorage? _linuxStorage;
   final Logger _logger = LoggingManager.getLogger('SecureStorage');
   final bool _useLinuxFallback;
@@ -20,7 +24,7 @@ class SecureStorage {
   /// Create a SecureStorage instance
   SecureStorage() : 
     _useLinuxFallback = Platform.isLinux,
-    _storage = Platform.isLinux ? null : const FlutterSecureStorage(
+    _storage = !Platform.isLinux ? const FlutterSecureStorage(
       aOptions: AndroidOptions(
         encryptedSharedPreferences: true,
       ),
@@ -31,7 +35,7 @@ class SecureStorage {
         accessibility: KeychainAccessibility.first_unlock,
       ),
       wOptions: WindowsOptions(),
-    ),
+    ) : null,
     _linuxStorage = Platform.isLinux ? LinuxSecureStorage() : null;
   
   /// Initialize storage

@@ -5,7 +5,7 @@ import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
 import 'package:oxicloud_desktop/infrastructure/adapters/native_fs_adapter_base.dart';
 import 'package:path/path.dart' as path;
 import 'package:process_run/process_run.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 /// Windows implementation for native file system integration
@@ -37,7 +37,7 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       }
       
       // Check if we should auto-mount
-      if (_autoMount) {
+      if (await getAutoMount()) {
         final mountPoint = await _secureStorage.getString(_configKeyMountPoint) ?? _driveLetter;
         return await mountVirtualDrive(mountPoint);
       }
@@ -53,7 +53,8 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   Future<bool> mountVirtualDrive(String mountPoint) async {
     try {
       if (await isVirtualDriveMounted()) {
-        _logger.info('Virtual drive already mounted at $_mountPoint');
+        final currentMountPoint = await getVirtualDriveMountPoint();
+        _logger.info('Virtual drive already mounted at $currentMountPoint');
         return true;
       }
       
@@ -64,7 +65,7 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       _driveLetter = mountPoint;
       
       // Use DokanNet (via a helper executable we bundle) to mount the virtual drive
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'OxiCloudVirtualDrive.exe',
         ['mount', _driveLetter, _localSyncFolder]
       );
@@ -94,7 +95,7 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
       }
       
       // Use DokanNet (via a helper executable we bundle) to unmount the virtual drive
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'OxiCloudVirtualDrive.exe',
         ['unmount', _driveLetter]
       );
@@ -135,8 +136,9 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   @override
   Future<bool> openFileWithDefaultAppInternal(File file) async {
     try {
-      final Uri uri = Uri.file(file.path);
-      return await launchUrl(uri);
+      // URL Launcher disabled for Linux compilation
+      _logger.info('URL Launcher disabled, unable to launch file');
+      return false;
     } catch (e) {
       _logger.warning('Failed to open file: ${file.path} - $e');
       return false;
@@ -147,7 +149,7 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   Future<bool> revealInFileExplorer(String filePath) async {
     try {
       // Use Explorer to select the specific file
-      final ShellResult result = await runExecutableArguments(
+      final result = await runExecutableArguments(
         'explorer.exe',
         ['/select,', filePath]
       );
@@ -202,24 +204,27 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
   
   @override
   Future<void> persistConfiguration() async {
-    await _secureStorage.setBool(_configKeyAutoMount, _autoMount);
-    if (_mountPoint != null) {
-      await _secureStorage.setString(_configKeyMountPoint, _mountPoint!);
+    final autoMount = await getAutoMount();
+    await _secureStorage.setBool(_configKeyAutoMount, autoMount);
+    final mountPoint = await getVirtualDriveMountPoint();
+    if (mountPoint != null) {
+      await _secureStorage.setString(_configKeyMountPoint, mountPoint);
     }
     
     // Add start-on-boot registry entry if auto-mount is enabled
-    await _setStartOnBoot(_autoMount);
+    await _setStartOnBoot(autoMount);
   }
   
   @override
   Future<void> loadConfiguration() async {
-    _autoMount = await _secureStorage.getBool(_configKeyAutoMount) ?? false;
-    _mountPoint = await _secureStorage.getString(_configKeyMountPoint);
+    final autoMount = await _secureStorage.getBool(_configKeyAutoMount) ?? false;
+    await setAutoMount(autoMount);
+    final mountPoint = await _secureStorage.getString(_configKeyMountPoint);
     
     // Check if we have an active mount
-    if (_mountPoint != null) {
-      final mounted = await _isDriveMounted(_mountPoint!);
-      setMountedState(mounted, mounted ? _mountPoint : null);
+    if (mountPoint != null) {
+      final mounted = await _isDriveMounted(mountPoint);
+      setMountedState(mounted, mounted ? mountPoint : null);
     }
   }
   
@@ -288,7 +293,9 @@ class WindowsNativeFileSystemAdapter extends NativeFileSystemAdapterBase {
         ));
       } else {
         // Remove entry from run key
-        if (runKey.getValueNames().contains('OxiCloudClient')) {
+        // Retrieve the values using alternative methods
+        final valueNames = runKey.values.map((v) => v.name).toList();
+        if (valueNames.contains('OxiCloudClient')) {
           runKey.deleteValue('OxiCloudClient');
         }
       }

@@ -6,14 +6,15 @@ import 'package:oxicloud_desktop/core/storage/secure_storage.dart';
 import 'package:oxicloud_desktop/domain/entities/folder.dart';
 import 'package:oxicloud_desktop/domain/entities/item.dart';
 import 'package:oxicloud_desktop/domain/repositories/folder_repository.dart';
-import 'package:webdav_client/webdav_client.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
+import 'dart:io' as io;
 import 'package:oxicloud_desktop/infrastructure/services/webdav_client_extension.dart';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
 
 /// WebDAV adapter for folder operations
 class WebDAVFolderAdapter implements FolderRepository {
-  late final Client _client;
+  late final EnhancedWebDavClient _client;
   final AppConfig _appConfig;
   final SecureStorage _secureStorage;
   final Logger _logger = LoggingManager.getLogger('WebDAVFolderAdapter');
@@ -31,14 +32,10 @@ class WebDAVFolderAdapter implements FolderRepository {
     final token = await _secureStorage.getToken();
     
     // Create client with token auth
-    _client = newClient(
+    _client = EnhancedWebDavClient(
       serverUrl,
-      httpClient: http.Client(),
+      token: token,
     );
-    
-    _client.headers = {
-      'Authorization': 'Bearer $token',
-    };
     
     _logger.info('WebDAV client initialized with server: $serverUrl');
   }
@@ -49,54 +46,51 @@ class WebDAVFolderAdapter implements FolderRepository {
     final token = await _secureStorage.getToken();
     
     // If token is different, update client
-    if (token != null && _client.headers['Authorization'] != 'Bearer $token') {
-      _client.headers = {
-        ..._client.headers,
-        'Authorization': 'Bearer $token',
-      };
+    if (token != null) {
+      _client.updateAuthorization(token);
     }
   }
   
   /// Convert WebDAV file to domain Folder
   Folder _convertWebDavFolder(webdav.File webdavFile) {
-    final name = p.basename(webdavFile.path);
-    final parentPath = p.dirname(webdavFile.path);
+    final name = p.basename(webdavFile.path ?? '');
+    final parentPath = p.dirname(webdavFile.path ?? '');
     
     return Folder(
-      id: webdavFile.path,
+      id: webdavFile.path ?? '',
       name: name == '/' ? 'Root' : name,
-      path: webdavFile.path,
-      modifiedAt: webdavFile.mTime,
+      path: webdavFile.path ?? '',
+      modifiedAt: webdavFile.mTime ?? DateTime.now(),
       isShared: false, // WebDAV doesn't provide this info directly
       parentId: parentPath == '/' ? null : parentPath,
-      etag: webdavFile.eTag,
+      etag: webdavFile.eTag ?? '',
     );
   }
   
   /// Convert WebDAV file to StorageItem
   StorageItem _convertWebDavFileToItem(webdav.File webdavFile) {
-    final name = p.basename(webdavFile.path);
+    final name = p.basename(webdavFile.path ?? '');
     
-    if (webdavFile.isDir) {
+    if (webdavFile.isDir ?? false) {
       return StorageItem(
-        id: webdavFile.path,
+        id: webdavFile.path ?? '',
         name: name == '/' ? 'Root' : name,
-        path: webdavFile.path,
-        modifiedAt: webdavFile.mTime,
+        path: webdavFile.path ?? '',
+        modifiedAt: webdavFile.mTime ?? DateTime.now(),
         isShared: false, // WebDAV doesn't provide this info directly
         isFavorite: false, // Same here
         type: ItemType.folder,
       );
     } else {
       return StorageItem(
-        id: webdavFile.path,
+        id: webdavFile.path ?? '',
         name: name,
-        path: webdavFile.path,
-        modifiedAt: webdavFile.mTime,
+        path: webdavFile.path ?? '',
+        modifiedAt: webdavFile.mTime ?? DateTime.now(),
         isShared: false, // WebDAV doesn't provide this info directly
         isFavorite: false, // Same here
         type: ItemType.file,
-        size: webdavFile.size,
+        size: webdavFile.size ?? 0,
         mimeType: webdavFile.mimeType,
       );
     }
@@ -108,7 +102,7 @@ class WebDAVFolderAdapter implements FolderRepository {
       await _ensureAuthenticated();
       
       final folder = await _client.getFileProps(folderId);
-      if (!folder.isDir) {
+      if (!(folder.isDir ?? false)) {
         throw Exception('Not a folder: $folderId');
       }
       
@@ -285,7 +279,7 @@ class WebDAVFolderAdapter implements FolderRepository {
     
     final token = await _secureStorage.getToken();
     
-    final response = await http.send(http.Request('PROPPATCH', uri)
+    final response = await http.Client().send(http.Request('PROPPATCH', uri)
       ..headers['Authorization'] = 'Bearer $token'
       ..headers['Content-Type'] = 'application/xml'
       ..body = body);
@@ -358,7 +352,7 @@ class WebDAVFolderAdapter implements FolderRepository {
           final path = resultMap['path'] as String;
           final folder = await _client.getFileProps(path);
           
-          if (folder.isDir) {
+          if (folder.isDir ?? false) {
             folders.add(_convertWebDavFolder(folder));
           }
         }
@@ -413,12 +407,12 @@ class WebDAVFolderAdapter implements FolderRepository {
       int totalSize = 0;
       
       for (final item in items) {
-        if (item.isDir) {
+        if (item.isDir ?? false) {
           // Recursively calculate subfolder size
-          totalSize += await _calculateFolderSizeFallback(item.path);
+          totalSize += await _calculateFolderSizeFallback(item.path ?? '');
         } else {
           // Add file size
-          totalSize += item.size;
+          totalSize += (item.size ?? 0);
         }
       }
       
