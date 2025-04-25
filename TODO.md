@@ -2,24 +2,24 @@
 
 ## Phase 1: Project Setup and Basic Structure
 - [x] Create project directory
-- [ ] Initialize Rust project with Cargo
-- [ ] Set up egui and eframe dependencies
+- [x] Initialize Rust project with Cargo
+- [x] Set up egui and eframe dependencies
 - [ ] Create basic application window
-- [ ] Design module structure following hexagonal architecture
-- [ ] Define core domain models matching server entities
-- [ ] Setup logging and error handling
+- [x] Design module structure following hexagonal architecture
+- [x] Define core domain models matching server entities
+- [x] Setup logging and error handling
 
 ## Phase 2: Authentication and API Connection
-- [ ] Implement HTTP client for REST API
-- [ ] Create authentication service (login, token management)
-- [ ] Implement token refresh mechanism
+- [x] Implement HTTP client for REST API
+- [x] Create authentication service (login, token management)
+- [x] Implement token refresh mechanism
 - [ ] Add secure credential storage
-- [ ] Create login UI with egui
+- [x] Create login UI with egui
 - [ ] Test connection to OxiCloud server
 
 ## Phase 3: File System Navigation
-- [ ] Implement WebDAV client for file operations
-- [ ] Create file browser UI component
+- [x] Implement WebDAV client for file operations
+- [x] Create file browser UI component
 - [ ] Implement folder navigation
 - [ ] Add file/folder context menus
 - [ ] Display file metadata (size, modification date)

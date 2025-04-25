@@ -3,13 +3,14 @@ use std::thread;
 use std::sync::mpsc::{self, Sender, Receiver};
 
 use eframe::egui;
-use egui::{Ui, Vec2, Color32, Stroke, RichText, TextEdit};
+use egui::{Ui, Vec2, Color32, Stroke, RichText, TextEdit, Frame, Rounding};
 use log::{info, debug, error};
 use tokio::runtime::Runtime;
 
 use crate::domain::models::user::{AuthToken, User};
 use crate::domain::repositories::auth_repository::AuthRepository;
 use crate::ui::app_state::{AppState, UiState, AppView};
+use crate::ui::theme::{OxiCloudColors, render_oxicloud_logo, widgets};
 
 /// Message types for login results
 enum LoginMessage {
@@ -92,65 +93,74 @@ impl LoginPanel {
             }
         }
         
+        let colors = OxiCloudColors::default();
+        
+        // Full screen container
         ui.vertical_centered(|ui| {
             ui.add_space(50.0);
             
-            // Logo
-            ui.label(RichText::new("OxiCloud").size(32.0).strong());
-            
-            ui.add_space(30.0);
-            
-            // Form
-            egui::Frame::none()
-                .fill(Color32::from_rgb(245, 245, 245))
+            // Auth panel frame
+            Frame::none()
+                .fill(colors.card_background)
                 .stroke(Stroke::new(1.0, Color32::from_gray(220)))
-                .rounding(8.0)
-                .inner_margin(20.0)
+                .rounding(Rounding::same(10.0))
+                .shadow(egui::epaint::Shadow::small_light())
+                .inner_margin(30.0)
                 .show(ui, |ui| {
-                    ui.set_width(300.0);
+                    ui.set_width(400.0);
                     
-                    ui.vertical_centered_justified(|ui| {
-                        ui.heading("Login");
-                        ui.add_space(16.0);
+                    ui.vertical_centered(|ui| {
+                        // Logo with cloud icon
+                        render_oxicloud_logo(ui, 60.0);
                         
-                        ui.label("Server URL");
-                        ui.add(TextEdit::singleline(&mut self.server_url)
-                            .hint_text("https://your-oxicloud-server.com")
-                            .desired_width(f32::INFINITY));
+                        ui.add_space(20.0);
                         
-                        ui.add_space(8.0);
+                        ui.heading(RichText::new("Login to OxiCloud").color(colors.text_primary).size(20.0));
                         
-                        ui.label("Username");
-                        ui.add(TextEdit::singleline(&mut self.username)
-                            .hint_text("username")
-                            .desired_width(f32::INFINITY));
+                        ui.add_space(25.0);
+                    });
+                    
+                    // Error message if any
+                    if let Some(error) = &self.error_message {
+                        ui.add(egui::Label::new(
+                            RichText::new(error).color(colors.error)
+                        ).wrap(true));
+                        ui.add_space(10.0);
+                    }
+                    
+                    // Login form
+                    ui.vertical(|ui| {
+                        // Server URL
+                        ui.label(RichText::new("Server URL").color(colors.text_primary).size(14.0));
+                        widgets::styled_text_input(ui, &mut self.server_url, "https://your-oxicloud-server.com");
+                        ui.add_space(12.0);
                         
-                        ui.add_space(8.0);
+                        // Username
+                        ui.label(RichText::new("Username").color(colors.text_primary).size(14.0));
+                        widgets::styled_text_input(ui, &mut self.username, "username");
+                        ui.add_space(12.0);
                         
-                        ui.label("Password");
+                        // Password
+                        ui.label(RichText::new("Password").color(colors.text_primary).size(14.0));
+                        ui.style_mut().visuals.widgets.inactive.bg_fill = Color32::from_rgb(249, 250, 251); // #f9fafb
+                        ui.style_mut().visuals.widgets.inactive.rounding = Rounding::same(8.0);
                         ui.add(TextEdit::singleline(&mut self.password)
                             .password(true)
                             .hint_text("password")
                             .desired_width(f32::INFINITY));
+                        ui.reset_style();
                         
-                        ui.add_space(16.0);
+                        ui.add_space(20.0);
                         
-                        // Error message
-                        if let Some(error) = &self.error_message {
-                            ui.colored_label(Color32::RED, error);
-                            ui.add_space(8.0);
-                        }
-                        
-                        // Login button
-                        let login_button = ui.add_enabled(
-                            !self.is_loading && 
+                        // Login button (primary style)
+                        let is_enabled = !self.is_loading && 
                             !self.server_url.is_empty() && 
                             !self.username.is_empty() && 
-                            !self.password.is_empty(),
-                            egui::Button::new(
-                                if self.is_loading { "Logging in..." } else { "Login" }
-                            ).min_size(Vec2::new(100.0, 36.0))
-                        );
+                            !self.password.is_empty();
+                        
+                        ui.set_enabled(is_enabled);
+                        let login_button = widgets::primary_button(ui, if self.is_loading { "Logging in..." } else { "Login" });
+                        ui.set_enabled(true);
                         
                         if login_button.clicked() {
                             self.handle_login();

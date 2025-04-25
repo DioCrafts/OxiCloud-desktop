@@ -10,6 +10,7 @@ description = "Desktop client for OxiCloud service"
 egui = "0.23.0"
 eframe = "0.23.0"
 egui_extras = "0.23.0"
+winapi = { version = "0.3.9", features = ["winuser", "windef", "wingdi", "winbase", "shellapi"] }
 
 # Async/HTTP
 tokio = { version = "1.28.0", features = ["full"] }
@@ -38,7 +39,10 @@ mime_guess = "2.0.4"
 image = { version = "0.24.7", features = ["jpeg", "png", "webp"] }
 
 # Security
-keyring = "2.0.5"
+keyring = "2.3.3"
+
+[target.'cfg(windows)'.dependencies]
+wincredentials = "0.2.0"
 
 # Error handling
 anyhow = "1.0.72"

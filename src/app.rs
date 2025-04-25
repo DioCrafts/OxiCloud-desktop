@@ -2,8 +2,10 @@ use std::sync::Arc;
 use std::path::PathBuf;
 
 use eframe::{App, Frame};
-use egui::{Context, CentralPanel, TopBottomPanel, SidePanel, Ui};
+use egui::{Context, CentralPanel, TopBottomPanel, SidePanel, Ui, Color32, RichText};
 use log::info;
+
+use crate::ui::theme::{apply_oxicloud_theme, render_oxicloud_logo, widgets, OxiCloudColors};
 
 use crate::domain::repositories::auth_repository::AuthRepository;
 use crate::domain::repositories::file_repository::FileRepository;
@@ -132,49 +134,123 @@ impl OxiCloudApp {
     
     /// Render the top navigation bar
     fn render_top_bar(&mut self, ui: &mut Ui) {
+        let colors = OxiCloudColors::default();
+        
+        // Apply styles for top bar
+        ui.style_mut().visuals.widgets.noninteractive.bg_fill = Color32::WHITE;
+        ui.style_mut().visuals.faint_bg_color = Color32::WHITE;
+        
         ui.horizontal(|ui| {
-            ui.heading("OxiCloud");
-            ui.add_space(16.0);
+            // Logo
+            render_oxicloud_logo(ui, 40.0);
+            ui.add_space(20.0);
             
-            if ui.button("Files").clicked() {
-                self.ui_state.current_view = AppView::Files;
+            // Navigation items
+            let nav_items = [
+                ("Files", AppView::Files),
+                ("Sync Status", AppView::SyncStatus),
+                ("Settings", AppView::Settings),
+            ];
+            
+            for (label, view) in nav_items.iter() {
+                let is_active = self.ui_state.current_view == *view;
+                let text = if is_active {
+                    RichText::new(*label).color(colors.primary).strong()
+                } else {
+                    RichText::new(*label).color(colors.text_primary)
+                };
+                
+                if ui.button(text).clicked() {
+                    self.ui_state.current_view = *view;
+                }
+                ui.add_space(10.0);
             }
             
-            if ui.button("Sync Status").clicked() {
-                self.ui_state.current_view = AppView::SyncStatus;
-            }
-            
-            if ui.button("Settings").clicked() {
-                self.ui_state.current_view = AppView::Settings;
-            }
-            
+            // Right-aligned controls
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.button("Logout").clicked() {
+                // Logout button with primary color
+                let logout_btn = ui.button(
+                    RichText::new("Logout").color(colors.text_secondary)
+                );
+                
+                if logout_btn.clicked() {
                     self.ui_state.current_view = AppView::Login;
                     self.state.is_authenticated = false;
                 }
+                
+                // Display username if available
+                if !self.state.username.is_empty() {
+                    let username_initial = self.state.username.chars().next().unwrap_or('U').to_uppercase().to_string();
+                    
+                    // User avatar
+                    ui.add_space(10.0);
+                    let (rect, _) = ui.allocate_exact_size(egui::Vec2::splat(40.0), egui::Sense::hover());
+                    
+                    if ui.is_rect_visible(rect) {
+                        // Draw circular avatar
+                        ui.painter().circle_filled(
+                            rect.center(),
+                            20.0,
+                            colors.primary
+                        );
+                        
+                        // Draw text
+                        ui.painter().text(
+                            rect.center(),
+                            egui::Align2::CENTER_CENTER,
+                            username_initial,
+                            egui::FontId::new(18.0, egui::FontFamily::Proportional),
+                            Color32::WHITE
+                        );
+                    }
+                }
             });
         });
+        
+        // Separator line
+        ui.separator();
     }
     
     /// Render the file browser view
     fn render_file_browser_view(&mut self, ctx: &Context) {
+        let colors = OxiCloudColors::default();
+        
         // Top bar
-        TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            self.render_top_bar(ui);
-        });
+        TopBottomPanel::top("top_panel")
+            .frame(egui::Frame::none()
+                .fill(Color32::WHITE)
+                .inner_margin(egui::style::Margin::symmetric(20.0, 0.0)))
+            .show(ctx, |ui| {
+                self.render_top_bar(ui);
+            });
         
         // Left panel (folder tree)
-        SidePanel::left("folder_tree").resizable(true).min_width(200.0).show(ctx, |ui| {
-            ui.heading("Folders");
-            ui.separator();
-            self.file_browser.render_folder_tree(ui);
-        });
+        SidePanel::left("folder_tree")
+            .resizable(true)
+            .min_width(250.0)
+            .frame(egui::Frame::none()
+                .fill(colors.sidebar_bg))
+            .show(ctx, |ui| {
+                // Logo in sidebar
+                ui.add_space(20.0);
+                ui.horizontal(|ui| {
+                    ui.add_space(15.0);
+                    render_oxicloud_logo(ui, 40.0);
+                });
+                ui.add_space(30.0);
+                
+                // The TreeView will render with its own styling
+                self.file_browser.render_folder_tree(ui);
+            });
         
         // Main panel (file list)
-        CentralPanel::default().show(ctx, |ui| {
-            self.file_browser.render_file_list(ui, &self.state);
-        });
+        CentralPanel::default()
+            .frame(egui::Frame::none()
+                .fill(colors.background)
+                .inner_margin(egui::style::Margin::symmetric(20.0, 10.0)))
+            .show(ctx, |ui| {
+                self.file_browser.render_file_list(ui, &self.state);
+            });
     }
     
     /// Render the sync status view
@@ -238,7 +314,8 @@ impl App for OxiCloudApp {
     }
 }
 
-/// Set up custom fonts for the application
-fn setup_custom_fonts(_ctx: &Context) {
-    // Custom font setup would go here
+/// Set up custom fonts and apply theme for the application
+fn setup_custom_fonts(ctx: &Context) {
+    // Apply OxiCloud theme
+    apply_oxicloud_theme(ctx);
 }
