@@ -15,6 +15,8 @@ class FileView extends StatefulWidget {
   final Function(FileModel) onDownload;
   final Function(FileModel) onMove;
   final Function(FileModel) onCopy;
+  final Function(FileModel) onKeepOffline;
+  final Function(FileModel) onFreeSpace;
 
   const FileView({
     Key? key,
@@ -28,6 +30,8 @@ class FileView extends StatefulWidget {
     required this.onDownload,
     required this.onMove,
     required this.onCopy,
+    required this.onKeepOffline,
+    required this.onFreeSpace,
   }) : super(key: key);
 
   @override
