@@ -31,6 +31,10 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter create --platforms=linux .
+          cd linux
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          cd ..
           flutter build linux
 
   build-windows:
@@ -47,6 +51,7 @@ jobs:
           flutter config --enable-windows-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          flutter create --platforms=windows .
           flutter build windows
 
   build-macos:
@@ -80,6 +85,7 @@ jobs:
           flutter clean
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          flutter create --platforms=android .
           cd android
           ./gradlew clean
           cd ..

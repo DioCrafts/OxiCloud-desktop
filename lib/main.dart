@@ -319,26 +319,26 @@ class _MainScreenState extends State<MainScreen> {
   void _handleRename(FileModel file) async {
     final newName = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Renombrar archivo'),
-        content: TextField(
-          controller: TextEditingController(text: file.name),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancelar'),
+      builder: (context) {
+        final controller = TextEditingController(text: file.name);
+        return AlertDialog(
+          title: Text('Renombrar archivo'),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
           ),
-          TextButton(
-            onPressed: () {
-              final controller = context.findRenderObject() as TextField;
-              Navigator.pop(context, controller.text);
-            },
-            child: Text('Renombrar'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: Text('Renombrar'),
+            ),
+          ],
+        );
+      },
     );
 
     if (newName != null && newName.isNotEmpty) {
