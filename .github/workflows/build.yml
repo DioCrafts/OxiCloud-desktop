@@ -33,7 +33,9 @@ jobs:
           flutter create --platforms=linux .
           cd linux
           export FLUTTER_ROOT=$(which flutter | xargs dirname | xargs dirname)
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$FLUTTER_ROOT
+          export FLUTTER_ENGINE=$FLUTTER_ROOT/bin/cache/artifacts/engine
+          export FLUTTER_CMAKE_DIR=$FLUTTER_ROOT/packages/flutter_tools/bin/cmake
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$FLUTTER_ROOT -DFLUTTER_ENGINE=$FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$FLUTTER_CMAKE_DIR
           cmake --build build
           cd ..
           flutter build linux
