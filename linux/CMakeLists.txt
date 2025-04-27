@@ -13,16 +13,37 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Set Flutter path
-set(FLUTTER_ROOT "/home/torrefacto/flutter")
-
-# Find required packages.
-find_package(Flutter REQUIRED)
-find_package(GTK3 REQUIRED)
+# Find required packages
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED gtk+-3.0)
+pkg_check_modules(GIO REQUIRED gio-2.0)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
 
-# Define the application target. This creates the "flutter_app" executable.
+# Find Flutter
+set(FLUTTER_ROOT $ENV{FLUTTER_ROOT})
+set(FLUTTER_ENGINE $ENV{FLUTTER_ENGINE})
+set(FLUTTER_CMAKE_DIR $ENV{FLUTTER_CMAKE_DIR})
+set(FLUTTER_ENGINE_SRC $ENV{FLUTTER_ENGINE_SRC})
+set(FLUTTER_ENGINE_OUT $ENV{FLUTTER_ENGINE_OUT})
+
+list(APPEND CMAKE_MODULE_PATH "${FLUTTER_CMAKE_DIR}")
+list(APPEND CMAKE_PREFIX_PATH "${FLUTTER_ENGINE}/linux-x64")
+
+# Find Flutter package
+find_package(Flutter REQUIRED)
+
+# Configure build options.
+option(BUILD_BUNDLE "Build a bundle instead of an executable" OFF)
+option(ENABLE_ASSERTS "Enable assertions" OFF)
+
+# Use bundles of the Flutter and GTK libraries.
+set(BUILD_BUNDLE ${BUILD_BUNDLE})
+set(ENABLE_ASSERTS ${ENABLE_ASSERTS})
+
+# Root files directory for absolute paths for the project.
+set(PROJECT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/..")
+
+# Define the application target. This creates the executable.
 add_executable(${BINARY_NAME}
   "main.cc"
   "my_application.cc"
@@ -39,7 +60,14 @@ set_target_properties(${BINARY_NAME} PROPERTIES
 
 # Add dependency libraries.
 target_link_libraries(${BINARY_NAME} PRIVATE flutter)
-target_link_libraries(${BINARY_NAME} PRIVATE PkgConfig::GTK)
+target_link_libraries(${BINARY_NAME} PRIVATE ${GTK_LIBRARIES})
+target_link_libraries(${BINARY_NAME} PRIVATE ${GIO_LIBRARIES})
+target_link_libraries(${BINARY_NAME} PRIVATE ${GLIB_LIBRARIES})
+
+# Add include directories
+target_include_directories(${BINARY_NAME} PRIVATE ${GTK_INCLUDE_DIRS})
+target_include_directories(${BINARY_NAME} PRIVATE ${GIO_INCLUDE_DIRS})
+target_include_directories(${BINARY_NAME} PRIVATE ${GLIB_INCLUDE_DIRS})
 
 # Run the Flutter tooling to download dependencies and generate files.
 flutter_configure_executable(${BINARY_NAME})
@@ -52,6 +80,10 @@ set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
 add_definitions(-DAPPLICATION_ID="${APPLICATION_ID}")
+
+# Flutter library and tool build rules.
+add_subdirectory(${FLUTTER_ENGINE_SRC}/flutter/shell/platform/linux/embedder
+                 ${FLUTTER_ENGINE_OUT}/linux-x64)
 
 # Application build
 add_subdirectory("runner") 
