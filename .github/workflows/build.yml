@@ -35,7 +35,10 @@ jobs:
           export FLUTTER_ROOT=$(which flutter | xargs dirname | xargs dirname)
           export FLUTTER_ENGINE=$FLUTTER_ROOT/bin/cache/artifacts/engine
           export FLUTTER_CMAKE_DIR=$FLUTTER_ROOT/packages/flutter_tools/bin/cmake
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$FLUTTER_ROOT -DFLUTTER_ENGINE=$FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$FLUTTER_CMAKE_DIR
+          export FLUTTER_ENGINE_SRC=$FLUTTER_ROOT/bin/cache/artifacts/engine/src
+          export FLUTTER_ENGINE_OUT=$FLUTTER_ROOT/bin/cache/artifacts/engine/out
+          mkdir -p $FLUTTER_ENGINE_OUT
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$FLUTTER_ROOT -DFLUTTER_ENGINE=$FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$FLUTTER_CMAKE_DIR -DFLUTTER_ENGINE_SRC=$FLUTTER_ENGINE_SRC -DFLUTTER_ENGINE_OUT=$FLUTTER_ENGINE_OUT -DCMAKE_MODULE_PATH=$FLUTTER_CMAKE_DIR
           cmake --build build
           cd ..
           flutter build linux
@@ -62,7 +65,12 @@ jobs:
           $env:FLUTTER_ROOT = (Get-Command flutter).Source | Split-Path -Parent | Split-Path -Parent
           $env:FLUTTER_ENGINE = "$env:FLUTTER_ROOT\bin\cache\artifacts\engine"
           $env:FLUTTER_CMAKE_DIR = "$env:FLUTTER_ROOT\packages\flutter_tools\bin\cmake"
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$env:FLUTTER_ROOT -DFLUTTER_ENGINE=$env:FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$env:FLUTTER_CMAKE_DIR
+          $env:FLUTTER_ENGINE_SRC = "$env:FLUTTER_ROOT\bin\cache\artifacts\engine\src"
+          $env:FLUTTER_ENGINE_OUT = "$env:FLUTTER_ROOT\bin\cache\artifacts\engine\out"
+          if (!(Test-Path $env:FLUTTER_ENGINE_OUT)) {
+            New-Item -ItemType Directory -Path $env:FLUTTER_ENGINE_OUT -Force
+          }
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$env:FLUTTER_ROOT -DFLUTTER_ENGINE=$env:FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$env:FLUTTER_CMAKE_DIR -DFLUTTER_ENGINE_SRC=$env:FLUTTER_ENGINE_SRC -DFLUTTER_ENGINE_OUT=$env:FLUTTER_ENGINE_OUT
           cmake --build build
           cd ..
           flutter build windows
