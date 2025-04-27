@@ -59,7 +59,10 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter create --platforms=windows .
           cd windows
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          $env:FLUTTER_ROOT = (Get-Command flutter).Source | Split-Path -Parent | Split-Path -Parent
+          $env:FLUTTER_ENGINE = "$env:FLUTTER_ROOT\bin\cache\artifacts\engine"
+          $env:FLUTTER_CMAKE_DIR = "$env:FLUTTER_ROOT\packages\flutter_tools\bin\cmake"
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$env:FLUTTER_ROOT -DFLUTTER_ENGINE=$env:FLUTTER_ENGINE -DFLUTTER_CMAKE_DIR=$env:FLUTTER_CMAKE_DIR
           cmake --build build
           cd ..
           flutter build windows
