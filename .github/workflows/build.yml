@@ -19,9 +19,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+          sudo apt-get install -y libx11-dev libxrandr-dev libxi-dev libxinerama-dev libxcursor-dev libxfixes-dev
+          sudo apt-get install -y libgl1-mesa-dev libgl2ps-dev libglu1-mesa-dev
+          sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev
+          sudo apt-get install -y libatk1.0-dev libcairo2-dev libpango1.0-dev
+          sudo apt-get install -y libgdk-pixbuf2.0-dev
       - name: Build Linux
         run: |
           flutter clean
+          flutter config --enable-linux-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter build linux
@@ -53,6 +59,7 @@ jobs:
       - name: Build macOS
         run: |
           flutter clean
+          flutter config --enable-macos-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter build macos
