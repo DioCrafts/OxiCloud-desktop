@@ -1,39 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'theme/app_theme.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/file_view.dart';
 import 'models/file_model.dart';
 import 'services/api_service.dart';
-import 'injection.dart';
 
-part 'main.freezed.dart';
-part 'main.g.dart';
-
-@injectable
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await configureDependencies();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'OxiCloud Desktop',
       theme: AppTheme.lightTheme,
-      home: const MainScreen(),
+      home: MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
