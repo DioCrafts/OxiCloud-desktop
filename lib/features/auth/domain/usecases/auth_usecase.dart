@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 import '../models/user.dart';
 import '../ports/auth_repository.dart';
 import '../../../../core/domain/usecase.dart';
 
-@Injectable()
 class AuthUseCase implements UseCase {
   final AuthRepository _repository;
 
