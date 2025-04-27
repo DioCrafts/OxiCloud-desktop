@@ -35,7 +35,7 @@ if(NOT DEFINED FLUTTER_ENGINE_OUT)
 endif()
 
 # Add Flutter's CMake modules to the module path
-list(APPEND CMAKE_MODULE_PATH "${FLUTTER_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${FLUTTER_ROOT}/packages/flutter_tools/bin")
 list(APPEND CMAKE_PREFIX_PATH "${FLUTTER_ROOT}/bin/cache/artifacts/engine/windows-x64")
 
 # Find Flutter package
