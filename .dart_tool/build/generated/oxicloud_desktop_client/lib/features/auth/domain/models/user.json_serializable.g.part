@@ -1,0 +1,23 @@
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_User _$UserFromJson(Map<String, dynamic> json) => _User(
+      id: json['id'] as String,
+      username: json['username'] as String,
+      email: json['email'] as String,
+      avatarUrl: json['avatarUrl'] as String?,
+      isAdmin: json['isAdmin'] as bool? ?? false,
+      storageUsed: (json['storageUsed'] as num?)?.toInt() ?? 0,
+      storageLimit: (json['storageLimit'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$UserToJson(_User instance) => <String, dynamic>{
+      'id': instance.id,
+      'username': instance.username,
+      'email': instance.email,
+      'avatarUrl': instance.avatarUrl,
+      'isAdmin': instance.isAdmin,
+      'storageUsed': instance.storageUsed,
+      'storageLimit': instance.storageLimit,
+    };

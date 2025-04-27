@@ -1,0 +1,133 @@
+name: Build OxiCloud Desktop Client
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev
+      - name: Build Linux
+        run: |
+          flutter clean
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build linux
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+      - name: Build Windows
+        run: |
+          flutter clean
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build windows
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+      - name: Build macOS
+        run: |
+          flutter clean
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build macos
+
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+      - uses: android-actions/setup-android@v3
+      - name: Build Android
+        run: |
+          flutter clean
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build apk --release
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
+      - name: Build iOS
+        run: |
+          flutter clean
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build ios --release --no-codesign
+
+  upload-artifacts:
+    needs: [build-linux, build-windows, build-macos, build-android, build-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download Linux Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: linux-build
+          path: artifacts/linux
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-build
+          path: artifacts/windows
+      - name: Download macOS Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: macos-build
+          path: artifacts/macos
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: android-build
+          path: artifacts/android
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-build
+          path: artifacts/ios
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/linux/*
+            artifacts/windows/*
+            artifacts/macos/*
+            artifacts/android/*
+            artifacts/ios/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

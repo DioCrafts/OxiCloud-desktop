@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Colores para la salida
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Función para mostrar mensajes
+function print_message() {
+    echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+function print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Verificar que Flutter está instalado
+if ! command -v flutter &> /dev/null; then
+    print_error "Flutter no está instalado. Por favor, instala Flutter primero."
+    exit 1
+fi
+
+# Verificar que estamos en el directorio correcto
+if [ ! -f "pubspec.yaml" ]; then
+    print_error "No se encontró el archivo pubspec.yaml. Asegúrate de estar en el directorio raíz del proyecto."
+    exit 1
+fi
+
+# Limpiar el proyecto
+print_message "Limpiando el proyecto..."
+flutter clean
+
+# Obtener las últimas versiones de los paquetes
+print_message "Actualizando paquetes..."
+flutter pub upgrade
+
+# Obtener dependencias
+print_message "Obteniendo dependencias..."
+flutter pub get
+
+# Generar código
+print_message "Generando código..."
+dart run build_runner build --delete-conflicting-outputs
+
+print_message "¡Actualización completada con éxito!" 
