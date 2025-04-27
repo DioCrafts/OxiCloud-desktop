@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
 import 'theme/app_theme.dart';
 import 'widgets/sidebar.dart';
 import 'widgets/top_bar.dart';
@@ -6,6 +8,10 @@ import 'widgets/file_view.dart';
 import 'models/file_model.dart';
 import 'services/api_service.dart';
 
+part 'main.freezed.dart';
+part 'main.g.dart';
+
+@injectable
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
