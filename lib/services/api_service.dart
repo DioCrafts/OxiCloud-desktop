@@ -4,7 +4,9 @@ import 'package:http/http.dart' as http;
 import '../models/file_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:injectable/injectable.dart';
 
+@injectable
 class ApiService {
   static const String baseUrl = 'http://localhost:3000/api'; // TODO: Cambiar por la URL real del servidor
   String? _token;

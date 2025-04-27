@@ -37,6 +37,7 @@ jobs:
       - name: Build Windows
         run: |
           flutter clean
+          flutter config --enable-windows-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter build windows

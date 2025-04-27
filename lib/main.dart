@@ -7,13 +7,15 @@ import 'widgets/top_bar.dart';
 import 'widgets/file_view.dart';
 import 'models/file_model.dart';
 import 'services/api_service.dart';
+import 'injection.dart';
 
 part 'main.freezed.dart';
 part 'main.g.dart';
 
 @injectable
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await configureDependencies();
   runApp(const MyApp());
 }
 
