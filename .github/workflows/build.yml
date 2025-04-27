@@ -96,6 +96,10 @@ jobs:
           flutter clean
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          flutter create --platforms=ios .
+          cd ios
+          pod install
+          cd ..
           flutter build ios --release --no-codesign
 
   upload-artifacts:
