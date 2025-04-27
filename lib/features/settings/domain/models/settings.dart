@@ -1,24 +1,37 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
-part 'settings.freezed.dart';
 part 'settings.g.dart';
 
-@freezed
-class Settings with _$Settings {
-  const factory Settings({
-    @Default(false) bool enableBackgroundSync,
-    @Default(false) bool enableWebDAV,
-    @Default(300) int syncInterval,
-    @Default(false) bool autoUploadPhotos,
-    @Default(false) bool autoUploadVideos,
-    @Default(100) int maxUploadSize,
-    @Default(false) bool enableNotifications,
-    @Default(false) bool enableDarkMode,
-    @Default('en') String language,
-    @Default('') String webDAVUrl,
-    @Default('') String webDAVUsername,
-    @Default('') String webDAVPassword,
-  }) = _Settings;
+@JsonSerializable()
+class Settings {
+  final bool enableBackgroundSync;
+  final bool enableWebDAV;
+  final int syncInterval;
+  final bool autoUploadPhotos;
+  final bool autoUploadVideos;
+  final int maxUploadSize;
+  final bool enableNotifications;
+  final bool enableDarkMode;
+  final String language;
+  final String webDAVUrl;
+  final String webDAVUsername;
+  final String webDAVPassword;
+
+  const Settings({
+    this.enableBackgroundSync = false,
+    this.enableWebDAV = false,
+    this.syncInterval = 300,
+    this.autoUploadPhotos = false,
+    this.autoUploadVideos = false,
+    this.maxUploadSize = 100,
+    this.enableNotifications = false,
+    this.enableDarkMode = false,
+    this.language = 'en',
+    this.webDAVUrl = '',
+    this.webDAVUsername = '',
+    this.webDAVPassword = '',
+  });
 
   factory Settings.fromJson(Map<String, dynamic> json) => _$SettingsFromJson(json);
+  Map<String, dynamic> toJson() => _$SettingsToJson(this);
 } 

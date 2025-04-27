@@ -1,10 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/models/user.dart';
 import '../../domain/ports/auth_repository.dart';
 
-@injectable
 class AuthUseCase {
   final AuthRepository _repository;
 

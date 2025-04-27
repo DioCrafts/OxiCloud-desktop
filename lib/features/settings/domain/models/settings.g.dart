@@ -6,7 +6,7 @@ part of 'settings.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_Settings _$SettingsFromJson(Map<String, dynamic> json) => _Settings(
+Settings _$SettingsFromJson(Map<String, dynamic> json) => Settings(
       enableBackgroundSync: json['enableBackgroundSync'] as bool? ?? false,
       enableWebDAV: json['enableWebDAV'] as bool? ?? false,
       syncInterval: (json['syncInterval'] as num?)?.toInt() ?? 300,
@@ -21,7 +21,7 @@ _Settings _$SettingsFromJson(Map<String, dynamic> json) => _Settings(
       webDAVPassword: json['webDAVPassword'] as String? ?? '',
     );
 
-Map<String, dynamic> _$SettingsToJson(_Settings instance) => <String, dynamic>{
+Map<String, dynamic> _$SettingsToJson(Settings instance) => <String, dynamic>{
       'enableBackgroundSync': instance.enableBackgroundSync,
       'enableWebDAV': instance.enableWebDAV,
       'syncInterval': instance.syncInterval,

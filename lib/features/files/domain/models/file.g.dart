@@ -6,7 +6,7 @@ part of 'file.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_File _$FileFromJson(Map<String, dynamic> json) => _File(
+File _$FileFromJson(Map<String, dynamic> json) => File(
       id: json['id'] as String,
       name: json['name'] as String,
       path: json['path'] as String,
@@ -21,7 +21,7 @@ _File _$FileFromJson(Map<String, dynamic> json) => _File(
       downloadUrl: json['downloadUrl'] as String?,
     );
 
-Map<String, dynamic> _$FileToJson(_File instance) => <String, dynamic>{
+Map<String, dynamic> _$FileToJson(File instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'path': instance.path,

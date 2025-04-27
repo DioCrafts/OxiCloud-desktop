@@ -6,7 +6,7 @@ part of 'folder.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_Folder _$FolderFromJson(Map<String, dynamic> json) => _Folder(
+Folder _$FolderFromJson(Map<String, dynamic> json) => Folder(
       id: json['id'] as String,
       name: json['name'] as String,
       path: json['path'] as String,
@@ -18,7 +18,7 @@ _Folder _$FolderFromJson(Map<String, dynamic> json) => _Folder(
       itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
     );
 
-Map<String, dynamic> _$FolderToJson(_Folder instance) => <String, dynamic>{
+Map<String, dynamic> _$FolderToJson(Folder instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'path': instance.path,

@@ -1,12 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../domain/models/user.dart';
 import '../../../domain/ports/auth_repository.dart';
 
-@Injectable(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final Dio _dio;
   final SharedPreferences _prefs;

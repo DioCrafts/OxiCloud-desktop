@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../../domain/models/user.dart';
 import '../../application/usecases/auth_usecase.dart';
 
-@injectable
 class AuthProvider with ChangeNotifier {
   final AuthUseCase _authUseCase;
   User? _user;
