@@ -30,6 +30,7 @@ jobs:
           flutter config --enable-linux-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          flutter create --platforms=linux .
           flutter build linux
 
   build-windows:
@@ -62,6 +63,7 @@ jobs:
           flutter config --enable-macos-desktop
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          flutter create --platforms=macos .
           flutter build macos
 
   build-android:
@@ -78,6 +80,9 @@ jobs:
           flutter clean
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
+          cd android
+          ./gradlew clean
+          cd ..
           flutter build apk --release
 
   build-ios:

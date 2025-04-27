@@ -199,12 +199,13 @@ class _MainScreenState extends State<MainScreen> {
       await _apiService.downloadFile(file);
       await _apiService.setSyncStatus(file.id, SyncStatus.synced);
 
+      final localPath = await _apiService.getLocalPath(file.id);
       setState(() {
         _files = _files.map((f) {
           if (f.id == file.id) {
             return f.copyWith(
               syncStatus: SyncStatus.synced,
-              localPath: await _apiService.getLocalPath(file.id),
+              localPath: localPath,
             );
           }
           return f;
