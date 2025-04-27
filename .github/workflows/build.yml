@@ -32,7 +32,8 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           flutter create --platforms=linux .
           cd linux
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          export FLUTTER_ROOT=$(which flutter | xargs dirname | xargs dirname)
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DFLUTTER_ROOT=$FLUTTER_ROOT
           cmake --build build
           cd ..
           flutter build linux
@@ -45,6 +46,9 @@ jobs:
         with:
           flutter-version: '3.29.3'
           channel: 'stable'
+      - name: Install CMake
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
       - name: Build Windows
         run: |
           flutter clean
@@ -52,6 +56,10 @@ jobs:
           flutter pub get
           dart run build_runner build --delete-conflicting-outputs
           flutter create --platforms=windows .
+          cd windows
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          cd ..
           flutter build windows
 
   build-macos:
