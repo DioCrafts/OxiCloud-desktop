@@ -13,12 +13,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Find required packages
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK REQUIRED gtk+-3.0)
-pkg_check_modules(GIO REQUIRED gio-2.0)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
-
 # Find Flutter
 set(FLUTTER_ROOT $ENV{FLUTTER_ROOT})
 set(FLUTTER_ENGINE $ENV{FLUTTER_ENGINE})
@@ -26,8 +20,15 @@ set(FLUTTER_CMAKE_DIR $ENV{FLUTTER_CMAKE_DIR})
 set(FLUTTER_ENGINE_SRC $ENV{FLUTTER_ENGINE_SRC})
 set(FLUTTER_ENGINE_OUT $ENV{FLUTTER_ENGINE_OUT})
 
+# Add Flutter's CMake modules to the module path
 list(APPEND CMAKE_MODULE_PATH "${FLUTTER_CMAKE_DIR}")
 list(APPEND CMAKE_PREFIX_PATH "${FLUTTER_ENGINE}/linux-x64")
+
+# Find required packages
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED gtk+-3.0)
+pkg_check_modules(GIO REQUIRED gio-2.0)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 # Find Flutter package
 find_package(Flutter REQUIRED)
