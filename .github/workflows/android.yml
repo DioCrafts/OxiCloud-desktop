@@ -43,14 +43,14 @@ jobs:
           sed -i '1s/^/plugins {\n    id "com.android.application"\n    id "kotlin-android"\n    id "dev.flutter.flutter-gradle-plugin"\n}\n\n/' android/app/build.gradle
         fi
 
-        # Fix MainActivity.kt imports - using simpler version
-        cat > android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt << 'EOF'
-        package com.example.oxicloud_desktop
+        # Generate a clean Android project to grab correct Kotlin files
+        flutter create --platforms=android --project-name temp_project --org com.example /tmp/temp_project
 
-        import io.flutter.embedding.android.FlutterActivity
+        # Copy the complete MainActivity.kt file from the fresh project
+        cp /tmp/temp_project/android/app/src/main/kotlin/com/example/temp_project/MainActivity.kt android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
 
-        class MainActivity: FlutterActivity()
-        EOF
+        # Update the package name in the copied file
+        sed -i 's/package com.example.temp_project/package com.example.oxicloud_desktop/g' android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
 
     - name: Update Gradle version
       run: |
@@ -59,7 +59,11 @@ jobs:
         cat android/gradle/wrapper/gradle-wrapper.properties
 
     - name: Build APK
-      run: flutter build apk --release
+      run: |
+        # Add some debugging info
+        ls -la android/app/src/main/kotlin/com/example/oxicloud_desktop/
+        cat android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
+        flutter build apk --release
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
