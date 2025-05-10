@@ -1,4 +1,4 @@
-name: Windows Build
+name: Windows
 
 on:
   push:
@@ -16,15 +16,38 @@ jobs:
       with:
         flutter-version: '3.29.1'
         channel: 'stable'
-    
+        cache: true
+
     - name: Install dependencies
       run: flutter pub get
-    
+
+    - name: Clean build directory
+      run: |
+        Remove-Item -Recurse -Force build/ -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force windows/build/ -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force windows/flutter/ephemeral/ -ErrorAction SilentlyContinue
+
+    - name: Setup Flutter
+      run: |
+        flutter clean
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs
+
+    - name: Create required asset directories
+      run: |
+        New-Item -ItemType Directory -Force -Path assets/images
+        New-Item -ItemType Directory -Force -Path assets/icons
+        New-Item -ItemType Directory -Force -Path assets/fonts
+        New-Item -ItemType File -Force -Path assets/images/.gitkeep
+        New-Item -ItemType File -Force -Path assets/icons/.gitkeep
+        New-Item -ItemType File -Force -Path assets/fonts/.gitkeep
+
     - name: Build Windows
-      run: flutter build windows
-    
-    - name: Upload Windows Artifact
+      run: flutter build windows --release
+
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: windows-build
-        path: build/windows/runner/Release/ 
+        path: build/windows/x64/runner/Release
+        if-no-files-found: error 

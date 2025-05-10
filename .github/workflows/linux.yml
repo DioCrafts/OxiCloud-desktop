@@ -1,4 +1,4 @@
-name: Linux Build
+name: Linux
 
 on:
   push:
@@ -16,23 +16,40 @@ jobs:
       with:
         flutter-version: '3.29.1'
         channel: 'stable'
-    
+        cache: true
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libgtk-3-dev
         flutter pub get
-    
+
     - name: Clean build directory
       run: |
         rm -rf build/
         rm -rf linux/build/
-    
+
+    - name: Setup Flutter
+      run: |
+        flutter clean
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs
+
+    - name: Create required asset directories
+      run: |
+        mkdir -p assets/images
+        mkdir -p assets/icons
+        mkdir -p assets/fonts
+        touch assets/images/.gitkeep
+        touch assets/icons/.gitkeep
+        touch assets/fonts/.gitkeep
+
     - name: Build Linux
-      run: flutter build linux
-    
-    - name: Upload Linux Artifact
+      run: flutter build linux --release
+
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: linux-build
-        path: build/linux/x64/release/bundle/ 
+        path: build/linux/x64/release/bundle
+        if-no-files-found: error 

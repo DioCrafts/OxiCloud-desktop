@@ -1,4 +1,4 @@
-name: macOS Build
+name: macOS
 
 on:
   push:
@@ -16,21 +16,23 @@ jobs:
       with:
         flutter-version: '3.29.1'
         channel: 'stable'
-    
+        cache: true
+
     - name: Install dependencies
       run: flutter pub get
-    
+
     - name: Clean build directory
       run: |
         rm -rf build/
         rm -rf macos/Pods/
-        rm -rf macos/.symlinks/
-        rm -rf macos/Flutter/Flutter.framework
-        rm -rf macos/Flutter/Flutter.podspec
-    
+        rm -rf .symlinks/
+        rm -rf Flutter/ephemeral/
+        rm -rf Flutter/Flutter.framework
+        rm -rf Flutter/Flutter.podspec
+
     - name: Setup Flutter
       run: |
-        flutter precache
+        flutter clean
         flutter pub get
         cd macos
         pod deintegrate
@@ -38,12 +40,13 @@ jobs:
         pod setup
         pod install
         cd ..
-    
+
     - name: Build macOS
-      run: flutter build macos
-    
-    - name: Upload macOS Artifact
+      run: flutter build macos --release
+
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: build/macos/Build/Products/Release/ 
+        path: build/macos/Build/Products/Release/oxicloud_desktop.app
+        if-no-files-found: error 
