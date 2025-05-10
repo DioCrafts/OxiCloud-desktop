@@ -22,9 +22,11 @@ jobs:
     
     - name: Setup Flutter SDK path
       run: |
-        FLUTTER_ROOT=$(which flutter | xargs dirname | xargs dirname)
-        echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+        echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" > android/local.properties
+        echo "Contents of local.properties:"
         cat android/local.properties
+        echo "FLUTTER_ROOT environment variable:"
+        echo ${{ env.FLUTTER_ROOT }}
     
     - name: Clean build directory
       run: |
