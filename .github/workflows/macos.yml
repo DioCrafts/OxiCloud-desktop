@@ -29,7 +29,7 @@ jobs:
         rm -rf Pods
         rm -rf Podfile.lock
         flutter pub get
-        pod install
+        pod install --repo-update
         cd ..
     
     - name: Clean build directory
