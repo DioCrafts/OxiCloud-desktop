@@ -43,6 +43,22 @@ jobs:
           sed -i '1s/^/plugins {\n    id "com.android.application"\n    id "kotlin-android"\n    id "dev.flutter.flutter-gradle-plugin"\n}\n\n/' android/app/build.gradle
         fi
 
+        # Fix MainActivity.kt imports
+        cat > android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt << 'EOF'
+        package com.example.oxicloud_desktop
+
+        import androidx.annotation.NonNull
+        import io.flutter.embedding.android.FlutterActivity
+        import io.flutter.embedding.engine.FlutterEngine
+        import io.flutter.plugins.GeneratedPluginRegistrant
+
+        class MainActivity: FlutterActivity() {
+            override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+                GeneratedPluginRegistrant.registerWith(flutterEngine)
+            }
+        }
+        EOF
+
     - name: Update Gradle version
       run: |
         # Update Gradle version to match the Android Gradle plugin version
