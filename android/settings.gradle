@@ -1,3 +1,18 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+        id 'com.android.application' version '8.3.0' apply false
+        id 'com.android.library' version '8.3.0' apply false
+        id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+    }
+}
+
 def flutterSdkPath = {
     def properties = new Properties()
     def propertiesFile = new File(settingsDir.parentFile, 'local.properties')
@@ -12,22 +27,7 @@ def flutterSdkPath = {
     return flutterSdkPath
 }()
 
-pluginManagement {
-    includeBuild("${flutterSdkPath}/packages/flutter_tools/gradle")
-
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-
-    plugins {
-        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
-        id 'com.android.application' version '8.3.0' apply false
-        id 'com.android.library' version '8.3.0' apply false
-        id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
-    }
-}
+includeBuild("${flutterSdkPath}/packages/flutter_tools/gradle")
 
 include ":app"
 
