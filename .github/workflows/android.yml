@@ -55,7 +55,7 @@ jobs:
     - name: Update Gradle version
       run: |
         # Update Gradle version to match the Android Gradle plugin version
-        sed -i 's/distributionUrl=.*$/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.4-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+        sed -i 's/distributionUrl=.*$/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.14-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
         cat android/gradle/wrapper/gradle-wrapper.properties
 
     - name: Build APK
