@@ -32,6 +32,8 @@ jobs:
         flutter pub run build_runner build
         flutter build macos --debug
         flutter pub get
+        mkdir -p Flutter/ephemeral
+        flutter pub get
         pod install --repo-update
         cd ..
     
