@@ -1,4 +1,4 @@
-name: macOS
+name: macOS Build
 
 on:
   push:
@@ -16,37 +16,15 @@ jobs:
       with:
         flutter-version: '3.29.1'
         channel: 'stable'
-        cache: true
-
+    
     - name: Install dependencies
       run: flutter pub get
-
-    - name: Clean build directory
-      run: |
-        rm -rf build/
-        rm -rf macos/Pods/
-        rm -rf .symlinks/
-        rm -rf Flutter/ephemeral/
-        rm -rf Flutter/Flutter.framework
-        rm -rf Flutter/Flutter.podspec
-
-    - name: Setup Flutter
-      run: |
-        flutter clean
-        flutter pub get
-        cd macos
-        pod deintegrate
-        pod cache clean --all
-        pod setup
-        pod install
-        cd ..
-
+    
     - name: Build macOS
-      run: flutter build macos --release
-
-    - name: Upload build artifacts
+      run: flutter build macos
+    
+    - name: Upload macOS Artifact
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: build/macos/Build/Products/Release/oxicloud_desktop.app
-        if-no-files-found: error 
+        path: build/macos/Build/Products/Release/ 
