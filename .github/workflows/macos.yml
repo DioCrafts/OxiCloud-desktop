@@ -30,7 +30,7 @@ jobs:
         rm -rf Podfile.lock
         flutter pub get
         flutter pub run build_runner build
-        flutter build macos --no-codesign
+        flutter build macos --debug
         pod install --repo-update
         cd ..
     
