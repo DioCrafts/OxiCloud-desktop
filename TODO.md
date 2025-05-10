@@ -1,157 +1,152 @@
 # TODO List - OxiCloud Desktop Client
 
-## ✅ Características Implementadas
+## 1. Autenticación y Gestión de Usuarios
+- [x] Implementar inicio de sesión
+- [ ] Implementar registro de usuarios
+- [ ] Implementar recuperación de contraseña
+- [ ] Implementar verificación de email
+- [ ] Implementar gestión de perfil de usuario
+- [ ] Implementar cambio de contraseña
+- [ ] Implementar cierre de sesión
+- [ ] Implementar sesiones múltiples
+- [x] Implementar autenticación de dos factores
 
-### Autenticación
-- [x] Login/Registro
-- [x] Recuperación de contraseña
-- [x] Verificación de email
-- [x] Gestión de tokens
-- [x] Cierre de sesión
+## 2. Explorador de Archivos
+- [x] Implementar vista de lista de archivos
+- [x] Implementar vista de cuadrícula
+- [x] Implementar navegación entre directorios
+- [x] Implementar creación de carpetas
+- [x] Implementar subida de archivos
+- [x] Implementar descarga de archivos
+- [x] Implementar eliminación de archivos/carpetas
+- [x] Implementar renombrado de archivos/carpetas
+- [x] Implementar movimiento de archivos/carpetas
+- [x] Implementar copia de archivos/carpetas
+- [x] Implementar vista previa de archivos
+- [x] Implementar búsqueda de archivos
+- [x] Implementar filtrado por tipo de archivo
+- [x] Implementar ordenamiento por nombre, fecha, tamaño
+- [x] Implementar selección múltiple de archivos
+- [x] Implementar arrastrar y soltar para mover archivos
+- [ ] Implementar miniaturas para diferentes tipos de archivos
+- [ ] Implementar vista de detalles de archivo
+- [ ] Implementar historial de navegación
+- [x] Implementar favoritos
+- [ ] Implementar etiquetas
+- [ ] Implementar compresión/descompresión de archivos
 
-### Interfaz Básica
-- [x] Sidebar con navegación
-- [x] Top bar con búsqueda
-- [x] Vista de archivos (grid/list)
-- [x] Tema de la aplicación
+## 3. Compartir y Colaboración
+- [ ] Implementar compartir archivos/carpetas
+- [ ] Implementar gestión de permisos
+- [ ] Implementar enlaces de compartir
+- [ ] Implementar notificaciones de compartir
+- [ ] Implementar comentarios en archivos
+- [ ] Implementar versiones de archivos
+- [ ] Implementar historial de cambios
 
-## 📝 Características Pendientes
+## 4. Sincronización
+- [ ] Implementar sincronización automática
+- [ ] Implementar sincronización selectiva
+- [ ] Implementar resolución de conflictos
+- [ ] Implementar indicadores de estado de sincronización
+- [ ] Implementar cola de sincronización
+- [ ] Implementar límites de ancho de banda
 
-### 1. Sincronización
-- [ ] Sincronización selectiva de carpetas
-- [ ] Sincronización automática en segundo plano
-- [ ] Indicador de estado de sincronización
-- [ ] Resolución de conflictos
-- [ ] Historial de sincronización
-- [ ] Pausar/Reanudar sincronización
-- [ ] Límites de ancho de banda
+## 5. Interfaz de Usuario
+- [x] Implementar tema claro/oscuro
+- [ ] Implementar personalización de tema
+- [ ] Implementar atajos de teclado
+- [ ] Implementar barra de herramientas personalizable
+- [x] Implementar vista de detalles de archivo
+- [ ] Implementar vista de propiedades
+- [ ] Implementar vista de actividad reciente
+- [ ] Implementar vista de favoritos
+- [ ] Implementar vista de papelera
+- [ ] Implementar vista de compartidos
+- [ ] Implementar vista de etiquetas
 
-### 2. Gestión de Archivos
-- [ ] Subida de archivos múltiples
-- [ ] Arrastrar y soltar (drag & drop)
-- [ ] Vista previa de archivos
-- [ ] Compartir archivos/carpetas
-- [ ] Control de versiones
-- [ ] Historial de cambios
-- [ ] Restaurar versiones anteriores
-- [ ] Favoritos
-- [ ] Etiquetas
-- [ ] Búsqueda avanzada
-- [ ] Filtros por tipo/date/tamaño
+## 6. Rendimiento y Optimización
+- [ ] Implementar carga perezosa de archivos
+- [ ] Implementar caché de miniaturas
+- [ ] Implementar compresión de archivos
+- [ ] Implementar optimización de red
+- [ ] Implementar manejo de errores
+- [ ] Implementar reintentos automáticos
+- [ ] Implementar logging y telemetría
 
-### 3. Compartir
-- [ ] Enlaces públicos
-- [ ] Compartir con usuarios específicos
-- [ ] Permisos granulares (lectura/escritura)
-- [ ] Fecha de expiración de enlaces
-- [ ] Contraseña para enlaces
-- [ ] Estadísticas de compartido
+## 7. Seguridad
+- [ ] Implementar encriptación de archivos
+  - [ ] Encriptación de extremo a extremo (E2EE)
+  - [ ] Algoritmos de cifrado AES-256
+  - [ ] Gestión de claves de encriptación
+  - [ ] Encriptación de metadatos
+- [ ] Implementar encriptación de conexión
+  - [ ] TLS 1.3 para todas las comunicaciones
+  - [ ] Certificados SSL/TLS
+  - [ ] Verificación de certificados
+  - [ ] Perfect Forward Secrecy (PFS)
+- [ ] Implementar verificación de integridad
+  - [ ] Checksums SHA-256
+  - [ ] Firmas digitales
+  - [ ] Verificación de integridad de archivos
+- [ ] Implementar políticas de contraseñas
+  - [ ] Requisitos de complejidad
+  - [ ] Rotación de contraseñas
+  - [ ] Historial de contraseñas
+  - [ ] Bloqueo de cuenta por intentos fallidos
+- [ ] Implementar bloqueo de aplicación
+  - [ ] Bloqueo por inactividad
+  - [ ] Bloqueo por PIN/contraseña
+  - [ ] Bloqueo biométrico (opcional)
+- [ ] Implementar limpieza de caché
+  - [ ] Limpieza automática
+  - [ ] Limpieza manual
+  - [ ] Configuración de retención
+- [ ] Implementar registro de actividad
+  - [ ] Registro de inicio de sesión
+  - [ ] Registro de operaciones de archivos
+  - [ ] Registro de cambios de configuración
+  - [ ] Alertas de seguridad
 
-### 4. Seguridad
-- [ ] Encriptación de archivos
-- [ ] Autenticación de dos factores
-- [ ] Registro de actividad
-- [ ] Detección de actividad sospechosa
-- [ ] Bloqueo de cuenta
-- [ ] Políticas de contraseña
-- [ ] Sesiones activas
+## 8. Características Adicionales
+- [ ] Implementar vista de calendario
+- [ ] Implementar vista de notas
+- [ ] Implementar vista de tareas
+- [ ] Implementar vista de contactos
+- [ ] Implementar integración con aplicaciones externas
+- [ ] Implementar exportación/importación de datos
+- [ ] Implementar respaldo automático
 
-### 5. Integración con Sistema
-- [ ] Integración con explorador de archivos
-- [ ] Menú contextual
-- [ ] Acceso rápido desde escritorio
-- [ ] Notificaciones del sistema
-- [ ] Atajos de teclado
-- [ ] Integración con aplicaciones nativas
+## 9. Pruebas
+- [ ] Implementar pruebas unitarias
+- [ ] Implementar pruebas de integración
+- [ ] Implementar pruebas de UI
+- [ ] Implementar pruebas de rendimiento
+- [ ] Implementar pruebas de seguridad
+- [ ] Implementar pruebas de usabilidad
 
-### 6. Rendimiento
-- [ ] Compresión de archivos
-- [ ] Transferencia diferencial
-- [ ] Caché local
-- [ ] Optimización de recursos
-- [ ] Modo de bajo consumo
+## 10. Documentación
+- [ ] Implementar documentación de código
+- [ ] Implementar guía de usuario
+- [ ] Implementar guía de desarrollo
+- [ ] Implementar guía de API
+- [ ] Implementar guía de despliegue
+- [ ] Implementar guía de contribución
 
-### 7. Colaboración
-- [ ] Edición colaborativa
-- [ ] Comentarios en archivos
-- [ ] Notificaciones de cambios
-- [ ] @menciones
-- [ ] Actividad reciente
+## 11. Internacionalización
+- [ ] Implementar soporte multiidioma
+- [ ] Implementar formatos de fecha/hora locales
+- [ ] Implementar formatos de número locales
+- [ ] Implementar direcciones RTL
 
-### 8. Backup y Recuperación
-- [ ] Backup automático
-- [ ] Restauración de archivos eliminados
-- [ ] Historial de eliminaciones
-- [ ] Backup local
-- [ ] Programación de backups
+## 12. Accesibilidad
+- [ ] Implementar soporte para lectores de pantalla
+- [ ] Implementar navegación por teclado
+- [ ] Implementar alto contraste
+- [ ] Implementar tamaños de texto ajustables
+- [ ] Implementar descripciones alternativas
 
-### 9. Personalización
-- [ ] Temas personalizables
-- [ ] Configuración de interfaz
-- [ ] Preferencias de sincronización
-- [ ] Atajos personalizables
-- [ ] Widgets personalizables
-
-### 10. Monitoreo y Estadísticas
-- [ ] Uso de almacenamiento
-- [ ] Actividad reciente
-- [ ] Estadísticas de transferencia
-- [ ] Gráficos de uso
-- [ ] Alertas de espacio
-
-### 11. Integración con Servicios Externos
-- [ ] Integración con Office
-- [ ] Integración con editores de imagen
-- [ ] Integración con editores de video
-- [ ] Integración con editores de audio
-- [ ] API para desarrolladores
-
-### 12. Accesibilidad
-- [ ] Soporte para lectores de pantalla
-- [ ] Modo de alto contraste
-- [ ] Tamaños de texto ajustables
-- [ ] Atajos de teclado accesibles
-- [ ] Soporte para diferentes idiomas
-
-### 13. Movilidad
-- [ ] Sincronización con dispositivos móviles
-- [ ] Modo offline
-- [ ] Sincronización selectiva por dispositivo
-- [ ] Optimización para redes móviles
-
-### 14. Administración
-- [ ] Panel de administración
-- [ ] Gestión de usuarios
-- [ ] Políticas de grupo
-- [ ] Cuotas de almacenamiento
-- [ ] Reportes de uso
-
-### 15. Documentación
-- [ ] Manual de usuario
-- [ ] FAQ
-- [ ] Tutoriales
-- [ ] Documentación de API
-- [ ] Guías de solución de problemas
-
-## Prioridades de Implementación
-
-### Alta Prioridad
-1. Sincronización básica
-2. Gestión de archivos básica
-3. Compartir archivos
-4. Integración con sistema
-5. Seguridad básica
-
-### Media Prioridad
-1. Rendimiento y optimización
-2. Colaboración básica
-3. Backup y recuperación
-4. Monitoreo básico
-5. Personalización básica
-
-### Baja Prioridad
-1. Integración con servicios externos
-2. Características avanzadas de colaboración
-3. Características avanzadas de personalización
-4. Documentación avanzada
-5. Características de administración avanzadas 
+## Notas
+- Las tareas marcadas con [x] indican que ya están implementadas
+- Las tareas marcadas con [ ] indican que están pendientes
+- Esta lista se actualizará a medida que se implementen nuevas características 

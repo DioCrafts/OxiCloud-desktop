@@ -1,378 +1,192 @@
 import 'package:flutter/material.dart';
-import 'theme/app_theme.dart';
-import 'widgets/sidebar.dart';
-import 'widgets/top_bar.dart';
-import 'widgets/file_view.dart';
-import 'models/file_model.dart';
-import 'services/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:oxicloud_desktop/core/config/app_config.dart';
+import 'package:oxicloud_desktop/core/theme/app_theme.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/api_auth_repository.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/api_file_repository.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/local_auth_repository.dart';
+import 'package:oxicloud_desktop/presentation/providers/auth_provider.dart';
+import 'package:oxicloud_desktop/presentation/providers/file_explorer_provider.dart';
+import 'package:oxicloud_desktop/presentation/views/file_explorer_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
+import 'package:oxicloud_desktop/infrastructure/database/database_helper.dart';
 
-void main() {
+// Proveedor para el repositorio local de autenticación
+final localAuthRepositoryProvider = Provider<LocalAuthRepository>((ref) {
+  final dbHelper = ref.watch(databaseHelperProvider);
+  return LocalAuthRepository(dbHelper);
+});
+
+// Proveedor de DatabaseHelper
+final databaseHelperProvider = Provider<DatabaseHelper>((ref) {
+  throw UnimplementedError('DatabaseHelper no ha sido inicializado');
+});
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  
+  // Inicializar configuración
+  final config = AppConfig();
+  await config.initialize();
+  
+  // Inicializar SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  
+  // Inicializar Dio
+  final dio = Dio(BaseOptions(
+    baseUrl: 'http://localhost:8080/api',
+    connectTimeout: const Duration(seconds: 5),
+    receiveTimeout: const Duration(seconds: 3),
+  ));
+
+  // Inicializar la base de datos SQLite
+  final dbHelper = DatabaseHelper();
+  await dbHelper.database;
+  
+  runApp(
+    ProviderScope(
+      overrides: [
+        // Otros proveedores
+        authRepositoryProvider.overrideWithValue(
+          ApiAuthRepository(config.apiClient, prefs),
+        ),
+        apiFileRepositoryProvider.overrideWithValue(
+          ApiFileRepository(dio, 'http://localhost:8080/api'),
+        ),
+        // Proveedor de DatabaseHelper
+        databaseHelperProvider.overrideWithValue(dbHelper),
+        // Proveedor de LocalAuthRepository
+        localAuthRepositoryProvider.overrideWithValue(
+          LocalAuthRepository(dbHelper),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'OxiCloud Desktop',
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const FileExplorerView(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'OxiCloud Desktop',
-      theme: AppTheme.lightTheme,
-      home: MainScreen(),
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  MainScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
-  List<FileModel> _files = [];
-  String _currentPath = '/';
-  final ApiService _apiService = ApiService();
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFiles();
-  }
-
-  Future<void> _loadFiles() async {
-    setState(() => _isLoading = true);
-    try {
-      final files = await _apiService.getFiles(_currentPath);
-      setState(() {
-        _files = files;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      _showError('Error al cargar archivos: $e');
-    }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a purple toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
+      home: const FileExplorerView(),
     );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
     return Scaffold(
-      body: Row(
-        children: [
-          Sidebar(
-            selectedIndex: _selectedIndex,
-            onItemSelected: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                TopBar(
-                  title: _getTitle(),
-                  onSearch: _handleSearch,
-                  onLogout: _handleLogout,
-                ),
-                Expanded(
-                  child: _isLoading
-                      ? Center(child: CircularProgressIndicator())
-                      : _getContent(),
-                ),
-              ],
-            ),
-          ),
-        ],
+      appBar: AppBar(
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
       ),
-    );
-  }
-
-  String _getTitle() {
-    switch (_selectedIndex) {
-      case 0:
-        return 'Mis archivos';
-      case 1:
-        return 'Compartidos';
-      case 2:
-        return 'Favoritos';
-      case 3:
-        return 'Recientes';
-      case 4:
-        return 'Papelera';
-      default:
-        return 'OxiCloud';
-    }
-  }
-
-  Widget _getContent() {
-    switch (_selectedIndex) {
-      case 0:
-        return _buildFilesContent();
-      case 1:
-        return _buildSharedContent();
-      case 2:
-        return _buildFavoritesContent();
-      case 3:
-        return _buildRecentContent();
-      case 4:
-        return _buildTrashContent();
-      default:
-        return Center(child: Text('Contenido no disponible'));
-    }
-  }
-
-  Widget _buildFilesContent() {
-    return FileView(
-      files: _files,
-      onFileTap: _handleFileTap,
-      onFileLongPress: _handleFileLongPress,
-      onFavoriteToggle: _handleFavoriteToggle,
-      onShare: _handleShare,
-      onDelete: _handleDelete,
-      onRename: _handleRename,
-      onDownload: _handleDownload,
-      onMove: _handleMove,
-      onCopy: _handleCopy,
-      onKeepOffline: _handleKeepOffline,
-      onFreeSpace: _handleFreeSpace,
-    );
-  }
-
-  Widget _buildSharedContent() {
-    return Center(
-      child: Text('Contenido de Compartidos'),
-    );
-  }
-
-  Widget _buildFavoritesContent() {
-    return Center(
-      child: Text('Contenido de Favoritos'),
-    );
-  }
-
-  Widget _buildRecentContent() {
-    return Center(
-      child: Text('Contenido de Recientes'),
-    );
-  }
-
-  Widget _buildTrashContent() {
-    return Center(
-      child: Text('Contenido de Papelera'),
-    );
-  }
-
-  void _handleSearch(String query) {
-    // TODO: Implementar búsqueda
-  }
-
-  void _handleLogout() {
-    // TODO: Implementar logout
-  }
-
-  Future<void> _handleKeepOffline(FileModel file) async {
-    try {
-      setState(() {
-        _files = _files.map((f) {
-          if (f.id == file.id) {
-            return f.copyWith(syncStatus: SyncStatus.syncing);
-          }
-          return f;
-        }).toList();
-      });
-
-      await _apiService.downloadFile(file);
-      await _apiService.setSyncStatus(file.id, SyncStatus.synced);
-
-      final localPath = await _apiService.getLocalPath(file.id);
-      setState(() {
-        _files = _files.map((f) {
-          if (f.id == file.id) {
-            return f.copyWith(
-              syncStatus: SyncStatus.synced,
-              localPath: localPath,
-            );
-          }
-          return f;
-        }).toList();
-      });
-    } catch (e) {
-      setState(() {
-        _files = _files.map((f) {
-          if (f.id == file.id) {
-            return f.copyWith(syncStatus: SyncStatus.error);
-          }
-          return f;
-        }).toList();
-      });
-      _showError('Error al mantener archivo disponible sin conexión: $e');
-    }
-  }
-
-  Future<void> _handleFreeSpace(FileModel file) async {
-    try {
-      await _apiService.removeLocalFile(file.id);
-      await _apiService.setSyncStatus(file.id, SyncStatus.onlineOnly);
-
-      setState(() {
-        _files = _files.map((f) {
-          if (f.id == file.id) {
-            return f.copyWith(
-              syncStatus: SyncStatus.onlineOnly,
-              localPath: null,
-            );
-          }
-          return f;
-        }).toList();
-      });
-    } catch (e) {
-      _showError('Error al liberar espacio: $e');
-    }
-  }
-
-  Future<void> _handleFileTap(FileModel file) async {
-    if (file.type == FileType.folder) {
-      setState(() {
-        _currentPath = file.path;
-      });
-      await _loadFiles();
-    } else {
-      if (file.syncStatus == SyncStatus.synced && file.localPath != null) {
-        // TODO: Abrir archivo local
-      } else if (file.syncStatus == SyncStatus.onlineOnly) {
-        // Preguntar si desea descargar el archivo
-        final shouldDownload = await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Archivo no disponible sin conexión'),
-            content: Text('¿Desea descargar el archivo para verlo sin conexión?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('No'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text('Sí'),
-              ),
-            ],
-          ),
-        );
-
-        if (shouldDownload == true) {
-          await _handleKeepOffline(file);
-        }
-      }
-    }
-  }
-
-  void _handleFileLongPress(FileModel file) {
-    // TODO: Implementar selección múltiple
-  }
-
-  void _handleFavoriteToggle(FileModel file) async {
-    try {
-      await _apiService.toggleFavorite(file.id, !file.isFavorite);
-      setState(() {
-        _files = _files.map((f) {
-          if (f.id == file.id) {
-            return f.copyWith(isFavorite: !f.isFavorite);
-          }
-          return f;
-        }).toList();
-      });
-    } catch (e) {
-      _showError('Error al actualizar favorito: $e');
-    }
-  }
-
-  void _handleShare(FileModel file) {
-    // TODO: Implementar compartir
-  }
-
-  void _handleDelete(FileModel file) async {
-    try {
-      await _apiService.deleteFile(file.id);
-      setState(() {
-        _files.removeWhere((f) => f.id == file.id);
-      });
-    } catch (e) {
-      _showError('Error al eliminar archivo: $e');
-    }
-  }
-
-  void _handleRename(FileModel file) async {
-    final newName = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        final controller = TextEditingController(text: file.name);
-        return AlertDialog(
-          title: Text('Renombrar archivo'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          //
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'Has presionado el botón esta cantidad de veces:',
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, controller.text),
-              child: Text('Renombrar'),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
-        );
-      },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Incrementar',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-
-    if (newName != null && newName.isNotEmpty) {
-      try {
-        await _apiService.renameFile(file.id, newName);
-        setState(() {
-          _files = _files.map((f) {
-            if (f.id == file.id) {
-              return f.copyWith(name: newName);
-            }
-            return f;
-          }).toList();
-        });
-      } catch (e) {
-        _showError('Error al renombrar archivo: $e');
-      }
-    }
   }
-
-  void _handleDownload(FileModel file) {
-    // TODO: Implementar descarga
-  }
-
-  void _handleMove(FileModel file) async {
-    // TODO: Implementar diálogo para seleccionar nueva ubicación
-  }
-
-  void _handleCopy(FileModel file) async {
-    // TODO: Implementar diálogo para seleccionar ubicación de copia
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-} 
+}
