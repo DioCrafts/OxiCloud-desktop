@@ -105,12 +105,6 @@ jobs:
         # Create directory structure
         mkdir -p macos/Flutter/ephemeral
         
-        # Create Flutter-Generated.xcconfig if it doesn't exist
-        if [ ! -f macos/Flutter/ephemeral/Flutter-Generated.xcconfig ]; then
-          echo "FLUTTER_ROOT=$FLUTTER_ROOT" > macos/Flutter/ephemeral/Flutter-Generated.xcconfig
-          echo "FLUTTER_APPLICATION_PATH=$(pwd)" >> macos/Flutter/ephemeral/Flutter-Generated.xcconfig
-        fi
-        
         # Create Flutter.podspec to satisfy any remaining requirements
         cat > macos/Flutter/ephemeral/Flutter.podspec << 'EOF'
         Pod::Spec.new do |s|
@@ -130,59 +124,57 @@ jobs:
       run: |
         # Pre-build to generate Flutter files (without the unsupported flag)
         flutter build macos --debug || true
-
+        
         # Create Plugins symlinks directory
         mkdir -p macos/Flutter/.symlinks/plugins
-
-        # Create symlinks for all macOS plugins
-        mkdir -p macos/Flutter/.symlinks/plugins/connectivity_plus/macos
-        mkdir -p macos/Flutter/.symlinks/plugins/path_provider_foundation/darwin
-        mkdir -p macos/Flutter/.symlinks/plugins/shared_preferences_foundation/darwin
-        mkdir -p macos/Flutter/.symlinks/plugins/url_launcher_macos/macos
-        mkdir -p macos/Flutter/.symlinks/plugins/file_picker/macos
-        mkdir -p macos/Flutter/.symlinks/plugins/flutter_local_notifications/macos
-        mkdir -p macos/Flutter/.symlinks/plugins/permission_handler_apple/macos
-
-        # Create basic plugin podspec files
-        for plugin in connectivity_plus path_provider_foundation shared_preferences_foundation url_launcher_macos file_picker flutter_local_notifications permission_handler_apple; do
-          dir=$(find macos/Flutter/.symlinks/plugins -name "$plugin" -type d)
-          subdir=$(find $dir -type d -depth 1 | head -1)
-
-          cat > $subdir/dummy.podspec << EOF
-          Pod::Spec.new do |s|
-            s.name             = '$(basename $plugin)'
-            s.version          = '1.0.0'
-            s.summary          = 'Flutter plugin'
-            s.description      = 'Flutter plugin for CI'
-            s.homepage         = 'https://flutter.dev'
-            s.license          = { :type => 'MIT' }
-            s.author           = { 'Flutter Team' => 'flutter-dev@googlegroups.com' }
-            s.source           = { :git => 'https://github.com/flutter/plugins.git', :tag => s.version.to_s }
-            s.osx.deployment_target = '10.14'
-            s.source_files = '*.{h,m,mm,swift}'
-          end
-          EOF
-
-          touch $subdir/dummy.swift
+        
+        # Create and properly name plugin podspecs
+        for plugin_info in "connectivity_plus:macos:connectivity_plus" "path_provider_foundation:darwin:path_provider_foundation" "shared_preferences_foundation:darwin:shared_preferences_foundation" "url_launcher_macos:macos:url_launcher_macos" "file_picker:macos:file_picker" "flutter_local_notifications:macos:flutter_local_notifications" "permission_handler_apple:macos:permission_handler_apple"; do
+          IFS=':' read -r plugin_name platform podspec_name <<< "$plugin_info"
+          
+          mkdir -p "macos/Flutter/.symlinks/plugins/$plugin_name/$platform"
+          
+          # Create the correctly named podspec file for each plugin
+          cat > "macos/Flutter/.symlinks/plugins/$plugin_name/$platform/$podspec_name.podspec" << EOF
+        Pod::Spec.new do |s|
+          s.name             = '$podspec_name'
+          s.version          = '1.0.0'
+          s.summary          = 'Flutter plugin'
+          s.description      = 'Flutter plugin for CI'
+          s.homepage         = 'https://flutter.dev'
+          s.license          = { :type => 'MIT' }
+          s.author           = { 'Flutter Team' => 'flutter-dev@googlegroups.com' }
+          s.source           = { :git => 'https://github.com/flutter/plugins.git', :tag => s.version.to_s }
+          s.osx.deployment_target = '10.14'
+          s.source_files = '*.{h,m,mm,swift}'
+          s.vendored_frameworks = '*.framework'
+        end
+        EOF
+          
+          # Create a dummy implementation file
+          touch "macos/Flutter/.symlinks/plugins/$plugin_name/$platform/dummy.swift"
         done
-
+        
         # Create framework directories
         mkdir -p macos/Flutter/ephemeral/FlutterMacOS.framework
         mkdir -p macos/Flutter/ephemeral/App.framework
-
+        
         # Create dummy GeneratedPluginRegistrant without the imports
         cat > macos/Flutter/GeneratedPluginRegistrant.swift << 'EOF'
         //
         // Generated file. Do not edit.
         //
-
+        
         import FlutterMacOS
-
+        
         func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           // Dummy implementation for CI
         }
         EOF
-
+        
+        echo "Directory structure before pod install:"
+        find macos/Flutter/.symlinks -type f | grep podspec
+        
         # Run pod install with the new Podfile
         cd macos
         pod install --repo-update || echo "Pod install warnings expected, continuing build..."
