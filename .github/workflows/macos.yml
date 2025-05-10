@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,34 +15,55 @@ jobs:
     - uses: actions/checkout@v4
     - uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.29.1'
+        flutter-version: '3.29.3'
         channel: 'stable'
-    
+
     - name: Install dependencies
       run: |
         flutter pub get
         flutter precache --macos
-    
+
     - name: Setup Flutter for macOS
       run: |
         flutter config --enable-macos-desktop
         flutter create --platforms=macos .
         flutter pub get
-        
+
+        # Create Flutter.podspec file before pod install
+        mkdir -p macos/Flutter/ephemeral
+        cat > macos/Flutter/ephemeral/Flutter.podspec << 'EOF'
+        # This podspec is only used as a local source!
+        Pod::Spec.new do |s|
+          s.name             = 'Flutter'
+          s.version          = '1.0.0'
+          s.summary          = 'High-performance, high-fidelity mobile apps.'
+          s.description      = <<-DESC
+        Flutter provides an easy and productive way to build and deploy high-performance mobile apps for Android and iOS.
+                               DESC
+          s.homepage         = 'https://flutter.dev'
+          s.license          = { :type => 'MIT' }
+          s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+          s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
+          s.osx.deployment_target = '10.14'
+          s.vendored_frameworks = 'App.framework', 'FlutterMacOS.framework'
+          s.xcconfig = { 'ENABLE_BITCODE' => 'NO' }
+        end
+        EOF
+
         # Generate ephemeral Flutter directory for macOS
         flutter build macos --debug || true
-        
+
         # Regenerate Flutter macOS files
         cd macos
         pod install --repo-update
         cd ..
-        
+
         # Run build_runner if needed (for code generation)
-        flutter pub run build_runner build --delete-conflicting-outputs
-    
+        flutter pub run build_runner build --delete-conflicting-outputs || true
+
     - name: Build macOS
       run: flutter build macos --release
-    
+
     - name: Upload macOS Artifact
       uses: actions/upload-artifact@v4
       with:

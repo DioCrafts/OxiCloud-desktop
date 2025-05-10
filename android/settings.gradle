@@ -29,6 +29,21 @@ pluginManagement {
     }
 }
 
+// Define flutterSdkPath at root level
+def flutterSdkPath = {
+    def properties = new Properties()
+    def propertiesFile = new File(settingsDir.parentFile, 'local.properties')
+    if (propertiesFile.exists()) {
+        propertiesFile.withReader('UTF-8') { reader -> properties.load(reader) }
+    }
+    def sdkPath = properties.getProperty('flutter.sdk')
+    if (sdkPath == null) {
+        sdkPath = System.getenv('FLUTTER_ROOT')
+    }
+    assert sdkPath != null, "flutter.sdk not set in local.properties and FLUTTER_ROOT not set in environment"
+    return sdkPath
+}()
+
 include ":app"
 
 apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
