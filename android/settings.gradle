@@ -13,6 +13,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def flutterSdkPath = {
     def properties = new Properties()
     def propertiesFile = new File(settingsDir.parentFile, 'local.properties')
@@ -30,9 +34,5 @@ def flutterSdkPath = {
 includeBuild("${flutterSdkPath}/packages/flutter_tools/gradle")
 
 include ":app"
-
-plugins {
-    id "dev.flutter.flutter-gradle-plugin"
-}
 
 apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
