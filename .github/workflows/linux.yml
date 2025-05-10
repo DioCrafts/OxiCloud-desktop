@@ -23,6 +23,11 @@ jobs:
         sudo apt-get install -y libgtk-3-dev
         flutter pub get
     
+    - name: Clean build directory
+      run: |
+        rm -rf build/
+        rm -rf linux/build/
+    
     - name: Build Linux
       run: flutter build linux
     

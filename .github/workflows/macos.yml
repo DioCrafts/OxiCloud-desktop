@@ -20,6 +20,25 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
     
+    - name: Clean build directory
+      run: |
+        rm -rf build/
+        rm -rf macos/Pods/
+        rm -rf macos/.symlinks/
+        rm -rf macos/Flutter/Flutter.framework
+        rm -rf macos/Flutter/Flutter.podspec
+    
+    - name: Setup Flutter
+      run: |
+        flutter precache
+        flutter pub get
+        cd macos
+        pod deintegrate
+        pod cache clean --all
+        pod setup
+        pod install
+        cd ..
+    
     - name: Build macOS
       run: flutter build macos
     
