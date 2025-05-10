@@ -46,4 +46,5 @@ def flutterSdkPath = {
 
 include ":app"
 
-apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+// No longer use the deprecated plugin loader
+// apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"

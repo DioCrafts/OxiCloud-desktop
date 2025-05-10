@@ -29,8 +29,15 @@ jobs:
         flutter create --platforms=macos .
         flutter pub get
 
-        # Create Flutter.podspec file before pod install
+    - name: Modify macOS Podfile
+      run: |
+        # Modify the problematic line in the Podfile - macOS sed requires different syntax
+        sed -i '' "s|require File.expand_path(.*Flutter.podspec.*)|# Line commented for CI build|" macos/Podfile
+
+        # Create directory structure
         mkdir -p macos/Flutter/ephemeral
+
+        # Create minimal Flutter.podspec file
         cat > macos/Flutter/ephemeral/Flutter.podspec << 'EOF'
         # This podspec is only used as a local source!
         Pod::Spec.new do |s|
@@ -50,16 +57,27 @@ jobs:
         end
         EOF
 
-        # Generate ephemeral Flutter directory for macOS
-        flutter build macos --debug || true
+        # Create Flutter-Generated.xcconfig if it doesn't exist
+        if [ ! -f macos/Flutter/ephemeral/Flutter-Generated.xcconfig ]; then
+          echo "FLUTTER_ROOT=$FLUTTER_ROOT" > macos/Flutter/ephemeral/Flutter-Generated.xcconfig
+          echo "FLUTTER_APPLICATION_PATH=$(pwd)" >> macos/Flutter/ephemeral/Flutter-Generated.xcconfig
+        fi
 
-        # Regenerate Flutter macOS files
+    - name: Generate Flutter macOS files
+      run: |
+        # Pre-build to generate Flutter files
+        flutter build macos --debug --no-codesign || true
+
+        # Apply workarounds for pod issues
         cd macos
-        pod install --repo-update
-        cd ..
 
-        # Run build_runner if needed (for code generation)
-        flutter pub run build_runner build --delete-conflicting-outputs || true
+        # Try with custom pod command that ignores missing podspec
+        pod install --repo-update || (echo "Pod install failed, trying alternative approach" &&
+          (mkdir -p Flutter/ephemeral/FlutterMacOS.framework &&
+           mkdir -p Flutter/ephemeral/App.framework &&
+           pod install --repo-update --verbose))
+
+        cd ..
 
     - name: Build macOS
       run: flutter build macos --release
