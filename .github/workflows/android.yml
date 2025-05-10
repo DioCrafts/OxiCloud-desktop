@@ -20,11 +20,20 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
     
+    - name: Setup Flutter SDK path
+      run: |
+        echo "flutter.sdk=$FLUTTER_HOME" > android/local.properties
+    
+    - name: Clean build directory
+      run: |
+        rm -rf build/
+        flutter clean
+    
     - name: Build APK
       run: flutter build apk --release
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: android-apk
+        name: release-apk
         path: build/app/outputs/flutter-apk/app-release.apk 
