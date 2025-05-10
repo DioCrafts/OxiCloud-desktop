@@ -34,6 +34,7 @@ jobs:
         flutter pub get
         mkdir -p Flutter/ephemeral
         flutter pub get
+        flutter pub run build_runner build
         pod install --repo-update
         cd ..
     
