@@ -25,31 +25,25 @@ jobs:
     - name: Setup Flutter for macOS
       run: |
         flutter config --enable-macos-desktop
+        flutter create --platforms=macos .
+        flutter pub get
+        
+        # Generate ephemeral Flutter directory for macOS
+        flutter build macos --debug || true
+        
+        # Regenerate Flutter macOS files
         cd macos
-        rm -rf Pods
-        rm -rf Podfile.lock
-        flutter pub get
-        flutter pub run build_runner build
-        flutter build macos --debug
-        flutter pub get
-        mkdir -p Flutter/ephemeral
-        flutter pub get
-        flutter pub run build_runner build
-        flutter build macos --debug
         pod install --repo-update
         cd ..
-    
-    - name: Clean build directory
-      run: |
-        rm -rf build/
-        rm -rf macos/Flutter/ephemeral/
-        flutter clean
+        
+        # Run build_runner if needed (for code generation)
+        flutter pub run build_runner build --delete-conflicting-outputs
     
     - name: Build macOS
-      run: flutter build macos
+      run: flutter build macos --release
     
     - name: Upload macOS Artifact
       uses: actions/upload-artifact@v4
       with:
         name: macos-build
-        path: build/macos/Build/Products/Release/ 
+        path: build/macos/Build/Products/Release/

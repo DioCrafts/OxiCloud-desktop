@@ -25,13 +25,16 @@ jobs:
         echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" > android/local.properties
         echo "Contents of local.properties:"
         cat android/local.properties
-        echo "FLUTTER_ROOT environment variable:"
-        echo ${{ env.FLUTTER_ROOT }}
     
     - name: Clean build directory
       run: |
         rm -rf build/
         flutter clean
+        
+    - name: Update Gradle settings
+      run: |
+        # Remove Flutter plugin application line from settings.gradle if it exists
+        sed -i '/^plugins {/,/}/d' android/settings.gradle
     
     - name: Build APK
       run: flutter build apk --release
