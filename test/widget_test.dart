@@ -13,6 +13,10 @@ import 'package:oxicloud_desktop/infrastructure/repositories/api_file_repository
 import 'package:oxicloud_desktop/infrastructure/repositories/api_auth_repository.dart';
 import 'package:oxicloud_desktop/infrastructure/repositories/local_auth_repository.dart';
 import 'package:oxicloud_desktop/infrastructure/database/database_helper.dart';
+import 'package:oxicloud_desktop/presentation/providers/auth_provider.dart';
+import 'package:oxicloud_desktop/presentation/providers/file_explorer_provider.dart';
+import 'package:oxicloud_desktop/presentation/views/file_explorer_view.dart';
+import 'package:oxicloud_desktop/core/network/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 
@@ -25,6 +29,7 @@ void main() {
       receiveTimeout: const Duration(seconds: 3),
     ));
 
+    final apiClient = ApiClient(dio);
     final dbHelper = DatabaseHelper();
     await dbHelper.database;
 
@@ -38,7 +43,7 @@ void main() {
             ApiFileRepository(dio, 'http://localhost:8080/api'),
           ),
           authRepositoryProvider.overrideWithValue(
-            ApiAuthRepository(dio, prefs),
+            ApiAuthRepository(apiClient, prefs),
           ),
           databaseHelperProvider.overrideWithValue(dbHelper),
           localAuthRepositoryProvider.overrideWithValue(
