@@ -86,20 +86,4 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "io.flutter:flutter_embedding_release:1.0.0-3316dd8728419ad3534e3f6112aa6291f587078a"
-    
-    // Flutter plugins
-    implementation 'dev.fluttercommunity.plus:connectivity:4.0.2'
-    implementation 'com.mr.flutter:plugin:filepicker:6.1.1'
-    implementation 'com.dexterous:flutterlocalnotifications:16.3.0'
-    implementation 'net.jonhanson:flutter_native_splash:2.3.10'
-    implementation 'io.flutter.plugins:flutter_plugin_android_lifecycle:2.0.17'
-    implementation 'io.flutter.plugins:imagepicker:1.0.7'
-    implementation 'io.flutter.plugins:pathprovider:2.1.2'
-    implementation 'jp.espresso3389:pdf_render:1.0.0'
-    implementation 'com.baseflow.permissionhandler:permissionhandler:11.3.0'
-    implementation 'dev.fluttercommunity.plus:share:7.2.1'
-    implementation 'io.flutter.plugins:sharedpreferences:2.2.2'
-    implementation 'com.tekartik:sqflite:2.3.2'
-    implementation 'io.flutter.plugins:urllauncher:6.2.4'
-    implementation 'io.flutter.plugins:videoplayer:2.8.2'
 }
