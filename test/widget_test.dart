@@ -23,17 +23,26 @@ import 'package:dio/dio.dart';
 
 // Mock de AppConfig para pruebas
 class MockAppConfig extends AppConfig {
+  late final Dio _dio;
+
+  MockAppConfig() {
+    _dio = Dio(BaseOptions(
+      baseUrl: 'http://localhost:8080/api',
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
+    ));
+  }
+
   @override
   Future<void> initialize() async {
     // No hacer nada en la inicialización para pruebas
   }
 
   @override
-  ApiClient get apiClient => ApiClient(Dio(BaseOptions(
-        baseUrl: 'http://localhost:8080/api',
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
-      )));
+  ApiClient get apiClient => ApiClient(this);
+
+  @override
+  Dio get dio => _dio;
 }
 
 void main() {
