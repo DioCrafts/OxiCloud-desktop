@@ -9,26 +9,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:oxicloud_desktop/main.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/api_file_repository.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/api_auth_repository.dart';
+import 'package:oxicloud_desktop/infrastructure/repositories/local_auth_repository.dart';
+import 'package:oxicloud_desktop/infrastructure/database/database_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('FileExplorerView smoke test', (WidgetTester tester) async {
+    // Inicializar las dependencias necesarias
+    final dio = Dio(BaseOptions(
+      baseUrl: 'http://localhost:8080/api',
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
+    ));
+
+    final dbHelper = DatabaseHelper();
+    await dbHelper.database;
+
+    final prefs = await SharedPreferences.getInstance();
+
     // Build our app and trigger a frame.
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MyApp(),
+      ProviderScope(
+        overrides: [
+          apiFileRepositoryProvider.overrideWithValue(
+            ApiFileRepository(dio, 'http://localhost:8080/api'),
+          ),
+          authRepositoryProvider.overrideWithValue(
+            ApiAuthRepository(dio, prefs),
+          ),
+          databaseHelperProvider.overrideWithValue(dbHelper),
+          localAuthRepositoryProvider.overrideWithValue(
+            LocalAuthRepository(dbHelper),
+          ),
+        ],
+        child: const MyApp(),
       ),
     );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verificar que la vista se carga correctamente
+    expect(find.byType(FileExplorerView), findsOneWidget);
   });
 }
