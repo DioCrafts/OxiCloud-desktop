@@ -32,6 +32,48 @@ jobs:
         rm -rf build/
         flutter clean
 
+    # Nuevo paso: Fix plugin registration
+    - name: Fix plugin registration issue
+      run: |
+        # Ensure all plugins are correctly embedded in the Android project
+        cd android
+        ./gradlew clean
+        cd ..
+        flutter clean
+        flutter pub get
+        
+        # Force Flutter to regenerate plugin registrations
+        mkdir -p android/app/src/main/java/io/flutter/plugins
+        rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+        
+        # Generate native splash if it's in your dependencies
+        flutter pub run flutter_native_splash:create || true
+
+    # Nuevo paso: Configure Gradle for plugins
+    - name: Configure Gradle for plugins
+      run: |
+        # Ensure plugin repositories are available
+        if ! grep -q "mavenCentral()" android/build.gradle; then
+          sed -i '/google()/a \        mavenCentral()' android/build.gradle
+        fi
+        
+        # Add plugin dependencies resolution strategy
+        cat >> android/build.gradle << 'EOL'
+        
+        subprojects {
+            project.configurations.all {
+                resolutionStrategy.eachDependency { details ->
+                    if (details.requested.group == 'androidx.core') {
+                        details.useVersion '1.10.0'
+                    }
+                }
+            }
+        }
+        EOL
+        
+        # Update Kotlin version for compatibility
+        sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.20"/g' android/build.gradle || echo "Kotlin version not specified in build.gradle"
+
     - name: Update Gradle settings for Flutter 3.29.3
       run: |
         # Comment out the deprecated plugin loader line in settings.gradle
@@ -47,6 +89,7 @@ jobs:
         flutter create --platforms=android --project-name temp_project --org com.example /tmp/temp_project
 
         # Copy the complete MainActivity.kt file from the fresh project
+        mkdir -p android/app/src/main/kotlin/com/example/oxicloud_desktop/
         cp /tmp/temp_project/android/app/src/main/kotlin/com/example/temp_project/MainActivity.kt android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
 
         # Update the package name in the copied file
@@ -58,12 +101,27 @@ jobs:
         sed -i 's/distributionUrl=.*$/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.14-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
         cat android/gradle/wrapper/gradle-wrapper.properties
 
+    # Nuevo paso: Last minute fixes before build
+    - name: Prepare final build
+      run: |
+        # Update minSdkVersion if needed for plugin compatibility
+        sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || echo "minSdkVersion not found"
+        
+        # Make sure we have the latest Flutter dependencies
+        flutter pub upgrade
+        flutter pub get
+        
+        # Workaround for plugin registration issues
+        flutter doctor -v
+
     - name: Build APK
       run: |
         # Add some debugging info
         ls -la android/app/src/main/kotlin/com/example/oxicloud_desktop/
         cat android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
-        flutter build apk --release
+        
+        # Build with verbose mode to see more detailed errors
+        flutter build apk --release --verbose
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
