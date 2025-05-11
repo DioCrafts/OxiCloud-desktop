@@ -17,19 +17,16 @@ import 'package:oxicloud_desktop/presentation/providers/auth_provider.dart';
 import 'package:oxicloud_desktop/presentation/providers/file_explorer_provider.dart';
 import 'package:oxicloud_desktop/presentation/views/file_explorer_view.dart';
 import 'package:oxicloud_desktop/core/network/api_client.dart';
+import 'package:oxicloud_desktop/core/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 
 void main() {
   testWidgets('FileExplorerView smoke test', (WidgetTester tester) async {
     // Inicializar las dependencias necesarias
-    final dio = Dio(BaseOptions(
-      baseUrl: 'http://localhost:8080/api',
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 3),
-    ));
+    final config = AppConfig();
+    await config.initialize();
 
-    final apiClient = ApiClient(dio);
     final dbHelper = DatabaseHelper();
     await dbHelper.database;
 
@@ -40,10 +37,10 @@ void main() {
       ProviderScope(
         overrides: [
           apiFileRepositoryProvider.overrideWithValue(
-            ApiFileRepository(dio, 'http://localhost:8080/api'),
+            ApiFileRepository(config.apiClient, 'http://localhost:8080/api'),
           ),
           authRepositoryProvider.overrideWithValue(
-            ApiAuthRepository(apiClient, prefs),
+            ApiAuthRepository(config.apiClient, prefs),
           ),
           databaseHelperProvider.overrideWithValue(dbHelper),
           localAuthRepositoryProvider.overrideWithValue(
