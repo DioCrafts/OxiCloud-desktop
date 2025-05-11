@@ -32,13 +32,19 @@ jobs:
         rm -rf build/
         flutter clean
 
-    # Nuevo paso: Fix plugin registration
+    # Paso corregido: Fix plugin registration
     - name: Fix plugin registration issue
       run: |
-        # Ensure all plugins are correctly embedded in the Android project
-        cd android
-        ./gradlew clean
-        cd ..
+        # Verificar si existe gradlew y darle permisos si existe
+        if [ -f "android/gradlew" ]; then
+          chmod +x android/gradlew
+          cd android
+          ./gradlew clean
+          cd ..
+        else
+          echo "Gradle wrapper not found, skipping gradle clean"
+        fi
+        
         flutter clean
         flutter pub get
         
@@ -49,7 +55,7 @@ jobs:
         # Generate native splash if it's in your dependencies
         flutter pub run flutter_native_splash:create || true
 
-    # Nuevo paso: Configure Gradle for plugins
+    # Resto de los pasos...
     - name: Configure Gradle for plugins
       run: |
         # Ensure plugin repositories are available
@@ -101,7 +107,18 @@ jobs:
         sed -i 's/distributionUrl=.*$/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.14-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
         cat android/gradle/wrapper/gradle-wrapper.properties
 
-    # Nuevo paso: Last minute fixes before build
+    # Este paso asegura que gradlew exista y tenga permisos de ejecución
+    - name: Ensure gradlew exists and is executable
+      run: |
+        if [ ! -f "android/gradlew" ]; then
+          echo "gradlew not found, generating wrapper"
+          cd android
+          gradle wrapper
+          cd ..
+        fi
+        chmod +x android/gradlew
+        ls -la android/
+
     - name: Prepare final build
       run: |
         # Update minSdkVersion if needed for plugin compatibility
