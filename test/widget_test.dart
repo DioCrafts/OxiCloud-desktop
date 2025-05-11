@@ -21,10 +21,25 @@ import 'package:oxicloud_desktop/core/config/app_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 
+// Mock de AppConfig para pruebas
+class MockAppConfig extends AppConfig {
+  @override
+  Future<void> initialize() async {
+    // No hacer nada en la inicialización para pruebas
+  }
+
+  @override
+  ApiClient get apiClient => ApiClient(Dio(BaseOptions(
+        baseUrl: 'http://localhost:8080/api',
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 3),
+      )));
+}
+
 void main() {
   testWidgets('FileExplorerView smoke test', (WidgetTester tester) async {
     // Inicializar las dependencias necesarias
-    final config = AppConfig();
+    final config = MockAppConfig();
     await config.initialize();
 
     final dio = Dio(BaseOptions(
