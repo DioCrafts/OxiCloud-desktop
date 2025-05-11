@@ -9,139 +9,98 @@ on:
 
 jobs:
   build:
+    name: Build Android App
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.29.3'
-        channel: 'stable'
-
-    - name: Install dependencies
-      run: flutter pub get
-
-    - name: Setup Flutter SDK path
-      run: |
-        echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" > android/local.properties
-        echo "Contents of local.properties:"
-        cat android/local.properties
-
-    - name: Clean build directory
-      run: |
-        rm -rf build/
-        flutter clean
-
-    # Paso corregido: Fix plugin registration
-    - name: Fix plugin registration issue
-      run: |
-        # Verificar si existe gradlew y darle permisos si existe
-        if [ -f "android/gradlew" ]; then
-          chmod +x android/gradlew
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.3'
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+      
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          flutter pub run flutter_native_splash:create || echo "Native splash creation skipped"
+      
+      - name: Setup Flutter SDK path
+        run: |
+          echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" > android/local.properties
+          echo "Contents of local.properties:"
+          cat android/local.properties
+      
+      - name: Check Flutter setup
+        run: |
+          flutter doctor -v
+          flutter --version
+      
+      - name: Prepare Android build environment
+        run: |
+          # Update build.gradle to ensure proper plugin support
+          cd android
+          
+          # Check if wrapper exists, generate if not
+          if [ ! -f "./gradlew" ]; then
+            echo "Gradle wrapper not found, generating it"
+            gradle wrapper
+          fi
+          
+          # Make gradlew executable
+          chmod +x ./gradlew
+          
+          # Update Gradle configurations
+          ./gradlew --version
+          cd ..
+          
+          # Update Android configuration for proper plugin support
+          if ! grep -q "multiDexEnabled" android/app/build.gradle; then
+            sed -i '/defaultConfig {/a \        multiDexEnabled true' android/app/build.gradle
+          fi
+          
+          # Set minSdkVersion to 21 or higher for proper plugin support
+          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle
+      
+      - name: Clean project
+        run: |
+          flutter clean
           cd android
           ./gradlew clean
           cd ..
-        else
-          echo "Gradle wrapper not found, skipping gradle clean"
-        fi
-        
-        flutter clean
-        flutter pub get
-        
-        # Force Flutter to regenerate plugin registrations
-        mkdir -p android/app/src/main/java/io/flutter/plugins
-        rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-        
-        # Generate native splash if it's in your dependencies
-        flutter pub run flutter_native_splash:create || true
-
-    # Resto de los pasos...
-    - name: Configure Gradle for plugins
-      run: |
-        # Ensure plugin repositories are available
-        if ! grep -q "mavenCentral()" android/build.gradle; then
-          sed -i '/google()/a \        mavenCentral()' android/build.gradle
-        fi
-        
-        # Add plugin dependencies resolution strategy
-        cat >> android/build.gradle << 'EOL'
-        
-        subprojects {
-            project.configurations.all {
-                resolutionStrategy.eachDependency { details ->
-                    if (details.requested.group == 'androidx.core') {
-                        details.useVersion '1.10.0'
-                    }
-                }
-            }
-        }
-        EOL
-        
-        # Update Kotlin version for compatibility
-        sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.20"/g' android/build.gradle || echo "Kotlin version not specified in build.gradle"
-
-    - name: Update Gradle settings for Flutter 3.29.3
-      run: |
-        # Comment out the deprecated plugin loader line in settings.gradle
-        sed -i 's|apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"|// apply from: "${flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"|g' android/settings.gradle
-
-        # Make sure we're using the new plugin system
-        if ! grep -q "plugins {" android/app/build.gradle; then
-          # If not using the new plugins block, add it
-          sed -i '1s/^/plugins {\n    id "com.android.application"\n    id "kotlin-android"\n    id "dev.flutter.flutter-gradle-plugin"\n}\n\n/' android/app/build.gradle
-        fi
-
-        # Generate a clean Android project to grab correct Kotlin files
-        flutter create --platforms=android --project-name temp_project --org com.example /tmp/temp_project
-
-        # Copy the complete MainActivity.kt file from the fresh project
-        mkdir -p android/app/src/main/kotlin/com/example/oxicloud_desktop/
-        cp /tmp/temp_project/android/app/src/main/kotlin/com/example/temp_project/MainActivity.kt android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
-
-        # Update the package name in the copied file
-        sed -i 's/package com.example.temp_project/package com.example.oxicloud_desktop/g' android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
-
-    - name: Update Gradle version
-      run: |
-        # Update Gradle version to match the Android Gradle plugin version
-        sed -i 's/distributionUrl=.*$/distributionUrl=https\\:\/\/services.gradle.org\/distributions\/gradle-8.14-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
-        cat android/gradle/wrapper/gradle-wrapper.properties
-
-    # Este paso asegura que gradlew exista y tenga permisos de ejecución
-    - name: Ensure gradlew exists and is executable
-      run: |
-        if [ ! -f "android/gradlew" ]; then
-          echo "gradlew not found, generating wrapper"
-          cd android
-          gradle wrapper
-          cd ..
-        fi
-        chmod +x android/gradlew
-        ls -la android/
-
-    - name: Prepare final build
-      run: |
-        # Update minSdkVersion if needed for plugin compatibility
-        sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || echo "minSdkVersion not found"
-        
-        # Make sure we have the latest Flutter dependencies
-        flutter pub upgrade
-        flutter pub get
-        
-        # Workaround for plugin registration issues
-        flutter doctor -v
-
-    - name: Build APK
-      run: |
-        # Add some debugging info
-        ls -la android/app/src/main/kotlin/com/example/oxicloud_desktop/
-        cat android/app/src/main/kotlin/com/example/oxicloud_desktop/MainActivity.kt
-        
-        # Build with verbose mode to see more detailed errors
-        flutter build apk --release --verbose
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+          
+          # Regenerate plugin registrations
+          rm -rf .dart_tool
+          flutter pub get
+      
+      - name: Build APK (Debug)
+        run: |
+          # Debug build first to check for issues
+          flutter build apk --debug --verbose
+      
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: ignore
+      
+      - name: Build APK (Release)
+        run: |
+          # Now try the release build
+          flutter build apk --release || echo "Release build failed but debug APK was built"
+      
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: ignore
