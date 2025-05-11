@@ -27,6 +27,12 @@ void main() {
     final config = AppConfig();
     await config.initialize();
 
+    final dio = Dio(BaseOptions(
+      baseUrl: 'http://localhost:8080/api',
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
+    ));
+
     final dbHelper = DatabaseHelper();
     await dbHelper.database;
 
@@ -37,7 +43,7 @@ void main() {
       ProviderScope(
         overrides: [
           apiFileRepositoryProvider.overrideWithValue(
-            ApiFileRepository(config.apiClient, 'http://localhost:8080/api'),
+            ApiFileRepository(dio, 'http://localhost:8080/api'),
           ),
           authRepositoryProvider.overrideWithValue(
             ApiAuthRepository(config.apiClient, prefs),
