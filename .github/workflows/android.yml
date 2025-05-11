@@ -1,106 +1,55 @@
-name: Android Build
+name: Flutter Android Build
 
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:
+  workflow_dispatch:  # Permite ejecutar el workflow manualmente desde la interfaz de GitHub
 
 jobs:
   build:
-    name: Build Android App
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Java
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '11'
       
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.3'
+          flutter-version: '3.19.0'
           channel: 'stable'
           cache: true
-          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
       
-      - name: Install dependencies
-        run: |
-          flutter pub get
-          flutter pub run flutter_native_splash:create || echo "Native splash creation skipped"
+      - name: Get dependencies
+        run: flutter pub get
+        
+      - name: Run tests
+        run: flutter test
+        
+      - name: Analyze project
+        run: flutter analyze
       
-      - name: Setup Flutter SDK path
-        run: |
-          echo "flutter.sdk=${{ env.FLUTTER_ROOT }}" > android/local.properties
-          echo "Contents of local.properties:"
-          cat android/local.properties
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
       
-      - name: Check Flutter setup
-        run: |
-          flutter doctor -v
-          flutter --version
-      
-      - name: Prepare Android build environment
-        run: |
-          # Update build.gradle to ensure proper plugin support
-          cd android
-          
-          # Check if wrapper exists, generate if not
-          if [ ! -f "./gradlew" ]; then
-            echo "Gradle wrapper not found, generating it"
-            gradle wrapper
-          fi
-          
-          # Make gradlew executable
-          chmod +x ./gradlew
-          
-          # Update Gradle configurations
-          ./gradlew --version
-          cd ..
-          
-          # Update Android configuration for proper plugin support
-          if ! grep -q "multiDexEnabled" android/app/build.gradle; then
-            sed -i '/defaultConfig {/a \        multiDexEnabled true' android/app/build.gradle
-          fi
-          
-          # Set minSdkVersion to 21 or higher for proper plugin support
-          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle
-      
-      - name: Clean project
-        run: |
-          flutter clean
-          cd android
-          ./gradlew clean
-          cd ..
-          
-          # Regenerate plugin registrations
-          rm -rf .dart_tool
-          flutter pub get
-      
-      - name: Build APK (Debug)
-        run: |
-          # Debug build first to check for issues
-          flutter build apk --debug --verbose
-      
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          if-no-files-found: ignore
-      
-      - name: Build APK (Release)
-        run: |
-          # Now try the release build
-          flutter build apk --release || echo "Release build failed but debug APK was built"
-      
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: ignore
+          
+      - name: Upload AAB (Android App Bundle)
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
