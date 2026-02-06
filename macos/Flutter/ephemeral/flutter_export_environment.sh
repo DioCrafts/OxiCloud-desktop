@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/root/flutter"
-export "FLUTTER_APPLICATION_PATH=/home/torrefacto/OxiCloud-desktop"
+export "FLUTTER_ROOT=/home/torrefacto/flutter"
+export "FLUTTER_APPLICATION_PATH=/home/torrefacto/infra-repos/OxiCloud/oxicloud-app"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

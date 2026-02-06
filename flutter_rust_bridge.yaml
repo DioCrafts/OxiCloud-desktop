@@ -1,0 +1,18 @@
+# flutter_rust_bridge configuration
+# See: https://cjycode.com/flutter_rust_bridge/
+
+rust_input: crate::api  # Rust module to generate FFI for
+rust_output: src/frb_generated.rs  # Generated Rust FFI code
+dart_output: lib/src/rust/  # Generated Dart bindings
+c_output: ios/Runner/bridge_generated.h  # iOS C header
+
+# Dart formatter settings
+dart_format_line_length: 100
+
+# Enable various features
+full_dep: true  # Include all dependencies
+skip_deps_check: false
+
+# Customize codegen
+dart_enums_style: true  # Use Dart-style enums
+rust_async: true  # Support async Rust functions
