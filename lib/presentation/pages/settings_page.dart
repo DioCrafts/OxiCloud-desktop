@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/settings/settings_bloc.dart';
+import '../theme/oxicloud_colors.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -37,7 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error, size: 48, color: Colors.red),
+                  const Icon(Icons.error, size: 48, color: OxiColors.error),
                   const SizedBox(height: 16),
                   Text(state.message),
                   const SizedBox(height: 16),
@@ -338,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 8),
             const Text(
               'Set to 0 or leave empty for unlimited speed',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: OxiColors.textSecondary),
             ),
           ],
         ),
@@ -394,7 +395,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 8),
               const Text(
                 'Examples: *.tmp, .DS_Store, ~*, Thumbs.db',
-                style: TextStyle(fontSize: 11, color: Colors.grey),
+                style: TextStyle(fontSize: 11, color: OxiColors.textSecondary),
               ),
             ],
           ),

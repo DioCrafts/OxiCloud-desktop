@@ -23,8 +23,9 @@ dependencies:
   path_provider: ^2.1.1
   sqflite: ^2.3.0
 
-  # Rust FFI Bridge (enable when Rust bindings are generated)
-  # flutter_rust_bridge: ^2.0.0
+  # Rust FFI Bridge
+  flutter_rust_bridge: 2.11.1
+  ffi: ^2.1.0
 
   # UI Components
   cupertino_icons: ^1.0.6
@@ -51,6 +52,8 @@ dependencies:
 
   # Permissions
   permission_handler: ^12.0.1
+  oxicloud_core:
+    path: rust_builder
 
 dev_dependencies:
   flutter_test:
@@ -62,14 +65,14 @@ dev_dependencies:
   json_serializable: ^6.7.1
   mocktail: ^1.0.4
   bloc_test: ^10.0.0
+  ffigen: ^20.1.1
 
 flutter:
   uses-material-design: true
 
   # Uncomment when assets are added
-  # assets:
-  #   - assets/images/
-  #   - assets/icons/
+  assets:
+    - assets/icons/
 
   # Uncomment when fonts are added
   # fonts:

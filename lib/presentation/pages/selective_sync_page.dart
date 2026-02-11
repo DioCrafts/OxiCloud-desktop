@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../core/entities/sync_folder.dart';
 import '../blocs/sync/sync_bloc.dart';
+import '../theme/oxicloud_colors.dart';
 
 class SelectiveSyncPage extends StatefulWidget {
   const SelectiveSyncPage({super.key});
@@ -63,7 +64,7 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error, size: 48, color: Colors.red),
+          const Icon(Icons.error, size: 48, color: OxiColors.error),
           const SizedBox(height: 16),
           Text(message),
           const SizedBox(height: 16),
@@ -84,11 +85,11 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 64, color: Colors.grey[400]),
+            Icon(Icons.folder_open, size: 64, color: OxiColors.textPlaceholder),
             const SizedBox(height: 16),
             Text(
               'No folders found',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: OxiColors.textSecondary),
             ),
           ],
         ),
@@ -100,17 +101,17 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
         // Info banner
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.blue[50],
+          color: OxiColors.primaryBgTint,
           child: Row(
             children: [
-              Icon(Icons.info, color: Colors.blue[700]),
+              const Icon(Icons.info, color: OxiColors.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Select which folders to sync to this device. Unselected folders will be removed from local storage.',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.blue[900],
+                    color: OxiColors.textHeading,
                   ),
                 ),
               ),
@@ -145,7 +146,7 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
               const Spacer(),
               Text(
                 '${_selectedFolderIds.length} selected',
-                style: TextStyle(color: Colors.grey[600]),
+                style: TextStyle(color: OxiColors.textSecondary),
               ),
             ],
           ),
@@ -177,7 +178,7 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
                 title: Text(folder.name),
                 subtitle: Text(
                   '${_formatBytes(folder.sizeBytes)} • ${folder.itemCount} items',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: const TextStyle(color: OxiColors.textSecondary),
                 ),
               );
             },
@@ -188,8 +189,8 @@ class _SelectiveSyncPageState extends State<SelectiveSyncPage> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border(top: BorderSide(color: Colors.grey[300]!)),
+            color: OxiColors.toolbarBg,
+            border: Border(top: BorderSide(color: OxiColors.border)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

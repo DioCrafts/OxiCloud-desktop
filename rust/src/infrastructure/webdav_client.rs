@@ -52,7 +52,7 @@ impl WebDavClient {
     /// Parse WebDAV multistatus response
     fn parse_multistatus(&self, xml: &str) -> SyncResult<Vec<RemoteItem>> {
         let mut reader = Reader::from_str(xml);
-        reader.trim_text(true);
+        reader.config_mut().trim_text(true);
         
         let mut items = Vec::new();
         let mut current_item: Option<PartialRemoteItem> = None;
@@ -71,7 +71,7 @@ impl WebDavClient {
                 }
                 Ok(Event::Text(e)) => {
                     if let Some(ref mut item) = current_item {
-                        let text = e.unescape().unwrap_or_default().to_string();
+                        let text = e.decode().unwrap_or_default().to_string();
                         
                         if current_tag.ends_with("href") {
                             item.path = Some(text);
@@ -123,8 +123,9 @@ impl WebDavClient {
 #[async_trait]
 impl SyncPort for WebDavClient {
     async fn configure(&self, server_url: &str, username: &str, access_token: &str) -> SyncResult<()> {
+        // URL compatible con OxiCloud server (/webdav/{path})
         let config = WebDavConfig {
-            base_url: format!("{}/dav/files/{}", server_url.trim_end_matches('/'), username),
+            base_url: format!("{}/webdav", server_url.trim_end_matches('/')),
             username: username.to_string(),
             access_token: access_token.to_string(),
         };

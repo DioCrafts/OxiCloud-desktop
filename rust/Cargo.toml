@@ -11,7 +11,7 @@ crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
 # Async runtime
-tokio = { version = "1.35", features = ["full", "sync"] }
+tokio = { version = "1.49", features = ["full", "sync"] }
 async-trait = "0.1"
 futures = "0.3"
 
@@ -20,28 +20,27 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
 # HTTP/WebDAV client
-reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"], default-features = false }
-quick-xml = "0.31"
+reqwest = { version = "0.12", features = ["json", "stream", "rustls-tls-webpki-roots", "charset"], default-features = false }
+quick-xml = "0.39"
 
 # Local database
-rusqlite = { version = "0.30", features = ["bundled"] }
+rusqlite = { version = "0.38", features = ["bundled"] }
 
 # File system watching
-notify = "6.1"
+notify = "8.2"
 
 # Cryptography
 sha2 = "0.10"
-md5 = "0.7"
 hex = "0.4"
 
 # Date/time
 chrono = { version = "0.4", features = ["serde"] }
 
 # UUID generation
-uuid = { version = "1.6", features = ["v4", "serde"] }
+uuid = { version = "1.20", features = ["v4", "serde"] }
 
 # Error handling
-thiserror = "1.0"
+thiserror = "2.0"
 anyhow = "1.0"
 
 # Logging
@@ -49,19 +48,13 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Flutter Rust Bridge
-flutter_rust_bridge = "=2.0.0"
-
-# Cross-platform paths
-dirs = "5.0"
-
-# Keyring for secure credential storage
-keyring = "2.3"
+flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 
 # Mock support (optional)
-mockall = { version = "0.12", optional = true }
+mockall = { version = "0.14", optional = true }
 
 [dev-dependencies]
-tempfile = "3.9"
+tempfile = "3.25"
 tokio-test = "0.4"
 
 [profile.release]

@@ -327,8 +327,8 @@ impl SyncService {
             timestamp: r.timestamp.timestamp(),
             operation: r.operation,
             item_path: r.item_path,
-            direction: SyncDirection::Upload, // TODO: Store direction
-            status: if r.success { SyncStatus::Synced } else { SyncStatus::Error(r.error_message.clone().unwrap_or_default()) },
+            direction: "upload".to_string(),
+            status: if r.success { "synced".to_string() } else { "error".to_string() },
             error_message: r.error_message,
         }).collect())
     }
@@ -373,12 +373,12 @@ impl SyncService {
         Ok(items.into_iter().map(|i| {
             let conflict_type = match &i.status {
                 SyncStatus::Conflict(info) => match info.conflict_type {
-                    ConflictType::BothModified => crate::api::ConflictType::BothModified,
-                    ConflictType::DeletedLocally => crate::api::ConflictType::DeletedLocally,
-                    ConflictType::DeletedRemotely => crate::api::ConflictType::DeletedRemotely,
-                    ConflictType::TypeMismatch => crate::api::ConflictType::TypeMismatch,
+                    ConflictType::BothModified => ConflictType::BothModified,
+                    ConflictType::DeletedLocally => ConflictType::DeletedLocally,
+                    ConflictType::DeletedRemotely => ConflictType::DeletedRemotely,
+                    ConflictType::TypeMismatch => ConflictType::TypeMismatch,
                 },
-                _ => crate::api::ConflictType::BothModified,
+                _ => ConflictType::BothModified,
             };
             
             SyncConflict {

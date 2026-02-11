@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/auth/auth_bloc.dart';
+import '../theme/oxicloud_colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: OxiColors.error,
               ),
             );
           } else if (state is AuthAuthenticated) {
@@ -96,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                     Text(
                       'Connect to your self-hosted cloud',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                           ),
                       textAlign: TextAlign.center,
                     ),
@@ -203,14 +204,21 @@ class _LoginPageState extends State<LoginPage> {
     return Container(
       width: 100,
       height: 100,
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+      decoration: const BoxDecoration(
+        gradient: OxiColors.primaryGradient,
         shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x59FF5E3A),
+            blurRadius: 20,
+            offset: Offset(0, 6),
+          ),
+        ],
       ),
-      child: Icon(
+      child: const Icon(
         Icons.cloud,
-        size: 60,
-        color: Theme.of(context).primaryColor,
+        size: 56,
+        color: Colors.white,
       ),
     );
   }

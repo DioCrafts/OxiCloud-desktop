@@ -167,7 +167,7 @@ impl StoragePort for SqliteStorage {
                 path: row.get(1)?,
                 name: row.get(2)?,
                 is_directory: row.get::<_, i32>(3)? != 0,
-                size: row.get(4)?,
+                size: row.get::<_, i64>(4)? as u64,
                 content_hash: row.get(5)?,
                 local_modified: row.get::<_, Option<i64>>(6)?
                     .and_then(|ts| DateTime::from_timestamp(ts, 0)),
@@ -202,7 +202,7 @@ impl StoragePort for SqliteStorage {
                 path: row.get(1)?,
                 name: row.get(2)?,
                 is_directory: row.get::<_, i32>(3)? != 0,
-                size: row.get(4)?,
+                size: row.get::<_, i64>(4)? as u64,
                 content_hash: row.get(5)?,
                 local_modified: row.get::<_, Option<i64>>(6)?
                     .and_then(|ts| DateTime::from_timestamp(ts, 0)),
@@ -238,7 +238,7 @@ impl StoragePort for SqliteStorage {
                 path: row.get(1)?,
                 name: row.get(2)?,
                 is_directory: row.get::<_, i32>(3)? != 0,
-                size: row.get(4)?,
+                size: row.get::<_, i64>(4)? as u64,
                 content_hash: row.get(5)?,
                 local_modified: row.get::<_, Option<i64>>(6)?
                     .and_then(|ts| DateTime::from_timestamp(ts, 0)),
@@ -271,7 +271,7 @@ impl StoragePort for SqliteStorage {
                 path: row.get(1)?,
                 name: row.get(2)?,
                 is_directory: row.get::<_, i32>(3)? != 0,
-                size: row.get(4)?,
+                size: row.get::<_, i64>(4)? as u64,
                 content_hash: row.get(5)?,
                 local_modified: row.get::<_, Option<i64>>(6)?
                     .and_then(|ts| DateTime::from_timestamp(ts, 0)),
@@ -307,7 +307,7 @@ impl StoragePort for SqliteStorage {
                 path: row.get(1)?,
                 name: row.get(2)?,
                 is_directory: row.get::<_, i32>(3)? != 0,
-                size: row.get(4)?,
+                size: row.get::<_, i64>(4)? as u64,
                 content_hash: row.get(5)?,
                 local_modified: row.get::<_, Option<i64>>(6)?
                     .and_then(|ts| DateTime::from_timestamp(ts, 0)),

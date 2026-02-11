@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/entities/sync_status.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/sync/sync_bloc.dart';
+import '../shell/adaptive_shell.dart';
+import '../theme/oxicloud_colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,11 +27,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('OxiCloud'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.of(context).pushNamed('/settings'),
-            tooltip: 'Settings',
-          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'logout') {
@@ -131,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                             Text(
                               user.serverUrl,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey[600],
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                                   ),
                             ),
                           ],
@@ -143,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: OxiColors.successBgLight,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -152,14 +149,14 @@ class _HomePageState extends State<HomePage> {
                             Icon(
                               Icons.check_circle,
                               size: 14,
-                              color: Colors.green[700],
+                              color: OxiColors.successDark,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Connected',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.green[700],
+                                color: OxiColors.successDark,
                               ),
                             ),
                           ],
@@ -179,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             LinearProgressIndicator(
                               value: quotaPercent / 100,
-                              backgroundColor: Colors.grey[200],
+                              backgroundColor: OxiColors.border,
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -210,7 +207,7 @@ class _HomePageState extends State<HomePage> {
     if (state is SyncInProgress) {
       statusText = state.status.currentOperation ?? 'Syncing...';
       statusIcon = Icons.sync;
-      statusColor = Colors.blue;
+      statusColor = OxiColors.info;
       progress = state.status.progressPercent / 100;
     } else if (state is SyncIdle) {
       final lastSync = state.lastStatus?.lastSyncTime;
@@ -218,19 +215,19 @@ class _HomePageState extends State<HomePage> {
           ? 'Last sync: ${_formatTime(lastSync)}'
           : 'Ready to sync';
       statusIcon = Icons.check_circle;
-      statusColor = Colors.green;
+      statusColor = OxiColors.success;
     } else if (state is SyncPaused) {
       statusText = 'Sync paused';
       statusIcon = Icons.pause_circle;
-      statusColor = Colors.orange;
+      statusColor = OxiColors.warningDark;
     } else if (state is SyncError) {
       statusText = state.message;
       statusIcon = Icons.error;
-      statusColor = Colors.red;
+      statusColor = OxiColors.error;
     } else {
       statusText = 'Initializing...';
       statusIcon = Icons.hourglass_empty;
-      statusColor = Colors.grey;
+      statusColor = OxiColors.textSecondary;
     }
 
     return Card(
@@ -269,16 +266,16 @@ class _HomePageState extends State<HomePage> {
   Widget _buildConflictsCard(List<SyncConflict> conflicts) {
     return Card(
       margin: const EdgeInsets.all(16),
-      color: Colors.orange[50],
+      color: OxiColors.warningBg,
       child: ListTile(
-        leading: Icon(Icons.warning, color: Colors.orange[700]),
+        leading: const Icon(Icons.warning, color: OxiColors.warningDark),
         title: Text(
           '${conflicts.length} conflicts found',
-          style: TextStyle(color: Colors.orange[900]),
+          style: const TextStyle(color: OxiColors.textHeading),
         ),
         subtitle: Text(
           'Tap to resolve',
-          style: TextStyle(color: Colors.orange[700]),
+          style: const TextStyle(color: OxiColors.warningDark),
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => Navigator.of(context).pushNamed('/conflicts'),
@@ -302,6 +299,11 @@ class _HomePageState extends State<HomePage> {
             runSpacing: 12,
             children: [
               _buildActionCard(
+                icon: Icons.cloud_outlined,
+                label: 'Browse Files',
+                onTap: () => ShellScope.of(context).navigateTo(ShellDestination.files),
+              ),
+              _buildActionCard(
                 icon: Icons.folder,
                 label: 'Open Sync Folder',
                 onTap: () {
@@ -312,6 +314,21 @@ class _HomePageState extends State<HomePage> {
                 icon: Icons.folder_special,
                 label: 'Selective Sync',
                 onTap: () => Navigator.of(context).pushNamed('/selective-sync'),
+              ),
+              _buildActionCard(
+                icon: Icons.delete_outline,
+                label: 'Trash',
+                onTap: () => ShellScope.of(context).navigateTo(ShellDestination.trash),
+              ),
+              _buildActionCard(
+                icon: Icons.link,
+                label: 'Shared Links',
+                onTap: () => ShellScope.of(context).navigateTo(ShellDestination.shares),
+              ),
+              _buildActionCard(
+                icon: Icons.search,
+                label: 'Search',
+                onTap: () => ShellScope.of(context).navigateTo(ShellDestination.search),
               ),
               _buildActionCard(
                 icon: Icons.history,
@@ -346,7 +363,7 @@ class _HomePageState extends State<HomePage> {
         width: 100,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
+          border: Border.all(color: OxiColors.border),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

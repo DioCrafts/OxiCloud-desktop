@@ -3,15 +3,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/entities/user.dart';
 import '../../core/repositories/auth_repository.dart';
+import '../datasources/api_client.dart';
 import '../datasources/rust_bridge_datasource.dart';
 
 /// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
   final RustBridgeDataSource _rustDataSource;
+  final ApiClient? _apiClient;
   static const _serverUrlKey = 'server_url';
   static const _usernameKey = 'username';
+  static const _passwordKey = 'password';
+  static const _accessTokenKey = 'access_token';
 
-  AuthRepositoryImpl(this._rustDataSource);
+  AuthRepositoryImpl(this._rustDataSource, [this._apiClient]);
 
   @override
   Future<Either<AuthFailure, User>> login(AuthCredentials credentials) async {
@@ -26,10 +30,15 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Left(InvalidCredentialsFailure());
       }
 
-      // Store credentials for auto-login
+      // Store credentials for auto-login + API token
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_serverUrlKey, credentials.serverUrl);
       await prefs.setString(_usernameKey, credentials.username);
+      await prefs.setString(_passwordKey, credentials.password);
+      await prefs.setString(_accessTokenKey, result.accessToken);
+
+      // Configure the HTTP API client with the token
+      _apiClient?.updateCredentials(credentials.serverUrl, result.accessToken);
 
       final user = User(
         id: result.userId,
