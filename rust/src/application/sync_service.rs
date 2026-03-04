@@ -3,18 +3,17 @@
 //! Main synchronization service that orchestrates file sync operations.
 
 use std::sync::Arc;
-use std::collections::HashMap;
 use tokio::sync::{RwLock, mpsc, Mutex};
 use tokio::time::{interval, Duration};
 use chrono::Utc;
 
 use crate::domain::entities::{
     SyncItem, SyncStatus, SyncDirection, SyncConfig, ConflictResolution,
-    ConflictInfo, ConflictType, EngineStatus, SyncStats, SyncProgress,
+    ConflictType, EngineStatus, SyncStats, SyncProgress,
 };
 use crate::domain::ports::{
-    SyncPort, SyncResult, SyncError, RemoteItem,
-    StoragePort, StorageResult,
+    SyncPort, RemoteItem,
+    StoragePort,
     FileWatcherPort, FileEvent, FileEventType,
 };
 use crate::api::{SyncResult as ApiSyncResult, SyncStatusInfo, SyncHistoryEntry, RemoteFolder, SyncConflict};
@@ -256,40 +255,81 @@ impl SyncService {
     async fn handle_file_event(
         event: FileEvent,
         storage: Arc<dyn StoragePort>,
-        status: Arc<RwLock<EngineStatus>>,
+        _status: Arc<RwLock<EngineStatus>>,
     ) {
         tracing::debug!("File event: {:?}", event);
-        
+
         let path = event.path.to_string_lossy().to_string();
-        
+
         match event.event_type {
             FileEventType::Created | FileEventType::Modified => {
-                // Queue for upload
+                // Get actual file size
+                let size = std::fs::metadata(&event.path)
+                    .map(|m| m.len())
+                    .unwrap_or(0);
+
                 let item = SyncItem::from_local(
                     path.clone(),
                     event.path.file_name()
                         .map(|n| n.to_string_lossy().to_string())
                         .unwrap_or_default(),
                     event.is_directory,
-                    0, // Size will be filled later
+                    size,
                     Utc::now(),
                     None,
                 );
-                
+
                 if let Err(e) = storage.save_item(&item).await {
                     tracing::error!("Failed to queue item for sync: {}", e);
                 }
+
+                // Record in sync history
+                storage.record_sync_operation(
+                    &path,
+                    if matches!(event.event_type, FileEventType::Created) { "create" } else { "modify" },
+                    true,
+                    None,
+                ).await.ok();
             }
             FileEventType::Deleted => {
-                // Mark for deletion on server
                 if let Err(e) = storage.delete_item(&path).await {
                     tracing::error!("Failed to mark item for deletion: {}", e);
                 }
+                storage.record_sync_operation(&path, "delete", true, None).await.ok();
             }
-            FileEventType::Renamed { from, to } => {
-                // Handle rename as delete + create
+            FileEventType::Renamed { ref from, ref to } => {
+                // Delete old path entry
                 let from_path = from.to_string_lossy().to_string();
                 storage.delete_item(&from_path).await.ok();
+
+                // Queue new path for upload
+                let to_path = to.to_string_lossy().to_string();
+                let to_name = to.file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_default();
+                let size = std::fs::metadata(to)
+                    .map(|m| m.len())
+                    .unwrap_or(0);
+
+                let item = SyncItem::from_local(
+                    to_path.clone(),
+                    to_name,
+                    event.is_directory,
+                    size,
+                    Utc::now(),
+                    None,
+                );
+
+                if let Err(e) = storage.save_item(&item).await {
+                    tracing::error!("Failed to queue renamed item for sync: {}", e);
+                }
+
+                storage.record_sync_operation(
+                    &format!("{} -> {}", from_path, to_path),
+                    "rename",
+                    true,
+                    None,
+                ).await.ok();
             }
         }
     }
@@ -337,21 +377,36 @@ impl SyncService {
     pub async fn get_remote_folders(&self) -> Result<Vec<RemoteFolder>, String> {
         let items = self.remote.list_directory("/").await
             .map_err(|e| e.to_string())?;
-        
+
         let selected = self.storage.load_sync_folders().await
             .unwrap_or_default();
-        
-        Ok(items.into_iter()
+
+        let folders: Vec<RemoteItem> = items.into_iter()
             .filter(|i| i.is_directory)
-            .map(|i| RemoteFolder {
-                id: i.id.clone(),
-                name: i.name.clone(),
-                path: i.path.clone(),
-                size_bytes: i.size,
-                item_count: 0, // TODO: Count items
-                is_selected: selected.contains(&i.id),
-            })
-            .collect())
+            .collect();
+
+        let mut result = Vec::with_capacity(folders.len());
+        for folder in folders {
+            // Count items inside each folder
+            let item_count = match self.remote.list_directory(&folder.path).await {
+                Ok(children) => {
+                    // Subtract 1 because PROPFIND returns the folder itself
+                    (children.len() as u32).saturating_sub(1)
+                }
+                Err(_) => 0,
+            };
+
+            result.push(RemoteFolder {
+                id: folder.id.clone(),
+                name: folder.name.clone(),
+                path: folder.path.clone(),
+                size_bytes: folder.size,
+                item_count,
+                is_selected: selected.contains(&folder.id),
+            });
+        }
+
+        Ok(result)
     }
     
     /// Set folders to sync
@@ -411,8 +466,41 @@ impl SyncService {
                 self.download_item(&item).await?;
             }
             ConflictResolution::KeepBoth => {
-                // Rename local and download remote
-                // TODO: Implement rename logic
+                // Rename local file with conflict suffix, then download remote
+                let config = self.config.read().await;
+                let local_path = format!("{}/{}", config.sync_folder, item.path);
+                drop(config);
+
+                let local = std::path::Path::new(&local_path);
+                if local.exists() {
+                    let stem = local.file_stem()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_default();
+                    let ext = local.extension()
+                        .map(|e| format!(".{}", e.to_string_lossy()))
+                        .unwrap_or_default();
+                    let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
+                    let conflict_name = format!("{} (conflict {}){}", stem, timestamp, ext);
+                    let conflict_path = local.with_file_name(&conflict_name);
+
+                    std::fs::rename(&local_path, &conflict_path)
+                        .map_err(|e| format!("Failed to rename conflicting file: {}", e))?;
+
+                    // Upload the renamed conflict copy to server
+                    let parent = item.path.rsplit_once('/').map(|(p, _)| p).unwrap_or("");
+                    let remote_conflict = if parent.is_empty() {
+                        format!("/{}", conflict_name)
+                    } else {
+                        format!("{}/{}", parent, conflict_name)
+                    };
+                    self.remote.upload(
+                        &conflict_path.to_string_lossy(),
+                        &remote_conflict,
+                        None,
+                    ).await.ok();
+                }
+
+                // Download the remote version to original path
                 self.download_item(&item).await?;
             }
             ConflictResolution::Skip => {
@@ -448,23 +536,87 @@ struct SyncServiceRef {
 impl SyncServiceRef {
     async fn do_sync(&self) -> Result<(), String> {
         let _lock = self.sync_lock.lock().await;
-        
+
         *self.status.write().await = EngineStatus::Syncing;
-        
-        // Simplified sync logic for scheduled runs
+
         let pending = self.storage.get_pending_items().await
             .map_err(|e| e.to_string())?;
-        
-        for item in pending {
-            // Sync each item...
-            tracing::debug!("Syncing: {}", item.path);
+
+        let total = pending.len() as u32;
+        let mut uploaded = 0u32;
+        let mut downloaded = 0u32;
+
+        for (idx, item) in pending.iter().enumerate() {
+            // Update progress
+            *self.progress.write().await = Some(SyncProgress {
+                operation: format!("Syncing {}", item.name),
+                current_item: Some(item.path.clone()),
+                items_done: idx as u32,
+                items_total: total,
+                bytes_done: 0,
+                bytes_total: 0,
+                speed: 0,
+                eta_seconds: None,
+            });
+
+            let config = self.config.read().await;
+            let local_path = format!("{}/{}", config.sync_folder, item.path);
+            drop(config);
+
+            match item.direction {
+                SyncDirection::Upload => {
+                    match self.remote.upload(&local_path, &item.path, None).await {
+                        Ok(etag) => {
+                            let mut updated = item.clone();
+                            updated.status = SyncStatus::Synced;
+                            updated.etag = Some(etag);
+                            self.storage.save_item(&updated).await.ok();
+                            self.storage.record_sync_operation(
+                                &item.path, "upload", true, None,
+                            ).await.ok();
+                            uploaded += 1;
+                        }
+                        Err(e) => {
+                            tracing::error!("Upload failed for {}: {}", item.path, e);
+                            self.storage.record_sync_operation(
+                                &item.path, "upload", false, Some(&e.to_string()),
+                            ).await.ok();
+                        }
+                    }
+                }
+                SyncDirection::Download => {
+                    match self.remote.download(&item.path, &local_path, None).await {
+                        Ok(()) => {
+                            let mut updated = item.clone();
+                            updated.status = SyncStatus::Synced;
+                            self.storage.save_item(&updated).await.ok();
+                            self.storage.record_sync_operation(
+                                &item.path, "download", true, None,
+                            ).await.ok();
+                            downloaded += 1;
+                        }
+                        Err(e) => {
+                            tracing::error!("Download failed for {}: {}", item.path, e);
+                            self.storage.record_sync_operation(
+                                &item.path, "download", false, Some(&e.to_string()),
+                            ).await.ok();
+                        }
+                    }
+                }
+                SyncDirection::None => {}
+            }
         }
-        
+
+        *self.progress.write().await = None;
         *self.status.write().await = EngineStatus::Idle;
-        
+
         let mut stats = self.stats.write().await;
         stats.last_sync = Some(Utc::now());
-        
+        stats.pending_uploads = 0;
+        stats.pending_downloads = 0;
+
+        tracing::info!("Scheduled sync complete: {} uploaded, {} downloaded", uploaded, downloaded);
+
         Ok(())
     }
 }

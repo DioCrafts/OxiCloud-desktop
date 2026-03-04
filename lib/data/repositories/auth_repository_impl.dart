@@ -14,6 +14,7 @@ class AuthRepositoryImpl implements AuthRepository {
   static const _usernameKey = 'username';
   static const _passwordKey = 'password';
   static const _accessTokenKey = 'access_token';
+  static const _userIdKey = 'user_id';
 
   AuthRepositoryImpl(this._rustDataSource, [this._apiClient]);
 
@@ -36,6 +37,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await prefs.setString(_usernameKey, credentials.username);
       await prefs.setString(_passwordKey, credentials.password);
       await prefs.setString(_accessTokenKey, result.accessToken);
+      await prefs.setString(_userIdKey, result.userId);
 
       // Configure the HTTP API client with the token
       _apiClient?.updateCredentials(credentials.serverUrl, result.accessToken);
@@ -96,9 +98,10 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final prefs = await SharedPreferences.getInstance();
       final username = prefs.getString(_usernameKey) ?? '';
+      final userId = prefs.getString(_userIdKey) ?? username;
 
       final user = User(
-        id: 'current-user',
+        id: userId,
         username: username,
         serverUrl: serverInfo.url,
         serverInfo: ServerInfo(

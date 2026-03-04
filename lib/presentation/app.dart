@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/repositories/sync_repository.dart';
 import '../main.dart' show navigatorKey;
 
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/settings/settings_bloc.dart';
+import 'pages/activity_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/selective_sync_page.dart';
 import 'pages/file_browser_page.dart';
+import 'pages/sync_history_page.dart';
 import 'pages/trash_page.dart';
 import 'pages/shares_page.dart';
 import 'pages/search_page.dart';
@@ -29,6 +32,15 @@ class OxiCloudApp extends StatelessWidget {
       theme: OxiCloudTheme.light(),
       darkTheme: OxiCloudTheme.dark(),
       themeMode: ThemeMode.system,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('es'),
+      ],
       initialRoute: '/',
       onGenerateRoute: _generateRoute,
     );
@@ -82,6 +94,16 @@ class OxiCloudApp extends StatelessWidget {
       case '/search':
         return MaterialPageRoute(
           builder: (_) => const SearchPage(),
+        );
+
+      case '/sync-history':
+        return MaterialPageRoute(
+          builder: (_) => const SyncHistoryPage(),
+        );
+
+      case '/activity':
+        return MaterialPageRoute(
+          builder: (_) => const ActivityPage(),
         );
 
       default:

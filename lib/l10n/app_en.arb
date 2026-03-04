@@ -1,0 +1,217 @@
+{
+  "@@locale": "en",
+  "appTitle": "OxiCloud",
+  "login": "Login",
+  "logout": "Logout",
+  "serverUrl": "Server URL",
+  "username": "Username",
+  "password": "Password",
+  "loginButton": "Sign In",
+  "loginError": "Login failed. Check your credentials.",
+  "serverUrlHint": "https://your-server.com",
+  "serverUrlRequired": "Server URL is required",
+  "usernameRequired": "Username is required",
+  "passwordRequired": "Password is required",
+
+  "home": "Home",
+  "files": "Files",
+  "search": "Search",
+  "shares": "Shares",
+  "trash": "Trash",
+  "settings": "Settings",
+  "activity": "Activity",
+  "syncHistory": "Sync History",
+
+  "connected": "Connected",
+  "syncNow": "Sync Now",
+  "syncing": "Syncing...",
+  "syncPaused": "Sync paused",
+  "lastSync": "Last sync: {time}",
+  "@lastSync": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "readyToSync": "Ready to sync",
+  "upToDate": "Up to date",
+  "initializing": "Initializing...",
+
+  "quickActions": "Quick Actions",
+  "browseFiles": "Browse Files",
+  "openSyncFolder": "Open Sync Folder",
+  "selectiveSync": "Selective Sync",
+  "sharedLinks": "Shared Links",
+  "pauseSync": "Pause Sync",
+
+  "conflictsFound": "{count} conflicts found",
+  "@conflictsFound": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "tapToResolve": "Tap to resolve",
+  "keepLocal": "Keep Local",
+  "keepRemote": "Keep Remote",
+  "keepBoth": "Keep Both",
+  "skip": "Skip",
+
+  "storageUsed": "{used} of {total} used",
+  "@storageUsed": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+
+  "createFolder": "Create Folder",
+  "upload": "Upload",
+  "download": "Download",
+  "rename": "Rename",
+  "delete": "Delete",
+  "open": "Open",
+  "cancel": "Cancel",
+  "save": "Save",
+  "confirm": "Confirm",
+  "retry": "Retry",
+  "refresh": "Refresh",
+
+  "newFolderName": "Folder name",
+  "newName": "New name",
+  "deleteConfirmation": "Are you sure you want to delete this item?",
+  "emptyTrash": "Empty Trash",
+  "emptyTrashConfirmation": "Permanently delete all items in trash?",
+  "restore": "Restore",
+  "deletePermanently": "Delete Permanently",
+  "trashEmpty": "Trash is empty",
+  "deletedNDaysAgo": "Deleted {days} days ago",
+  "@deletedNDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "autoDeleteIn": "Auto-delete in {days} days",
+  "@autoDeleteIn": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+
+  "searchFiles": "Search files...",
+  "advancedSearch": "Advanced Search",
+  "fileType": "File Type",
+  "minSize": "Min Size (MB)",
+  "maxSize": "Max Size (MB)",
+  "noResults": "No results found",
+  "resultsFound": "{count} results found",
+  "@resultsFound": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "shareLink": "Share Link",
+  "copyLink": "Copy Link",
+  "linkCopied": "Link copied to clipboard",
+  "createShare": "Create Share",
+  "deleteShare": "Delete Share",
+  "noShares": "No shared links",
+  "expired": "Expired",
+  "passwordProtected": "Password protected",
+  "accessCount": "{count} accesses",
+  "@accessCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "syncSettings": "Sync Settings",
+  "syncFolder": "Sync Folder",
+  "syncInterval": "Sync Interval",
+  "deltaSyncTitle": "Delta Sync",
+  "deltaSyncSubtitle": "Only upload changed parts of files",
+  "watchFilesystem": "Watch Filesystem",
+  "watchFilesystemSubtitle": "Automatically detect file changes",
+
+  "networkSettings": "Network",
+  "uploadSpeedLimit": "Upload Speed Limit",
+  "downloadSpeedLimit": "Download Speed Limit",
+  "unlimited": "Unlimited",
+  "speedKbps": "{speed} KB/s",
+  "@speedKbps": {
+    "placeholders": {
+      "speed": { "type": "int" }
+    }
+  },
+  "wifiOnly": "WiFi Only",
+  "wifiOnlySubtitle": "Only sync when connected to WiFi",
+  "pauseOnMetered": "Pause on Metered",
+  "pauseOnMeteredSubtitle": "Pause sync on metered connections",
+
+  "applicationSettings": "Application",
+  "notifications": "Notifications",
+  "notificationsSubtitle": "Show sync notifications",
+  "launchAtStartup": "Launch at Startup",
+  "launchAtStartupSubtitle": "Start OxiCloud when you log in",
+  "minimizeToTray": "Minimize to Tray",
+  "minimizeToTraySubtitle": "Keep running in system tray",
+
+  "ignorePatterns": "Ignore Patterns",
+  "ignorePatternsCount": "{count} patterns configured",
+  "@ignorePatternsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "about": "About",
+  "version": "Version",
+  "github": "GitHub",
+
+  "pending": "Pending",
+  "recent": "Recent",
+  "conflicts": "Conflicts",
+  "allCaughtUp": "All caught up!",
+  "noPendingOperations": "No pending sync operations",
+  "noRecentActivity": "No recent activity",
+  "noConflicts": "No conflicts",
+  "allFilesInSync": "All files are in sync",
+  "noSyncHistory": "No sync history yet",
+  "syncHistoryHint": "History will appear here after files are synced",
+
+  "justNow": "Just now",
+  "minutesAgo": "{count}m ago",
+  "@minutesAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "hoursAgo": "{count}h ago",
+  "@hoursAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "daysAgo": "{count}d ago",
+  "@daysAgo": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "selectAll": "Select All",
+  "selectNone": "Select None",
+  "saveChanges": "Save Changes",
+  "selectedFolders": "{count} folders selected",
+  "@selectedFolders": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "totalSize": "Total: {size}",
+  "@totalSize": {
+    "placeholders": {
+      "size": { "type": "String" }
+    }
+  },
+  "routeNotFound": "Route not found"
+}
