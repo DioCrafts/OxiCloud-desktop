@@ -366,7 +366,6 @@ impl SyncPort for WebDavClient {
     }
     
     async fn get_quota(&self) -> SyncResult<(u64, u64)> {
-        // PROPFIND on root with quota properties
         let propfind_body = r#"<?xml version="1.0" encoding="UTF-8"?>
 <d:propfind xmlns:d="DAV:">
     <d:prop>
@@ -374,7 +373,7 @@ impl SyncPort for WebDavClient {
         <d:quota-used-bytes/>
     </d:prop>
 </d:propfind>"#;
-        
+
         let response = self.request(reqwest::Method::from_bytes(b"PROPFIND").unwrap(), "/")
             .await?
             .header("Depth", "0")
@@ -383,9 +382,48 @@ impl SyncPort for WebDavClient {
             .send()
             .await
             .map_err(|e| SyncError::NetworkError(e.to_string()))?;
-        
-        // Parse quota from response... (simplified)
-        Ok((0, 10 * 1024 * 1024 * 1024)) // 10GB default
+
+        if !response.status().is_success() && response.status() != StatusCode::MULTI_STATUS {
+            return Ok((0, 10 * 1024 * 1024 * 1024));
+        }
+
+        let xml = response.text().await
+            .map_err(|e| SyncError::NetworkError(e.to_string()))?;
+
+        let mut reader = Reader::from_str(&xml);
+        reader.config_mut().trim_text(true);
+        let mut buf = Vec::new();
+        let mut current_tag = String::new();
+        let mut quota_used: u64 = 0;
+        let mut quota_available: u64 = 0;
+
+        loop {
+            match reader.read_event_into(&mut buf) {
+                Ok(Event::Start(ref e)) => {
+                    current_tag = String::from_utf8_lossy(e.name().as_ref()).to_string();
+                }
+                Ok(Event::Text(e)) => {
+                    let text = e.decode().unwrap_or_default().to_string();
+                    if current_tag.ends_with("quota-used-bytes") {
+                        quota_used = text.trim().parse().unwrap_or(0);
+                    } else if current_tag.ends_with("quota-available-bytes") {
+                        quota_available = text.trim().parse().unwrap_or(0);
+                    }
+                }
+                Ok(Event::Eof) => break,
+                Err(_) => break,
+                _ => {}
+            }
+            buf.clear();
+        }
+
+        let quota_total = if quota_available > 0 || quota_used > 0 {
+            quota_used + quota_available
+        } else {
+            10 * 1024 * 1024 * 1024
+        };
+
+        Ok((quota_used, quota_total))
     }
     
     async fn supports_delta_sync(&self) -> bool {

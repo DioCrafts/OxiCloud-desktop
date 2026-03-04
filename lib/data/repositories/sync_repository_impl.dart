@@ -7,6 +7,9 @@ import '../../core/entities/sync_status.dart';
 import '../../core/repositories/sync_repository.dart';
 import '../datasources/rust_bridge_datasource.dart';
 
+// Re-export SyncItem and related enums from sync_folder.dart
+// (already imported via sync_status.dart entities)
+
 /// Implementation of SyncRepository
 class SyncRepositoryImpl implements SyncRepository {
   final RustBridgeDataSource _rustDataSource;
@@ -84,14 +87,40 @@ class SyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<Either<SyncFailure, List<SyncItem>>> getPendingItems() async {
-    // TODO: Implement when Rust bindings are ready
-    return const Right([]);
+    try {
+      final items = await _rustDataSource.getPendingItems();
+      return Right(items.map((i) => SyncItem(
+        id: i.id,
+        path: i.path,
+        name: i.name,
+        isDirectory: i.isDirectory,
+        size: i.size,
+        status: _parseSyncItemStatus(i.status),
+        direction: _parseSyncDirection(i.direction),
+        localModified: i.localModified,
+        remoteModified: i.remoteModified,
+      )).toList());
+    } catch (e) {
+      return Left(UnknownSyncFailure(e.toString()));
+    }
   }
 
   @override
   Future<Either<SyncFailure, List<SyncHistoryEntry>>> getSyncHistory(int limit) async {
-    // TODO: Implement when Rust bindings are ready
-    return const Right([]);
+    try {
+      final entries = await _rustDataSource.getSyncHistory(limit);
+      return Right(entries.map((e) => SyncHistoryEntry(
+        id: e.id,
+        timestamp: DateTime.fromMillisecondsSinceEpoch(e.timestamp * 1000),
+        operation: e.operation,
+        itemPath: e.itemPath,
+        direction: _parseSyncDirection(e.direction),
+        status: _parseSyncItemStatus(e.status),
+        errorMessage: e.errorMessage,
+      )).toList());
+    } catch (e) {
+      return Left(UnknownSyncFailure(e.toString()));
+    }
   }
 
   @override
@@ -262,6 +291,36 @@ class SyncRepositoryImpl implements SyncRepository {
         return 'KeepBoth';
       case ConflictResolution.skip:
         return 'Skip';
+    }
+  }
+
+  SyncItemStatus _parseSyncItemStatus(String status) {
+    switch (status) {
+      case 'synced':
+        return SyncItemStatus.synced;
+      case 'pending':
+        return SyncItemStatus.pending;
+      case 'syncing':
+        return SyncItemStatus.syncing;
+      case 'conflict':
+        return SyncItemStatus.conflict;
+      case 'error':
+        return SyncItemStatus.error;
+      case 'ignored':
+        return SyncItemStatus.ignored;
+      default:
+        return SyncItemStatus.pending;
+    }
+  }
+
+  SyncDirection _parseSyncDirection(String direction) {
+    switch (direction) {
+      case 'upload':
+        return SyncDirection.upload;
+      case 'download':
+        return SyncDirection.download;
+      default:
+        return SyncDirection.none;
     }
   }
 

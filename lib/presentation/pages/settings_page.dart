@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../blocs/settings/settings_bloc.dart';
 import '../theme/oxicloud_colors.dart';
@@ -240,9 +241,12 @@ class _SettingsPageState extends State<SettingsPage> {
         ListTile(
           leading: const Icon(Icons.code),
           title: const Text('GitHub'),
-          subtitle: const Text('https://github.com/oxicloud'),
-          onTap: () {
-            // TODO: Open GitHub URL
+          subtitle: const Text('https://github.com/DioCrafts/OxiCloud'),
+          onTap: () async {
+            final uri = Uri.parse('https://github.com/DioCrafts/OxiCloud');
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
           },
         ),
 

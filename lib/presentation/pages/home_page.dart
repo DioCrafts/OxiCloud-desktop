@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/entities/sync_status.dart';
+import '../../core/repositories/sync_repository.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/sync/sync_bloc.dart';
 import '../shell/adaptive_shell.dart';
@@ -306,9 +310,7 @@ class _HomePageState extends State<HomePage> {
               _buildActionCard(
                 icon: Icons.folder,
                 label: 'Open Sync Folder',
-                onTap: () {
-                  // TODO: Open sync folder in file manager
-                },
+                onTap: () => _openSyncFolder(),
               ),
               _buildActionCard(
                 icon: Icons.folder_special,
@@ -333,9 +335,12 @@ class _HomePageState extends State<HomePage> {
               _buildActionCard(
                 icon: Icons.history,
                 label: 'Sync History',
-                onTap: () {
-                  // TODO: Navigate to sync history
-                },
+                onTap: () => Navigator.of(context).pushNamed('/sync-history'),
+              ),
+              _buildActionCard(
+                icon: Icons.notifications_outlined,
+                label: 'Activity',
+                onTap: () => Navigator.of(context).pushNamed('/activity'),
               ),
               _buildActionCard(
                 icon: Icons.pause,
@@ -379,6 +384,41 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _openSyncFolder() async {
+    final repo = context.read<SyncRepository>();
+    final configResult = await repo.getConfig();
+
+    configResult.fold(
+      (failure) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not get sync folder path')),
+          );
+        }
+      },
+      (config) async {
+        final folderPath = config.syncFolder;
+        final dir = Directory(folderPath);
+
+        // Create directory if it doesn't exist
+        if (!dir.existsSync()) {
+          dir.createSync(recursive: true);
+        }
+
+        final uri = Uri.file(folderPath);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Could not open: $folderPath')),
+            );
+          }
+        }
+      },
     );
   }
 

@@ -196,6 +196,62 @@ class RustBridgeDataSource {
   }
 
   // ===========================================================================
+  // PENDING ITEMS & HISTORY
+  // ===========================================================================
+
+  Future<List<SyncItemDto>> getPendingItems() async {
+    _ensureInitialized();
+    try {
+      final items = await rust.getPendingItems();
+      return items.map((i) => SyncItemDto(
+        id: i.id,
+        path: i.path,
+        name: i.name,
+        isDirectory: i.isDirectory,
+        size: i.size.toInt(),
+        status: _mapSyncStatus(i.status),
+        direction: _mapSyncDirection(i.direction),
+        localModified: i.localModified,
+        remoteModified: i.remoteModified,
+      )).toList();
+    } catch (_) { return []; }
+  }
+
+  Future<List<SyncHistoryEntryDto>> getSyncHistory(int limit) async {
+    _ensureInitialized();
+    try {
+      final entries = await rust.getSyncHistory(limit: limit);
+      return entries.map((e) => SyncHistoryEntryDto(
+        id: e.id,
+        timestamp: e.timestamp,
+        operation: e.operation,
+        itemPath: e.itemPath,
+        direction: e.direction,
+        status: e.status,
+        errorMessage: e.errorMessage,
+      )).toList();
+    } catch (_) { return []; }
+  }
+
+  String _mapSyncStatus(domain.SyncStatus status) {
+    if (status is domain.SyncStatus_Synced) return 'synced';
+    if (status is domain.SyncStatus_Pending) return 'pending';
+    if (status is domain.SyncStatus_Syncing) return 'syncing';
+    if (status is domain.SyncStatus_Conflict) return 'conflict';
+    if (status is domain.SyncStatus_Error) return 'error';
+    if (status is domain.SyncStatus_Ignored) return 'ignored';
+    return 'pending';
+  }
+
+  String _mapSyncDirection(domain.SyncDirection direction) {
+    switch (direction) {
+      case domain.SyncDirection.upload: return 'upload';
+      case domain.SyncDirection.download: return 'download';
+      case domain.SyncDirection.none: return 'none';
+    }
+  }
+
+  // ===========================================================================
   // CONFIGURATION
   // ===========================================================================
 
@@ -356,4 +412,23 @@ class SyncConfigDto {
     required this.wifiOnly, required this.watchFilesystem,
     required this.ignorePatterns, required this.notificationsEnabled,
     required this.launchAtStartup, required this.minimizeToTray});
+}
+
+class SyncItemDto {
+  final String id, path, name, status, direction;
+  final bool isDirectory;
+  final int size;
+  final DateTime? localModified, remoteModified;
+  SyncItemDto({required this.id, required this.path, required this.name,
+    required this.isDirectory, required this.size, required this.status,
+    required this.direction, this.localModified, this.remoteModified});
+}
+
+class SyncHistoryEntryDto {
+  final String id, operation, itemPath, direction, status;
+  final int timestamp;
+  final String? errorMessage;
+  SyncHistoryEntryDto({required this.id, required this.timestamp,
+    required this.operation, required this.itemPath, required this.direction,
+    required this.status, this.errorMessage});
 }
