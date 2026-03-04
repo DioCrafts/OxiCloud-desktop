@@ -454,11 +454,41 @@ struct PartialRemoteItem {
 
 impl PartialRemoteItem {
     fn into_remote_item(self) -> Option<RemoteItem> {
-        let path = self.path?;
+        let raw_path = self.path?;
+
+        // Strip /webdav prefix from href paths returned by OxiCloud server
+        let path = if raw_path.starts_with("/webdav") {
+            raw_path.strip_prefix("/webdav").unwrap_or(&raw_path).to_string()
+        } else {
+            raw_path
+        };
+
+        // Ensure path starts with /
+        let path = if path.is_empty() || path == "/" {
+            "/".to_string()
+        } else if !path.starts_with('/') {
+            format!("/{}", path)
+        } else {
+            path
+        };
+
+        // Clean trailing slashes for consistency (except root)
+        let path = if path.len() > 1 {
+            path.trim_end_matches('/').to_string()
+        } else {
+            path
+        };
+
+        // URL-decode percent-encoded characters
+        let path = percent_encoding::percent_decode_str(&path)
+            .decode_utf8()
+            .map(|s| s.to_string())
+            .unwrap_or(path);
+
         let name = self.name.unwrap_or_else(|| {
             path.rsplit('/').next().unwrap_or(&path).to_string()
         });
-        
+
         Some(RemoteItem {
             id: uuid::Uuid::new_v4().to_string(),
             path,

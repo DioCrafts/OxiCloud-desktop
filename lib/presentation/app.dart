@@ -8,8 +8,10 @@ import '../main.dart' show navigatorKey;
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/settings/settings_bloc.dart';
 import 'pages/activity_page.dart';
+import 'pages/favorites_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
+import 'pages/recent_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/selective_sync_page.dart';
 import 'pages/file_browser_page.dart';
@@ -104,6 +106,16 @@ class OxiCloudApp extends StatelessWidget {
       case '/activity':
         return MaterialPageRoute(
           builder: (_) => const ActivityPage(),
+        );
+
+      case '/favorites':
+        return MaterialPageRoute(
+          builder: (_) => const FavoritesPage(),
+        );
+
+      case '/recent':
+        return MaterialPageRoute(
+          builder: (_) => const RecentPage(),
         );
 
       default:

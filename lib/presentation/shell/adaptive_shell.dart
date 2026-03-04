@@ -6,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/repositories/sync_repository.dart';
 import '../blocs/settings/settings_bloc.dart';
 import '../blocs/sync/sync_bloc.dart';
+import '../pages/favorites_page.dart';
 import '../pages/file_browser_page.dart';
 import '../pages/home_page.dart';
+import '../pages/recent_page.dart';
 import '../pages/search_page.dart';
 import '../pages/settings_page.dart';
 import '../pages/shares_page.dart';
@@ -19,7 +21,7 @@ import '../theme/oxicloud_colors.dart';
 // =============================================================================
 
 /// Logical destinations used by both desktop and mobile shells.
-enum ShellDestination { home, files, search, shares, trash, settings }
+enum ShellDestination { home, files, favorites, recent, search, shares, trash, settings }
 
 // =============================================================================
 // ShellScope — lets child pages trigger tab switches
@@ -66,12 +68,26 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   void _onNavigate(ShellDestination dest) {
-    // On mobile, Trash is not in the bottom nav → push as standalone page
-    if (!_isDesktop && dest == ShellDestination.trash) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const TrashPage()),
-      );
-      return;
+    // On mobile, some pages are not in bottom nav → push as standalone
+    if (!_isDesktop) {
+      if (dest == ShellDestination.trash) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const TrashPage()),
+        );
+        return;
+      }
+      if (dest == ShellDestination.favorites) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const FavoritesPage()),
+        );
+        return;
+      }
+      if (dest == ShellDestination.recent) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const RecentPage()),
+        );
+        return;
+      }
     }
     setState(() => _selected = dest);
   }
@@ -80,10 +96,12 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
   late final List<Widget> _pages = [
     const HomePage(),             // 0 — home
     const FileBrowserPage(),      // 1 — files
-    const SearchPage(),           // 2 — search
-    const SharesPage(),           // 3 — shares
-    const TrashPage(),            // 4 — trash  (desktop tab, mobile push)
-    BlocProvider(                  // 5 — settings
+    const FavoritesPage(),        // 2 — favorites
+    const RecentPage(),           // 3 — recent
+    const SearchPage(),           // 4 — search
+    const SharesPage(),           // 5 — shares
+    const TrashPage(),            // 6 — trash  (desktop tab, mobile push)
+    BlocProvider(                  // 7 — settings
       create: (ctx) => SettingsBloc(ctx.read<SyncRepository>()),
       child: const SettingsPage(),
     ),
@@ -178,6 +196,16 @@ class _DesktopLayout extends StatelessWidget {
                 label: Text('Files'),
               ),
               NavigationRailDestination(
+                icon: Icon(Icons.star_outline),
+                selectedIcon: Icon(Icons.star),
+                label: Text('Favorites'),
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.history_outlined),
+                selectedIcon: Icon(Icons.history),
+                label: Text('Recent'),
+              ),
+              NavigationRailDestination(
                 icon: Icon(Icons.search),
                 selectedIcon: Icon(Icons.search),
                 label: Text('Search'),
@@ -230,7 +258,7 @@ class _MobileLayout extends StatelessWidget {
     required this.pages,
   });
 
-  // Mobile shows 5 destinations (no Trash — accessed via Home quick actions)
+  // Mobile shows 5 destinations (Trash, Favorites, Recent accessed via Home)
   static const _navDests = [
     ShellDestination.home,
     ShellDestination.files,

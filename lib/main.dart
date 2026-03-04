@@ -5,7 +5,9 @@ import 'dart:io';
 import 'src/rust/frb_generated.dart';
 import 'injection.dart';
 import 'core/repositories/auth_repository.dart';
+import 'core/repositories/favorites_repository.dart';
 import 'core/repositories/file_browser_repository.dart';
+import 'core/repositories/recent_repository.dart';
 import 'core/repositories/search_repository.dart';
 import 'core/repositories/share_repository.dart';
 import 'core/repositories/sync_repository.dart';
@@ -17,6 +19,8 @@ import 'presentation/blocs/file_browser/file_browser_bloc.dart';
 import 'presentation/blocs/trash/trash_bloc.dart';
 import 'presentation/blocs/share/share_bloc.dart';
 import 'presentation/blocs/search/search_bloc.dart';
+import 'presentation/blocs/favorites/favorites_bloc.dart';
+import 'presentation/blocs/recent/recent_bloc.dart';
 import 'presentation/app.dart';
 import 'platform/desktop_window.dart';
 import 'platform/system_tray_service.dart';
@@ -101,6 +105,12 @@ class OxiCloudAppWrapper extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => SearchBloc(getIt<SearchRepository>()),
+        ),
+        BlocProvider(
+          create: (_) => FavoritesBloc(getIt<FavoritesRepository>()),
+        ),
+        BlocProvider(
+          create: (_) => RecentBloc(getIt<RecentRepository>()),
         ),
         RepositoryProvider<SyncRepository>(
           create: (_) => getIt<SyncRepository>(),

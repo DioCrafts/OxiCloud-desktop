@@ -11,6 +11,7 @@ class ApiClient {
   static const _usernameKey = 'username';
   static const _passwordKey = 'password'; // stored for silent re-login
   static const _accessTokenKey = 'access_token';
+  static const _refreshTokenKey = 'refresh_token';
 
   final Dio _dio;
   final Logger _logger = Logger();
@@ -95,24 +96,57 @@ class ApiClient {
     _configured = _token != null;
   }
 
-  /// Try to obtain a fresh access token by calling the server login
-  /// endpoint directly with stored credentials.
+  /// Try to obtain a fresh access token. First attempts refresh token,
+  /// then falls back to full re-login with stored credentials.
   Future<bool> _silentReLogin() async {
     _isRefreshing = true;
     try {
       final prefs = await SharedPreferences.getInstance();
       final serverUrl = prefs.getString(_serverUrlKey);
+      if (serverUrl == null) return false;
+
+      final baseUrl = _normaliseUrl(serverUrl);
+
+      // 1. Try refresh token first (server expects it in JSON body)
+      final refreshToken = prefs.getString(_refreshTokenKey);
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        try {
+          final response = await Dio().post<Map<String, dynamic>>(
+            '${baseUrl}api/auth/refresh',
+            data: {'refresh_token': refreshToken},
+          );
+          final data = response.data;
+          if (data != null) {
+            final newToken = data['access_token'] as String?;
+            final newRefresh = data['refresh_token'] as String?;
+            if (newToken != null && newToken.isNotEmpty) {
+              await prefs.setString(_accessTokenKey, newToken);
+              if (newRefresh != null) {
+                await prefs.setString(_refreshTokenKey, newRefresh);
+              }
+              _token = newToken;
+              _dio.options.baseUrl = baseUrl;
+              _configured = true;
+              _logger.i('Token refresh succeeded');
+              return true;
+            }
+          }
+        } catch (_) {
+          _logger.w('Token refresh failed, falling back to re-login');
+        }
+      }
+
+      // 2. Fallback: full re-login with stored credentials
       final username = prefs.getString(_usernameKey);
       final password = prefs.getString(_passwordKey);
 
-      if (serverUrl == null || username == null || password == null) {
+      if (username == null || password == null) {
         _logger.w('Cannot re-login: missing stored credentials');
         return false;
       }
 
-      final baseUrl = _normaliseUrl(serverUrl);
       final response = await Dio().post<Map<String, dynamic>>(
-        '${baseUrl}auth/login',
+        '${baseUrl}api/auth/login',
         data: {'username': username, 'password': password},
       );
 
@@ -120,10 +154,13 @@ class ApiClient {
       if (data == null) return false;
 
       final newToken = data['access_token'] as String?;
+      final newRefresh = data['refresh_token'] as String?;
       if (newToken == null || newToken.isEmpty) return false;
 
-      // Persist and apply the fresh token
       await prefs.setString(_accessTokenKey, newToken);
+      if (newRefresh != null) {
+        await prefs.setString(_refreshTokenKey, newRefresh);
+      }
       _token = newToken;
       _dio.options.baseUrl = baseUrl;
       _configured = true;
