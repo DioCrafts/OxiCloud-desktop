@@ -120,6 +120,91 @@ class DownloadFileRequested extends FileBrowserEvent {
   List<Object?> get props => [fileId, savePath];
 }
 
+/// Upload a file with progress tracking (chunked upload for large files).
+class UploadFileWithProgress extends FileBrowserEvent {
+  final File file;
+
+  const UploadFileWithProgress(this.file);
+
+  @override
+  List<Object?> get props => [file];
+}
+
+/// Internal event: upload progress updated.
+class UploadProgressUpdated extends FileBrowserEvent {
+  final String fileName;
+  final int bytesSent;
+  final int bytesTotal;
+
+  const UploadProgressUpdated({
+    required this.fileName,
+    required this.bytesSent,
+    required this.bytesTotal,
+  });
+
+  @override
+  List<Object?> get props => [fileName, bytesSent, bytesTotal];
+}
+
+/// Toggle favorite on a file or folder.
+class ToggleFavorite extends FileBrowserEvent {
+  final String itemId;
+  final String itemType; // 'file' or 'folder'
+  final bool isFavorite;
+
+  const ToggleFavorite({
+    required this.itemId,
+    required this.itemType,
+    required this.isFavorite,
+  });
+
+  @override
+  List<Object?> get props => [itemId, itemType, isFavorite];
+}
+
+/// Batch delete multiple items.
+class BatchDeleteRequested extends FileBrowserEvent {
+  final List<String> fileIds;
+  final List<String> folderIds;
+
+  const BatchDeleteRequested({this.fileIds = const [], this.folderIds = const []});
+
+  @override
+  List<Object?> get props => [fileIds, folderIds];
+}
+
+/// Move items to a different folder.
+class MoveItemsRequested extends FileBrowserEvent {
+  final List<String> fileIds;
+  final List<String> folderIds;
+  final String? targetFolderId;
+
+  const MoveItemsRequested({
+    this.fileIds = const [],
+    this.folderIds = const [],
+    this.targetFolderId,
+  });
+
+  @override
+  List<Object?> get props => [fileIds, folderIds, targetFolderId];
+}
+
+/// Copy items to a different folder.
+class CopyItemsRequested extends FileBrowserEvent {
+  final List<String> fileIds;
+  final List<String> folderIds;
+  final String? targetFolderId;
+
+  const CopyItemsRequested({
+    this.fileIds = const [],
+    this.folderIds = const [],
+    this.targetFolderId,
+  });
+
+  @override
+  List<Object?> get props => [fileIds, folderIds, targetFolderId];
+}
+
 /// Toggle between list / grid view.
 class ToggleViewMode extends FileBrowserEvent {
   const ToggleViewMode();

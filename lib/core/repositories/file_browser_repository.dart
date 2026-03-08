@@ -64,4 +64,40 @@ abstract class FileBrowserRepository {
     String id,
     String savePath,
   );
+
+  /// Upload a large file using chunked upload with progress.
+  Future<Either<FileBrowserFailure, FileItem>> uploadFileChunked(
+    File file,
+    String? folderId, {
+    void Function(int sent, int total)? onProgress,
+  });
+
+  /// Batch delete files and folders.
+  Future<Either<FileBrowserFailure, void>> batchDelete({
+    List<String> fileIds,
+    List<String> folderIds,
+  });
+
+  /// Batch move files and folders to a target folder.
+  Future<Either<FileBrowserFailure, void>> batchMove({
+    List<String> fileIds,
+    List<String> folderIds,
+    String? targetFolderId,
+  });
+
+  /// Batch copy files and folders to a target folder.
+  Future<Either<FileBrowserFailure, void>> batchCopy({
+    List<String> fileIds,
+    List<String> folderIds,
+    String? targetFolderId,
+  });
+
+  /// Download a folder as a ZIP archive.
+  Future<Either<FileBrowserFailure, String>> downloadFolderAsZip(
+    String folderId,
+    String savePath,
+  );
+
+  /// Get thumbnail URL for a file.
+  String? getThumbnailUrl(String fileId, {String size = 'small'});
 }

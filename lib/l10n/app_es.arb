@@ -142,5 +142,58 @@
   "saveChanges": "Guardar cambios",
   "selectedFolders": "{count} carpetas seleccionadas",
   "totalSize": "Total: {size}",
-  "routeNotFound": "Ruta no encontrada"
+  "routeNotFound": "Ruta no encontrada",
+
+  "favorites": "Favoritos",
+  "addToFavorites": "Añadir a favoritos",
+  "removeFavorite": "Quitar de favoritos",
+  "noFavorites": "Aún no hay favoritos",
+  "noFavoritesHint": "Marca archivos y carpetas para encontrarlos aquí",
+
+  "recentFiles": "Archivos recientes",
+  "clearHistory": "Borrar historial",
+  "noRecentFiles": "No hay archivos recientes",
+
+  "uploading": "Subiendo {fileName}",
+  "uploadComplete": "Archivo subido",
+  "fileUploaded": "Archivo subido",
+  "folderCreated": "Carpeta creada",
+  "fileDeleted": "Archivo eliminado",
+  "folderDeleted": "Carpeta eliminada",
+  "fileRenamed": "Archivo renombrado",
+  "folderRenamed": "Carpeta renombrada",
+
+  "selectedItems": "{count} seleccionados",
+  "clearSelection": "Limpiar selección",
+  "moveItems": "Mover",
+  "copyItems": "Copiar",
+  "itemsDeleted": "{count} elementos eliminados",
+  "itemsMoved": "{count} elementos movidos",
+  "itemsCopied": "{count} elementos copiados",
+
+  "downloadAsZip": "Descargar como ZIP",
+  "downloadingZip": "Descargando {name} como ZIP...",
+
+  "emptyFolder": "Esta carpeta está vacía",
+  "emptyFolderHint": "Sube archivos o crea una carpeta para empezar",
+  "failedToLoadFolder": "Error al cargar la carpeta",
+  "newFolder": "Nueva carpeta",
+  "backToHome": "Volver al inicio",
+  "upOneLevel": "Subir un nivel",
+  "listView": "Vista de lista",
+  "gridView": "Vista de cuadrícula",
+
+  "loading": "Cargando...",
+  "moveItemsTitle": "Mover elementos",
+  "copyItemsTitle": "Copiar elementos",
+  "targetFolderHint": "ID de carpeta destino (vacío = raíz)",
+  "move": "Mover",
+  "copy": "Copiar",
+  "create": "Crear",
+
+  "renameFolder": "Renombrar carpeta",
+  "renameFile": "Renombrar archivo",
+  "deleteFolder": "Eliminar carpeta",
+  "deleteFile": "Eliminar archivo",
+  "deleteConfirmText": "¿Estás seguro de que quieres eliminar {name}? Se moverá a la papelera."
 }

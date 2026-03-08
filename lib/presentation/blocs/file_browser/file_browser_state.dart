@@ -78,6 +78,25 @@ class FileBrowserError extends FileBrowserState {
   List<Object?> get props => [message];
 }
 
+/// File upload is in progress with progress tracking.
+class FileBrowserUploadProgress extends FileBrowserState {
+  final String fileName;
+  final int bytesSent;
+  final int bytesTotal;
+
+  const FileBrowserUploadProgress({
+    required this.fileName,
+    required this.bytesSent,
+    required this.bytesTotal,
+  });
+
+  double get progress => bytesTotal > 0 ? bytesSent / bytesTotal : 0;
+  int get percent => (progress * 100).round();
+
+  @override
+  List<Object?> get props => [fileName, bytesSent, bytesTotal];
+}
+
 /// Transient success message (create, rename, delete completed).
 class FileBrowserActionSuccess extends FileBrowserState {
   final String message;
