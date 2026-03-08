@@ -1,0 +1,631 @@
+# ============================================================================
+# OxiCloud Desktop & Mobile — Release Build Pipeline
+# ============================================================================
+# Triggers on GitHub Release creation.
+# Builds Flutter+Rust apps for Linux, Windows, macOS, Android, and iOS.
+# Uploads all artifacts to the GitHub Release.
+# ============================================================================
+
+name: Build & Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.0.0)'
+        required: false
+        default: 'dev'
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: '3.27.4'
+  RUST_TOOLCHAIN: 'stable'
+
+jobs:
+  # ==========================================================================
+  # Linux — .deb, .rpm, .AppImage, .tar.gz
+  # ==========================================================================
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libappindicator3-dev libnotify-dev \
+            rpm patchelf locate \
+            libfuse2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: linux-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: linux-rust-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Package — tar.gz
+        run: |
+          cd build/linux/x64/release/bundle
+          tar czf "$GITHUB_WORKSPACE/OxiCloud-linux-x64.tar.gz" .
+
+      - name: Package — .deb
+        run: |
+          # Install flutter_distributor for packaging
+          dart pub global activate flutter_distributor
+
+          # Create .deb manually
+          PKG_DIR="$GITHUB_WORKSPACE/deb_pkg"
+          mkdir -p "$PKG_DIR/DEBIAN"
+          mkdir -p "$PKG_DIR/usr/bin"
+          mkdir -p "$PKG_DIR/usr/lib/oxicloud"
+          mkdir -p "$PKG_DIR/usr/share/applications"
+          mkdir -p "$PKG_DIR/usr/share/icons/hicolor/256x256/apps"
+
+          # Copy bundle
+          cp -r build/linux/x64/release/bundle/* "$PKG_DIR/usr/lib/oxicloud/"
+
+          # Create launcher script
+          cat > "$PKG_DIR/usr/bin/oxicloud" << 'LAUNCHER'
+          #!/bin/bash
+          exec /usr/lib/oxicloud/oxicloud_app "$@"
+          LAUNCHER
+          chmod +x "$PKG_DIR/usr/bin/oxicloud"
+
+          # Create desktop entry
+          cat > "$PKG_DIR/usr/share/applications/oxicloud.desktop" << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=OxiCloud
+          Comment=Fast, secure cloud storage sync client
+          Exec=oxicloud
+          Icon=oxicloud
+          Terminal=false
+          Categories=Network;FileTransfer;Utility;
+          Keywords=cloud;sync;storage;
+          DESKTOP
+
+          # Get version
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION:-1.0.0}"
+
+          # Control file
+          cat > "$PKG_DIR/DEBIAN/control" << CONTROL
+          Package: oxicloud
+          Version: ${VERSION}
+          Section: net
+          Priority: optional
+          Architecture: amd64
+          Maintainer: DioCrafts <info@diocrafts.com>
+          Description: OxiCloud Desktop Client
+           Fast, secure cloud storage synchronization client.
+           Supports file sync, selective sync, conflict resolution,
+           and real-time file monitoring.
+          Depends: libgtk-3-0, libappindicator3-1
+          CONTROL
+
+          dpkg-deb --build "$PKG_DIR" "OxiCloud-linux-amd64.deb"
+
+      - name: Package — .rpm
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${VERSION:-1.0.0}"
+
+          mkdir -p rpmbuild/{SPECS,BUILD,RPMS,SOURCES}
+
+          # Create tarball for RPM
+          mkdir -p "rpmbuild/BUILD/oxicloud-${VERSION}"
+          cp -r build/linux/x64/release/bundle/* "rpmbuild/BUILD/oxicloud-${VERSION}/"
+
+          cat > rpmbuild/SPECS/oxicloud.spec << SPEC
+          Name:           oxicloud
+          Version:        ${VERSION}
+          Release:        1
+          Summary:        OxiCloud Desktop Client
+          License:        MIT
+
+          %description
+          Fast, secure cloud storage synchronization client.
+
+          %install
+          mkdir -p %{buildroot}/usr/lib/oxicloud
+          mkdir -p %{buildroot}/usr/bin
+          mkdir -p %{buildroot}/usr/share/applications
+          cp -r %{_builddir}/oxicloud-${VERSION}/* %{buildroot}/usr/lib/oxicloud/
+
+          cat > %{buildroot}/usr/bin/oxicloud << 'LAUNCHER'
+          #!/bin/bash
+          exec /usr/lib/oxicloud/oxicloud_app "\$@"
+          LAUNCHER
+          chmod +x %{buildroot}/usr/bin/oxicloud
+
+          cat > %{buildroot}/usr/share/applications/oxicloud.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=OxiCloud
+          Comment=Fast, secure cloud storage sync client
+          Exec=oxicloud
+          Icon=oxicloud
+          Terminal=false
+          Categories=Network;FileTransfer;Utility;
+          DESKTOP
+
+          %files
+          /usr/lib/oxicloud/
+          /usr/bin/oxicloud
+          /usr/share/applications/oxicloud.desktop
+          SPEC
+
+          rpmbuild --define "_topdir $(pwd)/rpmbuild" -bb rpmbuild/SPECS/oxicloud.spec || true
+          find rpmbuild/RPMS -name "*.rpm" -exec cp {} OxiCloud-linux-x86_64.rpm \; || true
+
+      - name: Package — AppImage
+        run: |
+          # Download appimagetool
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          chmod +x appimagetool
+
+          # Create AppDir
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/lib
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+
+          # AppRun
+          cat > AppDir/AppRun << 'APPRUN'
+          #!/bin/bash
+          APPDIR="$(dirname "$(readlink -f "$0")")"
+          exec "$APPDIR/usr/bin/oxicloud_app" "$@"
+          APPRUN
+          chmod +x AppDir/AppRun
+
+          # Desktop file
+          cat > AppDir/oxicloud.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Type=Application
+          Name=OxiCloud
+          Exec=oxicloud_app
+          Icon=oxicloud
+          Categories=Network;FileTransfer;Utility;
+          DESKTOP
+
+          # Placeholder icon (if no icon exists)
+          if [ ! -f AppDir/oxicloud.png ]; then
+            convert -size 256x256 xc:coral -gravity center \
+              -pointsize 80 -fill white -annotate 0 "Oxi" \
+              AppDir/oxicloud.png 2>/dev/null || \
+              touch AppDir/oxicloud.png
+          fi
+          cp AppDir/oxicloud.png AppDir/usr/share/icons/hicolor/256x256/apps/
+
+          ARCH=x86_64 ./appimagetool AppDir OxiCloud-linux-x86_64.AppImage || true
+
+      - name: Upload Linux artifacts
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: |
+            OxiCloud-linux-x64.tar.gz
+            OxiCloud-linux-amd64.deb
+            OxiCloud-linux-x86_64.rpm
+            OxiCloud-linux-x86_64.AppImage
+
+      - name: Upload artifacts (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-builds
+          path: |
+            OxiCloud-linux-x64.tar.gz
+            OxiCloud-linux-amd64.deb
+
+  # ==========================================================================
+  # Windows — .msix, .zip
+  # ==========================================================================
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: windows-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: windows-rust-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package — ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "OxiCloud-windows-x64.zip"
+
+      - name: Create MSIX package
+        run: |
+          dart pub global activate msix
+          dart run msix:create --display-name "OxiCloud" --publisher-display-name "DioCrafts" --identity-name "com.oxicloud.app" --version "1.0.0.0" --output "OxiCloud-windows-x64.msix"
+        continue-on-error: true
+
+      - name: Create InnoSetup installer
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          if (-not $version) { $version = "1.0.0" }
+
+          @"
+          [Setup]
+          AppName=OxiCloud
+          AppVersion=$version
+          AppPublisher=DioCrafts
+          AppPublisherURL=https://github.com/DioCrafts/OxiCloud
+          DefaultDirName={autopf}\OxiCloud
+          DefaultGroupName=OxiCloud
+          OutputDir=.
+          OutputBaseFilename=OxiCloud-windows-x64-setup
+          Compression=lzma
+          SolidCompression=yes
+          WizardStyle=modern
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+
+          [Languages]
+          Name: "english"; MessagesFile: "compiler:Default.isl"
+          Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+
+          [Tasks]
+          Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+          Name: "launchstartup"; Description: "Launch at startup"; GroupDescription: "Other:"
+
+          [Files]
+          Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+
+          [Icons]
+          Name: "{group}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"
+          Name: "{autodesktop}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; Tasks: desktopicon
+          Name: "{userstartup}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; Tasks: launchstartup
+
+          [Run]
+          Filename: "{app}\oxicloud_app.exe"; Description: "Launch OxiCloud"; Flags: nowait postinstall skipifsilent
+          "@ | Out-File -FilePath "installer.iss" -Encoding UTF8
+
+          # Download and run InnoSetup
+          choco install innosetup -y --no-progress 2>$null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        continue-on-error: true
+
+      - name: Upload Windows artifacts
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: |
+            OxiCloud-windows-x64.zip
+            OxiCloud-windows-x64.msix
+            OxiCloud-windows-x64-setup.exe
+
+      - name: Upload artifacts (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-builds
+          path: |
+            OxiCloud-windows-x64.zip
+
+  # ==========================================================================
+  # macOS — .dmg, .app.zip
+  # ==========================================================================
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: macos-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: macos-rust-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build macOS release
+        run: flutter build macos --release
+
+      - name: Package — .app.zip
+        run: |
+          cd build/macos/Build/Products/Release
+          # Find the .app bundle
+          APP_NAME=$(ls -d *.app | head -1)
+          ditto -c -k --sequesterRsrc "$APP_NAME" "$GITHUB_WORKSPACE/OxiCloud-macos-universal.zip"
+
+      - name: Package — .dmg
+        run: |
+          cd build/macos/Build/Products/Release
+          APP_NAME=$(ls -d *.app | head -1)
+
+          # Create a temporary DMG folder
+          mkdir -p dmg_contents
+          cp -R "$APP_NAME" dmg_contents/
+          ln -s /Applications dmg_contents/Applications
+
+          hdiutil create -volname "OxiCloud" \
+            -srcfolder dmg_contents \
+            -ov -format UDZO \
+            "$GITHUB_WORKSPACE/OxiCloud-macos-universal.dmg"
+
+      - name: Upload macOS artifacts
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: |
+            OxiCloud-macos-universal.zip
+            OxiCloud-macos-universal.dmg
+
+      - name: Upload artifacts (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-builds
+          path: |
+            OxiCloud-macos-universal.zip
+            OxiCloud-macos-universal.dmg
+
+  # ==========================================================================
+  # Android — .apk, .aab
+  # ==========================================================================
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r26d
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: android-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: android-rust-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Decode keystore
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+
+      - name: Build APK (fat)
+        run: flutter build apk --release
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build APKs per ABI
+        run: flutter build apk --split-per-abi --release
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Rename artifacts
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk OxiCloud-android-universal.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk OxiCloud-android-arm64-v8a.apk || true
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk OxiCloud-android-armeabi-v7a.apk || true
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk OxiCloud-android-x86_64.apk || true
+          cp build/app/outputs/bundle/release/app-release.aab OxiCloud-android.aab || true
+
+      - name: Upload Android artifacts
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: |
+            OxiCloud-android-universal.apk
+            OxiCloud-android-arm64-v8a.apk
+            OxiCloud-android-armeabi-v7a.apk
+            OxiCloud-android-x86_64.apk
+            OxiCloud-android.aab
+
+      - name: Upload artifacts (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: |
+            OxiCloud-android-universal.apk
+            OxiCloud-android.aab
+
+  # ==========================================================================
+  # iOS — .ipa (unsigned for sideloading / re-sign)
+  # ==========================================================================
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,x86_64-apple-ios
+
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ios-rust-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: ios-rust-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods
+        run: |
+          cd ios
+          pod install || pod install --repo-update
+
+      - name: Setup iOS signing
+        if: env.IOS_P12_BASE64 != ''
+        env:
+          IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+          IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+          IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+        run: |
+          # Create keychain
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # Import certificate
+          echo "$IOS_P12_BASE64" | base64 --decode > $RUNNER_TEMP/certificate.p12
+          security import $RUNNER_TEMP/certificate.p12 -P "$IOS_P12_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          # Install provisioning profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$IOS_PROVISION_PROFILE_BASE64" | base64 --decode \
+            > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Build iOS (no codesign)
+        run: |
+          flutter build ios --release --no-codesign
+
+      - name: Create IPA
+        run: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -R Runner.app Payload/
+          zip -r "$GITHUB_WORKSPACE/OxiCloud-ios-arm64.ipa" Payload
+        continue-on-error: true
+
+      - name: Build iOS (signed)
+        if: env.IOS_P12_BASE64 != ''
+        env:
+          IOS_P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+        run: |
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions.plist || true
+
+      - name: Upload iOS artifacts
+        uses: softprops/action-gh-release@v2
+        if: github.event_name == 'release'
+        with:
+          files: |
+            OxiCloud-ios-arm64.ipa
+
+      - name: Upload artifacts (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-builds
+          path: |
+            OxiCloud-ios-arm64.ipa
