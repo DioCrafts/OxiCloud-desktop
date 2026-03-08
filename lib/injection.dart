@@ -9,6 +9,7 @@ import 'core/repositories/share_repository.dart';
 import 'core/repositories/sync_repository.dart';
 import 'core/repositories/trash_repository.dart';
 import 'data/datasources/api_client.dart';
+import 'data/datasources/batch_api_datasource.dart';
 import 'data/datasources/chunked_upload_datasource.dart';
 import 'data/datasources/favorites_api_datasource.dart';
 import 'data/datasources/file_browser_api_datasource.dart';
@@ -71,6 +72,10 @@ Future<void> configureDependencies() async {
     () => ChunkedUploadDataSource(getIt<ApiClient>()),
   );
 
+  getIt.registerLazySingleton<BatchApiDataSource>(
+    () => BatchApiDataSource(getIt<ApiClient>()),
+  );
+
   // ============================================================================
   // Repositories
   // ============================================================================
@@ -87,7 +92,11 @@ Future<void> configureDependencies() async {
   );
 
   getIt.registerLazySingleton<FileBrowserRepository>(
-    () => FileBrowserRepositoryImpl(getIt<FileBrowserApiDataSource>()),
+    () => FileBrowserRepositoryImpl(
+      getIt<FileBrowserApiDataSource>(),
+      getIt<ChunkedUploadDataSource>(),
+      getIt<BatchApiDataSource>(),
+    ),
   );
 
   getIt.registerLazySingleton<TrashRepository>(

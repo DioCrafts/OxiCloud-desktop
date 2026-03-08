@@ -213,5 +213,93 @@
       "size": { "type": "String" }
     }
   },
-  "routeNotFound": "Route not found"
+  "routeNotFound": "Route not found",
+
+  "favorites": "Favorites",
+  "addToFavorites": "Add to Favorites",
+  "removeFavorite": "Remove Favorite",
+  "noFavorites": "No favorites yet",
+  "noFavoritesHint": "Star files and folders to find them here",
+
+  "recentFiles": "Recent Files",
+  "clearHistory": "Clear History",
+  "noRecentFiles": "No recent files",
+
+  "uploading": "Uploading {fileName}",
+  "@uploading": {
+    "placeholders": {
+      "fileName": { "type": "String" }
+    }
+  },
+  "uploadComplete": "File uploaded",
+  "fileUploaded": "File uploaded",
+  "folderCreated": "Folder created",
+  "fileDeleted": "File deleted",
+  "folderDeleted": "Folder deleted",
+  "fileRenamed": "File renamed",
+  "folderRenamed": "Folder renamed",
+
+  "selectedItems": "{count} selected",
+  "@selectedItems": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "clearSelection": "Clear selection",
+  "moveItems": "Move",
+  "copyItems": "Copy",
+  "itemsDeleted": "{count} items deleted",
+  "@itemsDeleted": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "itemsMoved": "{count} items moved",
+  "@itemsMoved": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "itemsCopied": "{count} items copied",
+  "@itemsCopied": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "downloadAsZip": "Download as ZIP",
+  "downloadingZip": "Downloading {name} as ZIP...",
+  "@downloadingZip": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "emptyFolder": "This folder is empty",
+  "emptyFolderHint": "Upload files or create a folder to get started",
+  "failedToLoadFolder": "Failed to load folder",
+  "newFolder": "New Folder",
+  "backToHome": "Back to Home",
+  "upOneLevel": "Up one level",
+  "listView": "List view",
+  "gridView": "Grid view",
+
+  "loading": "Loading...",
+  "moveItemsTitle": "Move Items",
+  "copyItemsTitle": "Copy Items",
+  "targetFolderHint": "Target folder ID (empty = root)",
+  "move": "Move",
+  "copy": "Copy",
+  "create": "Create",
+
+  "renameFolder": "Rename Folder",
+  "renameFile": "Rename File",
+  "deleteFolder": "Delete Folder",
+  "deleteFile": "Delete File",
+  "deleteConfirmText": "Are you sure you want to delete {name}? It will be moved to trash.",
+  "@deleteConfirmText": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  }
 }

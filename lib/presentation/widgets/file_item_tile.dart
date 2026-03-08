@@ -4,7 +4,7 @@ import '../../core/entities/file_item.dart';
 import '../theme/oxicloud_colors.dart';
 
 // =============================================================================
-// Folder tile (used in both list and grid mode)
+// Folder tile (used in list mode)
 // =============================================================================
 
 class FolderTile extends StatelessWidget {
@@ -12,6 +12,11 @@ class FolderTile extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
+  final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onDownloadZip;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
 
   const FolderTile({
     super.key,
@@ -19,11 +24,18 @@ class FolderTile extends StatelessWidget {
     required this.onTap,
     this.onRename,
     this.onDelete,
+    this.onFavoriteToggle,
+    this.onDownloadZip,
+    this.isFavorite = false,
+    this.isSelected = false,
+    this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      selected: isSelected,
+      selectedTileColor: OxiColors.primary.withOpacity(0.08),
       leading: Container(
         width: 40,
         height: 40,
@@ -31,10 +43,21 @@ class FolderTile extends StatelessWidget {
           color: OxiColors.navFilesInactive.withOpacity(0.15),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(
-          Icons.folder_rounded,
-          color: OxiColors.navFilesInactive,
-          size: 24,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Icon(
+              Icons.folder_rounded,
+              color: OxiColors.navFilesInactive,
+              size: 24,
+            ),
+            if (isFavorite)
+              const Positioned(
+                right: 2,
+                top: 2,
+                child: Icon(Icons.star, color: Colors.amber, size: 12),
+              ),
+          ],
         ),
       ),
       title: Text(
@@ -53,8 +76,12 @@ class FolderTile extends StatelessWidget {
       trailing: _ContextMenuButton(
         onRename: onRename,
         onDelete: onDelete,
+        onFavoriteToggle: onFavoriteToggle,
+        onDownloadZip: onDownloadZip,
+        isFavorite: isFavorite,
       ),
       onTap: onTap,
+      onLongPress: onLongPress,
     );
   }
 }
@@ -69,6 +96,11 @@ class FileTile extends StatelessWidget {
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
   final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final String? thumbnailUrl;
 
   const FileTile({
     super.key,
@@ -77,6 +109,11 @@ class FileTile extends StatelessWidget {
     this.onRename,
     this.onDelete,
     this.onDownload,
+    this.onFavoriteToggle,
+    this.isFavorite = false,
+    this.isSelected = false,
+    this.onLongPress,
+    this.thumbnailUrl,
   });
 
   @override
@@ -86,15 +123,9 @@ class FileTile extends StatelessWidget {
     final icon = FileTypeHelper.icon(fileType);
 
     return ListTile(
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: color, size: 22),
-      ),
+      selected: isSelected,
+      selectedTileColor: OxiColors.primary.withOpacity(0.08),
+      leading: _buildLeading(fileType, color, icon),
       title: Text(
         file.name,
         maxLines: 1,
@@ -109,8 +140,51 @@ class FileTile extends StatelessWidget {
         onRename: onRename,
         onDelete: onDelete,
         onDownload: onDownload,
+        onFavoriteToggle: onFavoriteToggle,
+        isFavorite: isFavorite,
       ),
       onTap: onTap,
+      onLongPress: onLongPress,
+    );
+  }
+
+  Widget _buildLeading(FileType fileType, Color color, IconData icon) {
+    // Show thumbnail for images if URL is available
+    if (thumbnailUrl != null && fileType == FileType.image) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          thumbnailUrl!,
+          width: 40,
+          height: 40,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildIconContainer(color, icon),
+        ),
+      );
+    }
+    return _buildIconContainer(color, icon);
+  }
+
+  Widget _buildIconContainer(Color color, IconData icon) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          if (isFavorite)
+            const Positioned(
+              right: 2,
+              top: 2,
+              child: Icon(Icons.star, color: Colors.amber, size: 12),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -124,6 +198,10 @@ class FolderGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
 
   const FolderGridCard({
     super.key,
@@ -131,6 +209,10 @@ class FolderGridCard extends StatelessWidget {
     required this.onTap,
     this.onRename,
     this.onDelete,
+    this.onFavoriteToggle,
+    this.isFavorite = false,
+    this.isSelected = false,
+    this.onLongPress,
   });
 
   @override
@@ -138,21 +220,36 @@ class FolderGridCard extends StatelessWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: OxiColors.border),
+        side: BorderSide(
+          color: isSelected ? OxiColors.primary : OxiColors.border,
+          width: isSelected ? 2 : 1,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isSelected ? OxiColors.primary.withOpacity(0.05) : null,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.folder_rounded,
-                color: OxiColors.navFilesInactive,
-                size: 40,
+              Stack(
+                children: [
+                  const Icon(
+                    Icons.folder_rounded,
+                    color: OxiColors.navFilesInactive,
+                    size: 40,
+                  ),
+                  if (isFavorite)
+                    const Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Icon(Icons.star, color: Colors.amber, size: 16),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -191,6 +288,11 @@ class FileGridCard extends StatelessWidget {
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
   final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final String? thumbnailUrl;
 
   const FileGridCard({
     super.key,
@@ -199,6 +301,11 @@ class FileGridCard extends StatelessWidget {
     this.onRename,
     this.onDelete,
     this.onDownload,
+    this.onFavoriteToggle,
+    this.isFavorite = false,
+    this.isSelected = false,
+    this.onLongPress,
+    this.thumbnailUrl,
   });
 
   @override
@@ -210,18 +317,23 @@ class FileGridCard extends StatelessWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: OxiColors.border),
+        side: BorderSide(
+          color: isSelected ? OxiColors.primary : OxiColors.border,
+          width: isSelected ? 2 : 1,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isSelected ? OxiColors.primary.withOpacity(0.05) : null,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 36),
+              _buildIcon(fileType, color, icon),
               const SizedBox(height: 8),
               Text(
                 file.name,
@@ -247,6 +359,169 @@ class FileGridCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildIcon(FileType fileType, Color color, IconData icon) {
+    if (thumbnailUrl != null && fileType == FileType.image) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Image.network(
+          thumbnailUrl!,
+          width: 36,
+          height: 36,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Icon(icon, color: color, size: 36),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        Icon(icon, color: color, size: 36),
+        if (isFavorite)
+          const Positioned(
+            right: -4,
+            top: -4,
+            child: Icon(Icons.star, color: Colors.amber, size: 14),
+          ),
+      ],
+    );
+  }
+}
+
+// =============================================================================
+// Upload progress overlay widget
+// =============================================================================
+
+class UploadProgressOverlay extends StatelessWidget {
+  final String fileName;
+  final double progress;
+  final int percent;
+
+  const UploadProgressOverlay({
+    super.key,
+    required this.fileName,
+    required this.progress,
+    required this.percent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.upload_file, color: OxiColors.primary),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Uploading $fileName',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$percent%',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: OxiColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          LinearProgressIndicator(
+            value: progress,
+            backgroundColor: OxiColors.border,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Multi-select action bar
+// =============================================================================
+
+class MultiSelectActionBar extends StatelessWidget {
+  final int selectedCount;
+  final VoidCallback onDelete;
+  final VoidCallback onMove;
+  final VoidCallback onCopy;
+  final VoidCallback onClearSelection;
+
+  const MultiSelectActionBar({
+    super.key,
+    required this.selectedCount,
+    required this.onDelete,
+    required this.onMove,
+    required this.onCopy,
+    required this.onClearSelection,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        border: Border(
+          bottom: BorderSide(color: OxiColors.border),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: onClearSelection,
+            tooltip: 'Clear selection',
+          ),
+          Text(
+            '$selectedCount selected',
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          const Spacer(),
+          IconButton(
+            icon: const Icon(Icons.drive_file_move_outlined),
+            onPressed: onMove,
+            tooltip: 'Move',
+          ),
+          IconButton(
+            icon: const Icon(Icons.copy_outlined),
+            onPressed: onCopy,
+            tooltip: 'Copy',
+          ),
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: OxiColors.error),
+            onPressed: onDelete,
+            tooltip: 'Delete',
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // =============================================================================
@@ -257,11 +532,17 @@ class _ContextMenuButton extends StatelessWidget {
   final VoidCallback? onRename;
   final VoidCallback? onDelete;
   final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onDownloadZip;
+  final bool isFavorite;
 
   const _ContextMenuButton({
     this.onRename,
     this.onDelete,
     this.onDownload,
+    this.onFavoriteToggle,
+    this.onDownloadZip,
+    this.isFavorite = false,
   });
 
   @override
@@ -271,6 +552,21 @@ class _ContextMenuButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       itemBuilder: (_) => [
+        if (onFavoriteToggle != null)
+          PopupMenuItem(
+            value: 'favorite',
+            child: Row(
+              children: [
+                Icon(
+                  isFavorite ? Icons.star : Icons.star_outline,
+                  size: 18,
+                  color: isFavorite ? Colors.amber : null,
+                ),
+                const SizedBox(width: 8),
+                Text(isFavorite ? 'Remove Favorite' : 'Add to Favorites'),
+              ],
+            ),
+          ),
         if (onDownload != null)
           const PopupMenuItem(
             value: 'download',
@@ -279,6 +575,17 @@ class _ContextMenuButton extends StatelessWidget {
                 Icon(Icons.download, size: 18),
                 SizedBox(width: 8),
                 Text('Download'),
+              ],
+            ),
+          ),
+        if (onDownloadZip != null)
+          const PopupMenuItem(
+            value: 'download_zip',
+            child: Row(
+              children: [
+                Icon(Icons.archive_outlined, size: 18),
+                SizedBox(width: 8),
+                Text('Download as ZIP'),
               ],
             ),
           ),
@@ -307,8 +614,12 @@ class _ContextMenuButton extends StatelessWidget {
       ],
       onSelected: (value) {
         switch (value) {
+          case 'favorite':
+            onFavoriteToggle?.call();
           case 'download':
             onDownload?.call();
+          case 'download_zip':
+            onDownloadZip?.call();
           case 'rename':
             onRename?.call();
           case 'delete':

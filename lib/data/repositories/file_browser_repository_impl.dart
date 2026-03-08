@@ -7,6 +7,8 @@ import 'package:logger/logger.dart';
 import '../../core/entities/file_item.dart';
 import '../../core/errors/failures.dart';
 import '../../core/repositories/file_browser_repository.dart';
+import '../datasources/batch_api_datasource.dart';
+import '../datasources/chunked_upload_datasource.dart';
 import '../datasources/file_browser_api_datasource.dart';
 import '../mappers/file_browser_mapper.dart';
 
@@ -16,9 +18,15 @@ import '../mappers/file_browser_mapper.dart';
 /// raw JSON through [FileBrowserMapper].
 class FileBrowserRepositoryImpl implements FileBrowserRepository {
   final FileBrowserApiDataSource _dataSource;
+  final ChunkedUploadDataSource _chunkedUpload;
+  final BatchApiDataSource _batchDataSource;
   final Logger _logger = Logger();
 
-  FileBrowserRepositoryImpl(this._dataSource);
+  FileBrowserRepositoryImpl(
+    this._dataSource,
+    this._chunkedUpload,
+    this._batchDataSource,
+  );
 
   // ── Listing ─────────────────────────────────────────────────────────────
 
@@ -136,6 +144,27 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
   }
 
   @override
+  Future<Either<FileBrowserFailure, FileItem>> uploadFileChunked(
+    File file,
+    String? folderId, {
+    void Function(int sent, int total)? onProgress,
+  }) async {
+    try {
+      final json = await _chunkedUpload.uploadFile(
+        file: file,
+        folderId: folderId,
+        onProgress: onProgress,
+      );
+      return Right(FileBrowserMapper.fileFromJson(json));
+    } on DioException catch (e) {
+      return Left(UploadFailure(e.message ?? 'Chunked upload error'));
+    } catch (e) {
+      _logger.e('uploadFileChunked error: $e');
+      return Left(UploadFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<FileBrowserFailure, FileItem>> renameFile(
     String id,
     String newName,
@@ -178,6 +207,90 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       _logger.e('downloadFile error: $e');
       return Left(DownloadFailure(e.toString()));
     }
+  }
+
+  // ── Batch operations ──────────────────────────────────────────────────
+
+  @override
+  Future<Either<FileBrowserFailure, void>> batchDelete({
+    List<String> fileIds = const [],
+    List<String> folderIds = const [],
+  }) async {
+    try {
+      await _batchDataSource.batchDelete(
+        fileIds: fileIds,
+        folderIds: folderIds,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_mapDioError(e));
+    } catch (e) {
+      _logger.e('batchDelete error: $e');
+      return Left(UnknownFileBrowserFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<FileBrowserFailure, void>> batchMove({
+    List<String> fileIds = const [],
+    List<String> folderIds = const [],
+    String? targetFolderId,
+  }) async {
+    try {
+      await _batchDataSource.batchMove(
+        fileIds: fileIds,
+        folderIds: folderIds,
+        targetFolderId: targetFolderId,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_mapDioError(e));
+    } catch (e) {
+      _logger.e('batchMove error: $e');
+      return Left(UnknownFileBrowserFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<FileBrowserFailure, void>> batchCopy({
+    List<String> fileIds = const [],
+    List<String> folderIds = const [],
+    String? targetFolderId,
+  }) async {
+    try {
+      await _batchDataSource.batchCopy(
+        fileIds: fileIds,
+        folderIds: folderIds,
+        targetFolderId: targetFolderId,
+      );
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_mapDioError(e));
+    } catch (e) {
+      _logger.e('batchCopy error: $e');
+      return Left(UnknownFileBrowserFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<FileBrowserFailure, String>> downloadFolderAsZip(
+    String folderId,
+    String savePath,
+  ) async {
+    try {
+      await _batchDataSource.downloadFolderAsZip(folderId, savePath);
+      return Right(savePath);
+    } on DioException catch (e) {
+      return Left(DownloadFailure(e.message ?? 'Unknown download error'));
+    } catch (e) {
+      _logger.e('downloadFolderAsZip error: $e');
+      return Left(DownloadFailure(e.toString()));
+    }
+  }
+
+  @override
+  String? getThumbnailUrl(String fileId, {String size = 'small'}) {
+    return _batchDataSource.getThumbnailUrl(fileId, size: size);
   }
 
   // ── Error mapping ─────────────────────────────────────────────────────

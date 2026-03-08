@@ -12,6 +12,7 @@ import 'core/repositories/search_repository.dart';
 import 'core/repositories/share_repository.dart';
 import 'core/repositories/sync_repository.dart';
 import 'core/repositories/trash_repository.dart';
+import 'data/datasources/favorites_api_datasource.dart';
 import 'data/datasources/rust_bridge_datasource.dart';
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/sync/sync_bloc.dart';
@@ -95,7 +96,10 @@ class OxiCloudAppWrapper extends StatelessWidget {
           create: (_) => SyncBloc(getIt<SyncRepository>()),
         ),
         BlocProvider(
-          create: (_) => FileBrowserBloc(getIt<FileBrowserRepository>()),
+          create: (_) => FileBrowserBloc(
+            getIt<FileBrowserRepository>(),
+            getIt<FavoritesApiDataSource>(),
+          ),
         ),
         BlocProvider(
           create: (_) => TrashBloc(getIt<TrashRepository>()),
