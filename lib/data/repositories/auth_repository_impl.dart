@@ -8,6 +8,8 @@ import '../datasources/rust_bridge_datasource.dart';
 
 /// Implementation of AuthRepository
 class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl(this._rustDataSource, [this._apiClient]);
+
   final RustBridgeDataSource _rustDataSource;
   final ApiClient? _apiClient;
   static const _serverUrlKey = 'server_url';
@@ -15,8 +17,6 @@ class AuthRepositoryImpl implements AuthRepository {
   static const _passwordKey = 'password';
   static const _accessTokenKey = 'access_token';
   static const _userIdKey = 'user_id';
-
-  AuthRepositoryImpl(this._rustDataSource, [this._apiClient]);
 
   @override
   Future<Either<AuthFailure, User>> login(AuthCredentials credentials) async {
@@ -59,8 +59,8 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       return Right(user);
-    } catch (e) {
-      if (e.toString().contains('Network') || 
+    } on Exception catch (e) {
+      if (e.toString().contains('Network') ||
           e.toString().contains('Connection')) {
         return Left(ServerUnreachableFailure(e.toString()));
       }
@@ -73,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _rustDataSource.logout();
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownAuthFailure(e.toString()));
     }
   }
@@ -83,7 +83,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await _rustDataSource.isLoggedIn();
       return Right(result);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownAuthFailure(e.toString()));
     }
   }
@@ -117,7 +117,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       return Right(user);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownAuthFailure(e.toString()));
     }
   }

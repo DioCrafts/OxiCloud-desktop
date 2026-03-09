@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 
-import 'src/rust/frb_generated.dart';
-import 'injection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'core/repositories/auth_repository.dart';
 import 'core/repositories/favorites_repository.dart';
 import 'core/repositories/file_browser_repository.dart';
@@ -14,24 +13,26 @@ import 'core/repositories/sync_repository.dart';
 import 'core/repositories/trash_repository.dart';
 import 'data/datasources/favorites_api_datasource.dart';
 import 'data/datasources/rust_bridge_datasource.dart';
-import 'presentation/blocs/auth/auth_bloc.dart';
-import 'presentation/blocs/sync/sync_bloc.dart';
-import 'presentation/blocs/file_browser/file_browser_bloc.dart';
-import 'presentation/blocs/trash/trash_bloc.dart';
-import 'presentation/blocs/share/share_bloc.dart';
-import 'presentation/blocs/search/search_bloc.dart';
-import 'presentation/blocs/favorites/favorites_bloc.dart';
-import 'presentation/blocs/recent/recent_bloc.dart';
-import 'presentation/app.dart';
+import 'injection.dart';
 import 'platform/desktop_window.dart';
 import 'platform/system_tray_service.dart';
+import 'presentation/app.dart';
+import 'presentation/blocs/auth/auth_bloc.dart';
+import 'presentation/blocs/favorites/favorites_bloc.dart';
+import 'presentation/blocs/file_browser/file_browser_bloc.dart';
+import 'presentation/blocs/recent/recent_bloc.dart';
+import 'presentation/blocs/search/search_bloc.dart';
+import 'presentation/blocs/share/share_bloc.dart';
+import 'presentation/blocs/sync/sync_bloc.dart';
+import 'presentation/blocs/trash/trash_bloc.dart';
+import 'src/rust/frb_generated.dart';
 
 /// Check if current platform is desktop
 bool get isDesktop =>
     Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
 /// Check if current platform is mobile
-bool get isMobile => Platform.isAndroid || Platform.isIOS;
+bool get _isMobile => Platform.isAndroid || Platform.isIOS;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,10 +59,7 @@ void main() async {
     await windowManager.init();
 
     // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
-    trayService.onSyncNow = () {
-      // Access the global SyncBloc via the navigator key
-      _syncNowFromTray();
-    };
+    trayService.onSyncNow = _syncNowFromTray;
   }
 
   runApp(const OxiCloudAppWrapper());
@@ -75,7 +73,7 @@ void _syncNowFromTray() {
   if (ctx != null) {
     try {
       ctx.read<SyncBloc>().add(const SyncNowRequested());
-    } catch (_) {
+    } on Exception catch (_) {
       // BLoC not yet available
     }
   }

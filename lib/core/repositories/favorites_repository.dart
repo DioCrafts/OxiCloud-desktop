@@ -9,8 +9,8 @@ abstract class FavoritesRepository {
 }
 
 abstract class FavoritesFailure {
-  final String message;
   const FavoritesFailure(this.message);
+  final String message;
 }
 
 class NetworkFavoritesFailure extends FavoritesFailure {

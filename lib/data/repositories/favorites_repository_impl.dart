@@ -6,9 +6,9 @@ import '../../core/repositories/favorites_repository.dart';
 import '../datasources/favorites_api_datasource.dart';
 
 class FavoritesRepositoryImpl implements FavoritesRepository {
-  final FavoritesApiDataSource _dataSource;
-
   FavoritesRepositoryImpl(this._dataSource);
+
+  final FavoritesApiDataSource _dataSource;
 
   @override
   Future<Either<FavoritesFailure, List<FavoriteItem>>> getFavorites() async {
@@ -25,7 +25,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       return Right(items);
     } on DioException catch (e) {
       return Left(NetworkFavoritesFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFavoritesFailure(e.toString()));
     }
   }
@@ -37,7 +37,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(NetworkFavoritesFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFavoritesFailure(e.toString()));
     }
   }
@@ -49,7 +49,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(NetworkFavoritesFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownFavoritesFailure(e.toString()));
     }
   }

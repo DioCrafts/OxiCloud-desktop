@@ -2,9 +2,9 @@ import 'api_client.dart';
 
 /// API data source for batch operations matching OxiCloud server's /api/batch/*
 class BatchApiDataSource {
-  final ApiClient _apiClient;
-
   BatchApiDataSource(this._apiClient);
+
+  final ApiClient _apiClient;
 
   /// POST /api/batch/delete
   Future<Map<String, dynamic>> batchDelete({

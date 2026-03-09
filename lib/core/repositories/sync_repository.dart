@@ -65,8 +65,8 @@ abstract class SyncRepository {
 
 /// Sync failures
 abstract class SyncFailure {
-  final String message;
   const SyncFailure(this.message);
+  final String message;
 }
 
 class NotInitializedFailure extends SyncFailure {
@@ -86,19 +86,11 @@ class StorageSyncFailure extends SyncFailure {
 }
 
 class UnknownSyncFailure extends SyncFailure {
-  const UnknownSyncFailure(String message) : super(message);
+  const UnknownSyncFailure(super.message);
 }
 
 /// Sync history entry
 class SyncHistoryEntry {
-  final String id;
-  final DateTime timestamp;
-  final String operation;
-  final String itemPath;
-  final SyncDirection direction;
-  final SyncItemStatus status;
-  final String? errorMessage;
-
   const SyncHistoryEntry({
     required this.id,
     required this.timestamp,
@@ -108,23 +100,18 @@ class SyncHistoryEntry {
     required this.status,
     this.errorMessage,
   });
+
+  final String id;
+  final DateTime timestamp;
+  final String operation;
+  final String itemPath;
+  final SyncDirection direction;
+  final SyncItemStatus status;
+  final String? errorMessage;
 }
 
 /// Sync configuration
 class SyncConfig {
-  final String syncFolder;
-  final int syncIntervalSeconds;
-  final int maxUploadSpeedKbps;
-  final int maxDownloadSpeedKbps;
-  final bool deltaSyncEnabled;
-  final bool pauseOnMetered;
-  final bool wifiOnly;
-  final bool watchFilesystem;
-  final List<String> ignorePatterns;
-  final bool notificationsEnabled;
-  final bool launchAtStartup;
-  final bool minimizeToTray;
-
   const SyncConfig({
     required this.syncFolder,
     this.syncIntervalSeconds = 300,
@@ -139,6 +126,19 @@ class SyncConfig {
     this.launchAtStartup = false,
     this.minimizeToTray = true,
   });
+
+  final String syncFolder;
+  final int syncIntervalSeconds;
+  final int maxUploadSpeedKbps;
+  final int maxDownloadSpeedKbps;
+  final bool deltaSyncEnabled;
+  final bool pauseOnMetered;
+  final bool wifiOnly;
+  final bool watchFilesystem;
+  final List<String> ignorePatterns;
+  final bool notificationsEnabled;
+  final bool launchAtStartup;
+  final bool minimizeToTray;
 
   SyncConfig copyWith({
     String? syncFolder,

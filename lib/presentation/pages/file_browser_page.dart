@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart' hide FileType;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:open_file/open_file.dart';
@@ -355,7 +355,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       padding: const EdgeInsets.all(12),
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 1.0,
+      childAspectRatio: 1,
       children: items,
     );
   }

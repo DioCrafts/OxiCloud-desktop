@@ -7,21 +7,21 @@ import 'file_item.dart';
 // =============================================================================
 
 class SearchResults extends Equatable {
+  const SearchResults({
+    required this.files,
+    required this.folders,
+    required this.limit,
+    required this.offset,
+    required this.hasMore,
+    this.totalCount,
+  });
+
   final List<FileItem> files;
   final List<FolderItem> folders;
   final int? totalCount;
   final int limit;
   final int offset;
   final bool hasMore;
-
-  const SearchResults({
-    required this.files,
-    required this.folders,
-    this.totalCount,
-    required this.limit,
-    required this.offset,
-    required this.hasMore,
-  });
 
   int get count => files.length + folders.length;
   bool get isEmpty => files.isEmpty && folders.isEmpty;
@@ -36,19 +36,6 @@ class SearchResults extends Equatable {
 // =============================================================================
 
 class SearchCriteria extends Equatable {
-  final String? nameContains;
-  final List<String>? fileTypes;
-  final DateTime? createdAfter;
-  final DateTime? createdBefore;
-  final DateTime? modifiedAfter;
-  final DateTime? modifiedBefore;
-  final int? minSize;
-  final int? maxSize;
-  final String? folderId;
-  final bool recursive;
-  final int limit;
-  final int offset;
-
   const SearchCriteria({
     this.nameContains,
     this.fileTypes,
@@ -63,6 +50,19 @@ class SearchCriteria extends Equatable {
     this.limit = 100,
     this.offset = 0,
   });
+
+  final String? nameContains;
+  final List<String>? fileTypes;
+  final DateTime? createdAfter;
+  final DateTime? createdBefore;
+  final DateTime? modifiedAfter;
+  final DateTime? modifiedBefore;
+  final int? minSize;
+  final int? maxSize;
+  final String? folderId;
+  final bool recursive;
+  final int limit;
+  final int offset;
 
   @override
   List<Object?> get props => [

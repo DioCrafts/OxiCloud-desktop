@@ -9,9 +9,9 @@ import '../theme/oxicloud_colors.dart';
 /// navigates back to that folder level.
 class BreadcrumbBar extends StatelessWidget {
   const BreadcrumbBar({
-    super.key,
     required this.items,
     required this.onTap,
+    super.key,
   });
 
   final List<BreadcrumbItem> items;

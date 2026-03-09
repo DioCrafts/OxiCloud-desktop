@@ -7,20 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Wraps [Dio] with automatic JWT authentication, base-URL
 /// configuration, and transparent 401 → re-login recovery.
 class ApiClient {
-  static const _serverUrlKey = 'server_url';
-  static const _usernameKey = 'username';
-  static const _passwordKey = 'password'; // stored for silent re-login
-  static const _accessTokenKey = 'access_token';
-  static const _refreshTokenKey = 'refresh_token';
-
-  final Dio _dio;
-  final Logger _logger = Logger();
-
-  String? _baseUrl;
-  String? _token;
-  bool _configured = false;
-  bool _isRefreshing = false;
-
   ApiClient() : _dio = Dio() {
     _dio.options
       ..connectTimeout = const Duration(seconds: 15)
@@ -57,6 +43,20 @@ class ApiClient {
       },
     ));
   }
+
+  static const _serverUrlKey = 'server_url';
+  static const _usernameKey = 'username';
+  static const _passwordKey = 'password'; // stored for silent re-login
+  static const _accessTokenKey = 'access_token';
+  static const _refreshTokenKey = 'refresh_token';
+
+  final Dio _dio;
+  final Logger _logger = Logger();
+
+  String? _baseUrl;
+  String? _token;
+  bool _configured = false;
+  bool _isRefreshing = false;
 
   // ── Public API ──────────────────────────────────────────────────────────
 
@@ -134,7 +134,7 @@ class ApiClient {
               return true;
             }
           }
-        } catch (_) {
+        } on Exception catch (_) {
           _logger.w('Token refresh failed, falling back to re-login');
         }
       }
@@ -169,7 +169,7 @@ class ApiClient {
       _configured = true;
       _logger.i('Silent re-login succeeded');
       return true;
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Silent re-login failed: $e');
       return false;
     } finally {

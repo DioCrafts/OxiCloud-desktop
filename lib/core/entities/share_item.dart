@@ -5,6 +5,20 @@ import 'package:equatable/equatable.dart';
 // =============================================================================
 
 class ShareItem extends Equatable {
+  const ShareItem({
+    required this.id,
+    required this.itemId,
+    required this.itemType,
+    required this.token,
+    required this.url,
+    required this.hasPassword,
+    required this.permissions,
+    required this.createdAt,
+    required this.createdBy,
+    required this.accessCount,
+    this.expiresAt,
+  });
+
   final String id;
   final String itemId;
 
@@ -18,20 +32,6 @@ class ShareItem extends Equatable {
   final DateTime createdAt;
   final String createdBy;
   final int accessCount;
-
-  const ShareItem({
-    required this.id,
-    required this.itemId,
-    required this.itemType,
-    required this.token,
-    required this.url,
-    required this.hasPassword,
-    this.expiresAt,
-    required this.permissions,
-    required this.createdAt,
-    required this.createdBy,
-    required this.accessCount,
-  });
 
   bool get isExpired =>
       expiresAt != null && expiresAt!.isBefore(DateTime.now());
@@ -57,15 +57,15 @@ class ShareItem extends Equatable {
 // =============================================================================
 
 class SharePermissions extends Equatable {
-  final bool read;
-  final bool write;
-  final bool reshare;
-
   const SharePermissions({
     this.read = true,
     this.write = false,
     this.reshare = false,
   });
+
+  final bool read;
+  final bool write;
+  final bool reshare;
 
   @override
   List<Object?> get props => [read, write, reshare];
@@ -76,13 +76,6 @@ class SharePermissions extends Equatable {
 // =============================================================================
 
 class PaginationInfo extends Equatable {
-  final int page;
-  final int pageSize;
-  final int totalItems;
-  final int totalPages;
-  final bool hasNext;
-  final bool hasPrev;
-
   const PaginationInfo({
     required this.page,
     required this.pageSize,
@@ -92,6 +85,13 @@ class PaginationInfo extends Equatable {
     required this.hasPrev,
   });
 
+  final int page;
+  final int pageSize;
+  final int totalItems;
+  final int totalPages;
+  final bool hasNext;
+  final bool hasPrev;
+
   @override
   List<Object?> get props =>
       [page, pageSize, totalItems, totalPages, hasNext, hasPrev];
@@ -99,13 +99,13 @@ class PaginationInfo extends Equatable {
 
 /// Paginated wrapper for any list.
 class PaginatedResult<T> extends Equatable {
-  final List<T> items;
-  final PaginationInfo pagination;
-
   const PaginatedResult({
     required this.items,
     required this.pagination,
   });
+
+  final List<T> items;
+  final PaginationInfo pagination;
 
   @override
   List<Object?> get props => [items, pagination];

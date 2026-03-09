@@ -25,8 +25,8 @@ abstract class AuthRepository {
 
 /// Authentication failures
 abstract class AuthFailure {
-  final String message;
   const AuthFailure(this.message);
+  final String message;
 }
 
 class InvalidCredentialsFailure extends AuthFailure {
@@ -43,5 +43,5 @@ class NetworkFailure extends AuthFailure {
 }
 
 class UnknownAuthFailure extends AuthFailure {
-  const UnknownAuthFailure(String message) : super(message);
+  const UnknownAuthFailure(super.message);
 }

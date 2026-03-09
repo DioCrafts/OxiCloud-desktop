@@ -9,8 +9,8 @@ abstract class RecentRepository {
 }
 
 abstract class RecentFailure {
-  final String message;
   const RecentFailure(this.message);
+  final String message;
 }
 
 class NetworkRecentFailure extends RecentFailure {

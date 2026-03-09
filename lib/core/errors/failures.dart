@@ -5,10 +5,10 @@ import 'package:equatable/equatable.dart';
 /// Provides a unified error hierarchy that all feature-specific
 /// failures extend from, enabling generic error handling.
 abstract class Failure extends Equatable {
+  const Failure(this.message, {this.code});
+
   final String message;
   final String? code;
-
-  const Failure(this.message, {this.code});
 
   @override
   List<Object?> get props => [message, code];
@@ -59,8 +59,8 @@ class FileBrowserNetworkFailure extends FileBrowserFailure {
 }
 
 class UnknownFileBrowserFailure extends FileBrowserFailure {
-  const UnknownFileBrowserFailure(String detail)
-      : super(detail, code: 'UNKNOWN_FILE_BROWSER');
+  const UnknownFileBrowserFailure(super.message)
+      : super(code: 'UNKNOWN_FILE_BROWSER');
 }
 
 // =============================================================================
@@ -88,8 +88,8 @@ class TrashNetworkFailure extends TrashFailure {
 }
 
 class UnknownTrashFailure extends TrashFailure {
-  const UnknownTrashFailure(String detail)
-      : super(detail, code: 'UNKNOWN_TRASH');
+  const UnknownTrashFailure(super.message)
+      : super(code: 'UNKNOWN_TRASH');
 }
 
 // =============================================================================
@@ -127,8 +127,8 @@ class ShareNetworkFailure extends ShareFailure {
 }
 
 class UnknownShareFailure extends ShareFailure {
-  const UnknownShareFailure(String detail)
-      : super(detail, code: 'UNKNOWN_SHARE');
+  const UnknownShareFailure(super.message)
+      : super(code: 'UNKNOWN_SHARE');
 }
 
 // =============================================================================
@@ -151,6 +151,6 @@ class SearchNetworkFailure extends SearchFailure {
 }
 
 class UnknownSearchFailure extends SearchFailure {
-  const UnknownSearchFailure(String detail)
-      : super(detail, code: 'UNKNOWN_SEARCH');
+  const UnknownSearchFailure(super.message)
+      : super(code: 'UNKNOWN_SEARCH');
 }

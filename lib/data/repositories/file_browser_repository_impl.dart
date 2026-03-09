@@ -17,16 +17,16 @@ import '../mappers/file_browser_mapper.dart';
 /// Delegates network calls to [FileBrowserApiDataSource] and maps
 /// raw JSON through [FileBrowserMapper].
 class FileBrowserRepositoryImpl implements FileBrowserRepository {
-  final FileBrowserApiDataSource _dataSource;
-  final ChunkedUploadDataSource _chunkedUpload;
-  final BatchApiDataSource _batchDataSource;
-  final Logger _logger = Logger();
-
   FileBrowserRepositoryImpl(
     this._dataSource,
     this._chunkedUpload,
     this._batchDataSource,
   );
+
+  final FileBrowserApiDataSource _dataSource;
+  final ChunkedUploadDataSource _chunkedUpload;
+  final BatchApiDataSource _batchDataSource;
+  final Logger _logger = Logger();
 
   // ── Listing ─────────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.foldersFromJson(json));
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('listFolders error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -56,7 +56,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.filesFromJson(json));
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('listFiles error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -69,7 +69,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.folderFromJson(json));
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('getFolder error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -90,7 +90,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
         return Left(FolderAlreadyExistsFailure(name));
       }
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('createFolder error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -106,7 +106,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.folderFromJson(json));
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('renameFolder error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -119,7 +119,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('deleteFolder error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -137,7 +137,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.fileFromJson(json));
     } on DioException catch (e) {
       return Left(UploadFailure(e.message ?? 'Unknown upload error'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('uploadFile error: $e');
       return Left(UploadFailure(e.toString()));
     }
@@ -158,7 +158,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.fileFromJson(json));
     } on DioException catch (e) {
       return Left(UploadFailure(e.message ?? 'Chunked upload error'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('uploadFileChunked error: $e');
       return Left(UploadFailure(e.toString()));
     }
@@ -174,7 +174,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(FileBrowserMapper.fileFromJson(json));
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('renameFile error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -187,7 +187,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('deleteFile error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -203,7 +203,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(savePath);
     } on DioException catch (e) {
       return Left(DownloadFailure(e.message ?? 'Unknown download error'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('downloadFile error: $e');
       return Left(DownloadFailure(e.toString()));
     }
@@ -224,7 +224,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('batchDelete error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -245,7 +245,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('batchMove error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -266,7 +266,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('batchCopy error: $e');
       return Left(UnknownFileBrowserFailure(e.toString()));
     }
@@ -282,7 +282,7 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
       return Right(savePath);
     } on DioException catch (e) {
       return Left(DownloadFailure(e.message ?? 'Unknown download error'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('downloadFolderAsZip error: $e');
       return Left(DownloadFailure(e.toString()));
     }
@@ -310,7 +310,9 @@ class FileBrowserRepositoryImpl implements FileBrowserRepository {
         return UnknownFileBrowserFailure(
           'Server responded with $code: ${e.response?.statusMessage}',
         );
-      default:
+      case DioExceptionType.badCertificate:
+      case DioExceptionType.cancel:
+      case DioExceptionType.unknown:
         return UnknownFileBrowserFailure(e.message ?? 'Unknown error');
     }
   }
