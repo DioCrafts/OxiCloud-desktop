@@ -16,9 +16,9 @@ class GetRemoteFoldersUseCase {
 
 /// Select folders to sync use case
 class SelectFoldersUseCase {
-  final SyncRepository _repository;
-
   SelectFoldersUseCase(this._repository);
+
+  final SyncRepository _repository;
 
   Future<Either<SyncFailure, void>> call(List<String> folderIds) async {
     return _repository.setSyncFolders(folderIds);
@@ -27,9 +27,9 @@ class SelectFoldersUseCase {
 
 /// Get selected folders use case
 class GetSelectedFoldersUseCase {
-  final SyncRepository _repository;
-
   GetSelectedFoldersUseCase(this._repository);
+
+  final SyncRepository _repository;
 
   Future<Either<SyncFailure, List<String>>> call() async {
     return _repository.getSyncFolders();

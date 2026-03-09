@@ -12,11 +12,11 @@ import '../datasources/rust_bridge_datasource.dart';
 
 /// Implementation of SyncRepository
 class SyncRepositoryImpl implements SyncRepository {
+  SyncRepositoryImpl(this._rustDataSource);
+
   final RustBridgeDataSource _rustDataSource;
   final _statusController = StreamController<SyncStatus>.broadcast();
   Timer? _statusPollingTimer;
-
-  SyncRepositoryImpl(this._rustDataSource);
 
   @override
   Future<Either<SyncFailure, void>> startSync() async {
@@ -24,7 +24,7 @@ class SyncRepositoryImpl implements SyncRepository {
       await _rustDataSource.startSync();
       _startStatusPolling();
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -35,7 +35,7 @@ class SyncRepositoryImpl implements SyncRepository {
       await _rustDataSource.stopSync();
       _stopStatusPolling();
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -54,7 +54,7 @@ class SyncRepositoryImpl implements SyncRepository {
         errors: result.errors,
         duration: Duration(milliseconds: result.durationMs),
       ));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -77,7 +77,7 @@ class SyncRepositoryImpl implements SyncRepository {
             ? DateTime.fromMillisecondsSinceEpoch(status.nextSyncTime! * 1000)
             : null,
       ));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -100,7 +100,7 @@ class SyncRepositoryImpl implements SyncRepository {
         localModified: i.localModified,
         remoteModified: i.remoteModified,
       )).toList());
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -118,7 +118,7 @@ class SyncRepositoryImpl implements SyncRepository {
         status: _parseSyncItemStatus(e.status),
         errorMessage: e.errorMessage,
       )).toList());
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -136,7 +136,7 @@ class SyncRepositoryImpl implements SyncRepository {
         itemCount: f.itemCount,
         isSelected: f.isSelected,
       )).toList());
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -146,7 +146,7 @@ class SyncRepositoryImpl implements SyncRepository {
     try {
       await _rustDataSource.setSyncFolders(folderIds);
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -156,7 +156,7 @@ class SyncRepositoryImpl implements SyncRepository {
     try {
       final folders = await _rustDataSource.getSyncFolders();
       return Right(folders);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -175,7 +175,7 @@ class SyncRepositoryImpl implements SyncRepository {
         remoteSize: c.remoteSize,
         type: _parseConflictType(c.conflictType),
       )).toList());
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -191,7 +191,7 @@ class SyncRepositoryImpl implements SyncRepository {
         _serializeResolution(resolution),
       );
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -215,7 +215,7 @@ class SyncRepositoryImpl implements SyncRepository {
         launchAtStartup: config.launchAtStartup,
         minimizeToTray: config.minimizeToTray,
       ));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -238,7 +238,7 @@ class SyncRepositoryImpl implements SyncRepository {
         minimizeToTray: config.minimizeToTray,
       ));
       return const Right(null);
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownSyncFailure(e.toString()));
     }
   }
@@ -255,7 +255,7 @@ class SyncRepositoryImpl implements SyncRepository {
         final result = await getSyncStatus();
         result.fold(
           (failure) {},
-          (status) => _statusController.add(status),
+          _statusController.add,
         );
       },
     );

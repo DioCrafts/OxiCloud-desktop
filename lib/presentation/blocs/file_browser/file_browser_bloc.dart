@@ -18,9 +18,6 @@ part 'file_browser_state.dart';
 const int _chunkedUploadThreshold = 10 * 1024 * 1024;
 
 class FileBrowserBloc extends Bloc<FileBrowserEvent, FileBrowserState> {
-  final FileBrowserRepository _repository;
-  final FavoritesApiDataSource? _favoritesDataSource;
-
   FileBrowserBloc(this._repository, [this._favoritesDataSource])
       : super(const FileBrowserInitial()) {
     on<LoadFolder>(_onLoadFolder);
@@ -43,6 +40,9 @@ class FileBrowserBloc extends Bloc<FileBrowserEvent, FileBrowserState> {
     on<ToggleViewMode>(_onToggleViewMode);
     on<RefreshFolder>(_onRefreshFolder);
   }
+
+  final FileBrowserRepository _repository;
+  final FavoritesApiDataSource? _favoritesDataSource;
 
   // Current navigation stack — kept in the bloc so it survives state changes.
   final List<BreadcrumbItem> _breadcrumbs = [
@@ -274,7 +274,7 @@ class FileBrowserBloc extends Bloc<FileBrowserEvent, FileBrowserState> {
         await _favoritesDataSource.addFavorite(event.itemType, event.itemId);
         emit(const FileBrowserActionSuccess('Added to favorites'));
       }
-    } catch (e) {
+    } on Exception catch (e) {
       emit(FileBrowserActionError('Failed to update favorite: $e'));
     }
   }

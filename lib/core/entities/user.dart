@@ -75,15 +75,15 @@ class ServerInfo extends Equatable {
 
 /// Authentication credentials
 class AuthCredentials {
-  final String serverUrl;
-  final String username;
-  final String password;
-
   const AuthCredentials({
     required this.serverUrl,
     required this.username,
     required this.password,
   });
+
+  final String serverUrl;
+  final String username;
+  final String password;
 
   /// Validate credentials
   String? validate() {

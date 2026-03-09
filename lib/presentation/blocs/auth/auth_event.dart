@@ -22,6 +22,10 @@ class LoginSubmitted extends AuthEvent {
     required this.password,
   });
 
+  final String serverUrl;
+  final String username;
+  final String password;
+
   @override
   List<Object?> get props => [serverUrl, username, password];
 }

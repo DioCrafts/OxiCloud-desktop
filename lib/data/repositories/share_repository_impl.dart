@@ -87,7 +87,7 @@ class ShareRepositoryImpl implements ShareRepository {
   }) async {
     try {
       final body = <String, dynamic>{
-        ?'password': password,
+        if (password != null) 'password': password,
         if (expiresAt != null)
           'expires_at': expiresAt.millisecondsSinceEpoch ~/ 1000,
         if (permissions != null)

@@ -4,9 +4,9 @@ import 'api_client.dart';
 
 /// Raw REST calls to OxiCloud server for share operations.
 class ShareApiDataSource {
-  final ApiClient _apiClient;
-
   ShareApiDataSource(this._apiClient);
+
+  final ApiClient _apiClient;
 
   Dio get _dio => _apiClient.dio;
 

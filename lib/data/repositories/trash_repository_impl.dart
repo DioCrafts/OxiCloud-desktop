@@ -9,10 +9,10 @@ import '../datasources/trash_api_datasource.dart';
 import '../mappers/trash_share_search_mapper.dart';
 
 class TrashRepositoryImpl implements TrashRepository {
+  TrashRepositoryImpl(this._dataSource);
+
   final TrashApiDataSource _dataSource;
   final Logger _logger = Logger();
-
-  TrashRepositoryImpl(this._dataSource);
 
   @override
   Future<Either<TrashFailure, List<TrashItem>>> listTrash() async {
@@ -22,7 +22,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return Right(items);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'listing trash'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error listing trash: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -35,7 +35,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'trashing file'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error trashing file: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -48,7 +48,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'trashing folder'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error trashing folder: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -61,7 +61,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'restoring item'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error restoring item: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -76,7 +76,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'deleting permanently'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error deleting permanently: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -89,7 +89,7 @@ class TrashRepositoryImpl implements TrashRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'emptying trash'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error emptying trash: $e');
       return Left(UnknownTrashFailure(e.toString()));
     }
@@ -103,8 +103,9 @@ class TrashRepositoryImpl implements TrashRepository {
       return const TrashDisabledFailure();
     }
     if (statusCode == 404) {
+      final data = e.response?.data;
       return TrashItemNotFoundFailure(
-        e.response?.data?['error']?.toString() ?? 'Unknown',
+        (data is Map ? data['error']?.toString() : null) ?? 'Unknown',
       );
     }
     if (e.type == DioExceptionType.connectionTimeout ||
@@ -112,8 +113,9 @@ class TrashRepositoryImpl implements TrashRepository {
       return TrashNetworkFailure('$action: connection error');
     }
     _logger.e('Trash DioException ($action): $e');
+    final data = e.response?.data;
     return UnknownTrashFailure(
-      e.response?.data?['error']?.toString() ?? e.message ?? action,
+      (data is Map ? data['error']?.toString() : null) ?? e.message ?? action,
     );
   }
 }
