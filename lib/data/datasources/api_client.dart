@@ -63,6 +63,9 @@ class ApiClient {
   /// The underlying [Dio] instance (pre-configured with base URL & auth).
   Dio get dio => _dio;
 
+  /// The configured base URL (empty string if not yet configured).
+  String get baseUrl => _baseUrl ?? '';
+
   /// Whether the client has a valid (non-null) access token.
   bool get isAuthenticated => _token != null;
 

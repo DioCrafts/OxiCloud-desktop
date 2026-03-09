@@ -257,10 +257,12 @@ class RustBridgeDataSource {
 
   Future<void> updateConfig(SyncConfigDto config) async {
     _ensureInitialized();
+    final appDir = await getApplicationSupportDirectory();
+    final dbPath = '${appDir.path}/oxicloud.db';
     await rust.updateConfig(
       config: SyncConfig(
         syncFolder: config.syncFolder,
-        databasePath: '',
+        databasePath: dbPath,
         syncIntervalSeconds: config.syncIntervalSeconds,
         maxUploadSpeedKbps: config.maxUploadSpeedKbps,
         maxDownloadSpeedKbps: config.maxDownloadSpeedKbps,

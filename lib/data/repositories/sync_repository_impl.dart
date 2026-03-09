@@ -268,13 +268,13 @@ class SyncRepositoryImpl implements SyncRepository {
 
   ConflictType _parseConflictType(String type) {
     switch (type) {
-      case 'BothModified':
+      case 'both_modified':
         return ConflictType.bothModified;
-      case 'DeletedLocally':
+      case 'deleted_locally':
         return ConflictType.deletedLocally;
-      case 'DeletedRemotely':
+      case 'deleted_remotely':
         return ConflictType.deletedRemotely;
-      case 'TypeMismatch':
+      case 'type_mismatch':
         return ConflictType.typeMismatch;
       default:
         return ConflictType.bothModified;
@@ -284,13 +284,13 @@ class SyncRepositoryImpl implements SyncRepository {
   String _serializeResolution(ConflictResolution resolution) {
     switch (resolution) {
       case ConflictResolution.keepLocal:
-        return 'KeepLocal';
+        return 'keep_local';
       case ConflictResolution.keepRemote:
-        return 'KeepRemote';
+        return 'keep_remote';
       case ConflictResolution.keepBoth:
-        return 'KeepBoth';
+        return 'keep_both';
       case ConflictResolution.skip:
-        return 'Skip';
+        return 'skip';
     }
   }
 

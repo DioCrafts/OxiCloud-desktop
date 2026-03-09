@@ -15,69 +15,6 @@ abstract class Failure extends Equatable {
 }
 
 // =============================================================================
-// Auth failures
-// =============================================================================
-
-/// Base class for authentication-related failures.
-abstract class AuthFailure extends Failure {
-  const AuthFailure(super.message, {super.code});
-}
-
-class InvalidCredentialsFailure extends AuthFailure {
-  const InvalidCredentialsFailure()
-      : super('Invalid username or password', code: 'INVALID_CREDENTIALS');
-}
-
-class ServerUnreachableFailure extends AuthFailure {
-  const ServerUnreachableFailure(String detail)
-      : super('Server unreachable: $detail', code: 'SERVER_UNREACHABLE');
-}
-
-class NetworkFailure extends AuthFailure {
-  const NetworkFailure(String detail)
-      : super('Network error: $detail', code: 'NETWORK_ERROR');
-}
-
-class UnknownAuthFailure extends AuthFailure {
-  const UnknownAuthFailure(String detail)
-      : super(detail, code: 'UNKNOWN_AUTH');
-}
-
-// =============================================================================
-// Sync failures
-// =============================================================================
-
-/// Base class for synchronization-related failures.
-abstract class SyncFailure extends Failure {
-  const SyncFailure(super.message, {super.code});
-}
-
-class NotInitializedFailure extends SyncFailure {
-  const NotInitializedFailure()
-      : super('Sync engine not initialized', code: 'NOT_INITIALIZED');
-}
-
-class NotAuthenticatedFailure extends SyncFailure {
-  const NotAuthenticatedFailure()
-      : super('Not authenticated', code: 'NOT_AUTHENTICATED');
-}
-
-class NetworkSyncFailure extends SyncFailure {
-  const NetworkSyncFailure(String detail)
-      : super('Network error: $detail', code: 'NETWORK_SYNC');
-}
-
-class StorageSyncFailure extends SyncFailure {
-  const StorageSyncFailure(String detail)
-      : super('Storage error: $detail', code: 'STORAGE_SYNC');
-}
-
-class UnknownSyncFailure extends SyncFailure {
-  const UnknownSyncFailure(String detail)
-      : super(detail, code: 'UNKNOWN_SYNC');
-}
-
-// =============================================================================
 // File browser failures
 // =============================================================================
 
