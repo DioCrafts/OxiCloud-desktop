@@ -517,10 +517,21 @@ class SyncItemDto {
 }
 
 class SyncHistoryEntryDto {
-  final String id, operation, itemPath, direction, status;
+  SyncHistoryEntryDto({
+    required this.id,
+    required this.operation,
+    required this.itemPath,
+    required this.direction,
+    required this.status,
+    required this.timestamp,
+    this.errorMessage,
+  });
+
+  final String id;
+  final String operation;
+  final String itemPath;
+  final String direction;
+  final String status;
   final int timestamp;
   final String? errorMessage;
-  SyncHistoryEntryDto({required this.id, required this.timestamp,
-    required this.operation, required this.itemPath, required this.direction,
-    required this.status, this.errorMessage});
 }

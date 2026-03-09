@@ -24,9 +24,9 @@ class AddFavorite extends FavoritesEvent {
 }
 
 class RemoveFavorite extends FavoritesEvent {
+  const RemoveFavorite({required this.itemType, required this.itemId});
   final String itemType;
   final String itemId;
-  const RemoveFavorite({required this.itemType, required this.itemId});
   @override
   List<Object?> get props => [itemType, itemId];
 }
@@ -47,28 +47,28 @@ class FavoritesLoading extends FavoritesState {
 }
 
 class FavoritesLoaded extends FavoritesState {
-  final List<FavoriteItem> items;
   const FavoritesLoaded(this.items);
+  final List<FavoriteItem> items;
   @override
   List<Object?> get props => [items];
 }
 
 class FavoritesError extends FavoritesState {
-  final String message;
   const FavoritesError(this.message);
+  final String message;
   @override
   List<Object?> get props => [message];
 }
 
 // BLoC
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
-  final FavoritesRepository _repository;
-
   FavoritesBloc(this._repository) : super(const FavoritesInitial()) {
     on<LoadFavorites>(_onLoad);
     on<AddFavorite>(_onAdd);
     on<RemoveFavorite>(_onRemove);
   }
+
+  final FavoritesRepository _repository;
 
   Future<void> _onLoad(LoadFavorites event, Emitter<FavoritesState> emit) async {
     emit(const FavoritesLoading());
