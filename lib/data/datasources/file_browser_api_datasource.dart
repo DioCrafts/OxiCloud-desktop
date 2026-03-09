@@ -10,10 +10,10 @@ import 'api_client.dart';
 /// Returns decoded JSON maps; mapping to domain entities is done by
 /// [FileBrowserMapper].
 class FileBrowserApiDataSource {
+  FileBrowserApiDataSource(this._apiClient);
+
   final ApiClient _apiClient;
   final Logger _logger = Logger();
-
-  FileBrowserApiDataSource(this._apiClient);
 
   Dio get _dio => _apiClient.dio;
 
@@ -81,7 +81,7 @@ class FileBrowserApiDataSource {
   /// Upload a file via multipart.
   Future<Map<String, dynamic>> uploadFile(File file, String? folderId) async {
     final formData = FormData.fromMap({
-      if (folderId != null) 'folder_id': folderId,
+      ?'folder_id': folderId,
       'file': await MultipartFile.fromFile(
         file.path,
         filename: file.uri.pathSegments.last,

@@ -1,14 +1,12 @@
 import 'dart:async';
-
-import 'package:logger/logger.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-// Import generated Rust bindings
+import 'package:logger/logger.dart';
 import 'package:oxicloud_app/src/rust/api/oxicloud.dart' as rust;
-import 'package:oxicloud_app/src/rust/domain/entities/config.dart';
 import 'package:oxicloud_app/src/rust/domain/entities/auth.dart';
+import 'package:oxicloud_app/src/rust/domain/entities/config.dart';
 import 'package:oxicloud_app/src/rust/domain/entities/sync_item.dart' as domain;
+import 'package:path_provider/path_provider.dart';
 
 /// Data source that bridges Flutter with native Rust code via FFI.
 /// Uses flutter_rust_bridge generated bindings.
@@ -25,9 +23,10 @@ class RustBridgeDataSource {
       final syncFolder = await _getDefaultSyncFolder();
       final dbPath = '${appDir.path}/oxicloud.db';
 
-      _logger.i('Initializing Rust core');
-      _logger.i('Database path: $dbPath');
-      _logger.i('Sync folder: $syncFolder');
+      _logger
+        ..i('Initializing Rust core')
+        ..i('Database path: $dbPath')
+        ..i('Sync folder: $syncFolder');
 
       await rust.initialize(
         config: SyncConfig(
@@ -50,7 +49,7 @@ class RustBridgeDataSource {
 
       _initialized = true;
       _logger.i('Rust core initialized successfully');
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Failed to initialize Rust core: $e');
       rethrow;
     }
@@ -62,7 +61,7 @@ class RustBridgeDataSource {
     try {
       await rust.shutdown();
       _initialized = false;
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error during Rust core shutdown: $e');
     }
   }
@@ -95,7 +94,7 @@ class RustBridgeDataSource {
         accessToken: result.accessToken,
         serverInfo: _mapServerInfo(result.serverInfo),
       );
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Login failed: $e');
       rethrow;
     }
@@ -108,7 +107,7 @@ class RustBridgeDataSource {
 
   Future<bool> isLoggedIn() async {
     _ensureInitialized();
-    try { return await rust.isLoggedIn(); } catch (_) { return false; }
+    try { return await rust.isLoggedIn(); } on Exception catch (_) { return false; }
   }
 
   Future<ServerInfoDto?> getServerInfo() async {
@@ -116,7 +115,7 @@ class RustBridgeDataSource {
     try {
       final info = await rust.getServerInfo();
       return info != null ? _mapServerInfo(info) : null;
-    } catch (_) { return null; }
+    } on Exception catch (_) { return null; }
   }
 
   // ===========================================================================
@@ -147,7 +146,7 @@ class RustBridgeDataSource {
         itemsTotal: s.itemsTotal, lastSyncTime: s.lastSyncTime,
         nextSyncTime: s.nextSyncTime,
       );
-    } catch (_) {
+    } on Exception catch (_) {
       return SyncStatusDto(isSyncing: false, progressPercent: 0, itemsSynced: 0, itemsTotal: 0);
     }
   }
@@ -161,7 +160,7 @@ class RustBridgeDataSource {
         sizeBytes: f.sizeBytes.toInt(), itemCount: f.itemCount,
         isSelected: f.isSelected,
       )).toList();
-    } catch (_) { return []; }
+    } on Exception catch (_) { return []; }
   }
 
   Future<void> setSyncFolders(List<String> ids) async {
@@ -171,7 +170,7 @@ class RustBridgeDataSource {
 
   Future<List<String>> getSyncFolders() async {
     _ensureInitialized();
-    try { return await rust.getSyncFolders(); } catch (_) { return []; }
+    try { return await rust.getSyncFolders(); } on Exception catch (_) { return []; }
   }
 
   Future<List<SyncConflictDto>> getConflicts() async {
@@ -184,7 +183,7 @@ class RustBridgeDataSource {
         localSize: c.localSize.toInt(), remoteSize: c.remoteSize.toInt(),
         conflictType: _mapConflictType(c.conflictType),
       )).toList();
-    } catch (_) { return []; }
+    } on Exception catch (_) { return []; }
   }
 
   Future<void> resolveConflict(String conflictId, String resolution) async {
@@ -214,7 +213,7 @@ class RustBridgeDataSource {
         localModified: i.localModified,
         remoteModified: i.remoteModified,
       )).toList();
-    } catch (_) { return []; }
+    } on Exception catch (_) { return []; }
   }
 
   Future<List<SyncHistoryEntryDto>> getSyncHistory(int limit) async {
@@ -230,7 +229,7 @@ class RustBridgeDataSource {
         status: e.status,
         errorMessage: e.errorMessage,
       )).toList();
-    } catch (_) { return []; }
+    } on Exception catch (_) { return []; }
   }
 
   String _mapSyncStatus(domain.SyncStatus status) {
@@ -297,7 +296,7 @@ class RustBridgeDataSource {
         launchAtStartup: c.launchAtStartup,
         minimizeToTray: c.minimizeToTray,
       );
-    } catch (_) {
+    } on Exception catch (_) {
       return SyncConfigDto(
         syncFolder: await _getDefaultSyncFolder(),
         syncIntervalSeconds: 300, maxUploadSpeedKbps: 0, maxDownloadSpeedKbps: 0,
@@ -348,82 +347,173 @@ class RustBridgeDataSource {
 // =============================================================================
 
 class AuthResultDto {
+  AuthResultDto({
+    required this.success,
+    required this.userId,
+    required this.username,
+    required this.accessToken,
+    required this.serverInfo,
+  });
+
   final bool success;
   final String userId;
   final String username;
   final String accessToken;
   final ServerInfoDto serverInfo;
-  AuthResultDto({required this.success, required this.userId, required this.username,
-    required this.accessToken, required this.serverInfo});
 }
 
 class ServerInfoDto {
-  final String url, version, name, webdavUrl;
-  final int quotaTotal, quotaUsed;
-  final bool supportsDeltaSync, supportsChunkedUpload;
-  ServerInfoDto({required this.url, required this.version, required this.name,
-    required this.webdavUrl, required this.quotaTotal, required this.quotaUsed,
-    required this.supportsDeltaSync, required this.supportsChunkedUpload});
+  ServerInfoDto({
+    required this.url,
+    required this.version,
+    required this.name,
+    required this.webdavUrl,
+    required this.quotaTotal,
+    required this.quotaUsed,
+    required this.supportsDeltaSync,
+    required this.supportsChunkedUpload,
+  });
+
+  final String url;
+  final String version;
+  final String name;
+  final String webdavUrl;
+  final int quotaTotal;
+  final int quotaUsed;
+  final bool supportsDeltaSync;
+  final bool supportsChunkedUpload;
 }
 
 class SyncStatusDto {
+  SyncStatusDto({
+    required this.isSyncing,
+    required this.progressPercent,
+    required this.itemsSynced,
+    required this.itemsTotal,
+    this.currentOperation,
+    this.lastSyncTime,
+    this.nextSyncTime,
+  });
+
   final bool isSyncing;
   final String? currentOperation;
   final double progressPercent;
-  final int itemsSynced, itemsTotal;
-  final int? lastSyncTime, nextSyncTime;
-  SyncStatusDto({required this.isSyncing, this.currentOperation,
-    required this.progressPercent, required this.itemsSynced, required this.itemsTotal,
-    this.lastSyncTime, this.nextSyncTime});
+  final int itemsSynced;
+  final int itemsTotal;
+  final int? lastSyncTime;
+  final int? nextSyncTime;
 }
 
 class SyncResultDto {
+  SyncResultDto({
+    required this.success,
+    required this.itemsUploaded,
+    required this.itemsDownloaded,
+    required this.itemsDeleted,
+    required this.conflicts,
+    required this.errors,
+    required this.durationMs,
+  });
+
   final bool success;
-  final int itemsUploaded, itemsDownloaded, itemsDeleted, conflicts, durationMs;
+  final int itemsUploaded;
+  final int itemsDownloaded;
+  final int itemsDeleted;
+  final int conflicts;
+  final int durationMs;
   final List<String> errors;
-  SyncResultDto({required this.success, required this.itemsUploaded,
-    required this.itemsDownloaded, required this.itemsDeleted,
-    required this.conflicts, required this.errors, required this.durationMs});
 }
 
 class RemoteFolderDto {
-  final String id, name, path;
-  final int sizeBytes, itemCount;
+  RemoteFolderDto({
+    required this.id,
+    required this.name,
+    required this.path,
+    required this.sizeBytes,
+    required this.itemCount,
+    required this.isSelected,
+  });
+
+  final String id;
+  final String name;
+  final String path;
+  final int sizeBytes;
+  final int itemCount;
   final bool isSelected;
-  RemoteFolderDto({required this.id, required this.name, required this.path,
-    required this.sizeBytes, required this.itemCount, required this.isSelected});
 }
 
 class SyncConflictDto {
-  final String id, itemPath, conflictType;
-  final int localModified, remoteModified, localSize, remoteSize;
-  SyncConflictDto({required this.id, required this.itemPath,
-    required this.localModified, required this.remoteModified,
-    required this.localSize, required this.remoteSize, required this.conflictType});
+  SyncConflictDto({
+    required this.id,
+    required this.itemPath,
+    required this.conflictType,
+    required this.localModified,
+    required this.remoteModified,
+    required this.localSize,
+    required this.remoteSize,
+  });
+
+  final String id;
+  final String itemPath;
+  final String conflictType;
+  final int localModified;
+  final int remoteModified;
+  final int localSize;
+  final int remoteSize;
 }
 
 class SyncConfigDto {
+  SyncConfigDto({
+    required this.syncFolder,
+    required this.syncIntervalSeconds,
+    required this.maxUploadSpeedKbps,
+    required this.maxDownloadSpeedKbps,
+    required this.deltaSyncEnabled,
+    required this.pauseOnMetered,
+    required this.wifiOnly,
+    required this.watchFilesystem,
+    required this.ignorePatterns,
+    required this.notificationsEnabled,
+    required this.launchAtStartup,
+    required this.minimizeToTray,
+  });
+
   final String syncFolder;
-  final int syncIntervalSeconds, maxUploadSpeedKbps, maxDownloadSpeedKbps;
-  final bool deltaSyncEnabled, pauseOnMetered, wifiOnly, watchFilesystem;
+  final int syncIntervalSeconds;
+  final int maxUploadSpeedKbps;
+  final int maxDownloadSpeedKbps;
+  final bool deltaSyncEnabled;
+  final bool pauseOnMetered;
+  final bool wifiOnly;
+  final bool watchFilesystem;
   final List<String> ignorePatterns;
-  final bool notificationsEnabled, launchAtStartup, minimizeToTray;
-  SyncConfigDto({required this.syncFolder, required this.syncIntervalSeconds,
-    required this.maxUploadSpeedKbps, required this.maxDownloadSpeedKbps,
-    required this.deltaSyncEnabled, required this.pauseOnMetered,
-    required this.wifiOnly, required this.watchFilesystem,
-    required this.ignorePatterns, required this.notificationsEnabled,
-    required this.launchAtStartup, required this.minimizeToTray});
+  final bool notificationsEnabled;
+  final bool launchAtStartup;
+  final bool minimizeToTray;
 }
 
 class SyncItemDto {
-  final String id, path, name, status, direction;
+  SyncItemDto({
+    required this.id,
+    required this.path,
+    required this.name,
+    required this.status,
+    required this.direction,
+    required this.isDirectory,
+    required this.size,
+    this.localModified,
+    this.remoteModified,
+  });
+
+  final String id;
+  final String path;
+  final String name;
+  final String status;
+  final String direction;
   final bool isDirectory;
   final int size;
-  final DateTime? localModified, remoteModified;
-  SyncItemDto({required this.id, required this.path, required this.name,
-    required this.isDirectory, required this.size, required this.status,
-    required this.direction, this.localModified, this.remoteModified});
+  final DateTime? localModified;
+  final DateTime? remoteModified;
 }
 
 class SyncHistoryEntryDto {

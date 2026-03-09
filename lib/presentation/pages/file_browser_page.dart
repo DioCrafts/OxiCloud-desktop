@@ -355,7 +355,6 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       padding: const EdgeInsets.all(12),
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
-      childAspectRatio: 1,
       children: items,
     );
   }
@@ -468,7 +467,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
         // Upload file FAB
         FloatingActionButton.extended(
           heroTag: 'upload_file',
-          onPressed: () => _uploadFile(),
+          onPressed: _uploadFile,
           icon: const Icon(Icons.upload_file),
           label: const Text('Upload'),
         ),
@@ -503,10 +502,6 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
   }
 
   Future<void> _downloadFolderAsZip(FolderItem folder) async {
-    final dir = await getDownloadsDirectory() ??
-        await getApplicationDocumentsDirectory();
-    final savePath = '${dir.path}/${folder.name}.zip';
-
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -519,15 +514,15 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
     // TODO: This could be moved to a dedicated event in the BLoC
   }
 
-  void _onFileTap(FileItem file) async {
+  Future<void> _onFileTap(FileItem file) async {
     // Download to temp and open
     final dir = await getTemporaryDirectory();
     final tempPath = '${dir.path}/${file.name}';
 
     if (!mounted) return;
     // Download first, then open
-    final bloc = context.read<FileBrowserBloc>();
-    bloc.add(DownloadFileRequested(fileId: file.id, savePath: tempPath));
+    context.read<FileBrowserBloc>()
+      ..add(DownloadFileRequested(fileId: file.id, savePath: tempPath));
 
     // Open after a short delay to let download complete
     Future<void>.delayed(const Duration(seconds: 2), () {
@@ -565,7 +560,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       ),
     );
 
-    if (name != null && name.isNotEmpty && mounted) {
+    if (name != null && name.isNotEmpty && context.mounted) {
       context.read<FileBrowserBloc>().add(CreateFolderRequested(name));
     }
   }
@@ -605,7 +600,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       ),
     );
 
-    if (newName != null && newName.isNotEmpty && newName != currentName && mounted) {
+    if (newName != null && newName.isNotEmpty && newName != currentName && context.mounted) {
       if (isFolder) {
         context
             .read<FileBrowserBloc>()
@@ -658,7 +653,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       ),
     );
 
-    if (confirmed == true && mounted) {
+    if ((confirmed ?? false) && context.mounted) {
       if (isFolder) {
         context.read<FileBrowserBloc>().add(DeleteFolderRequested(id));
       } else {
@@ -690,7 +685,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(null),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
@@ -701,7 +696,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       ),
     );
 
-    if (targetFolderId != null && mounted) {
+    if (targetFolderId != null && context.mounted) {
       context.read<FileBrowserBloc>().add(MoveItemsRequested(
         fileIds: _selectedFileIds.toList(),
         folderIds: _selectedFolderIds.toList(),
@@ -744,7 +739,7 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
       ),
     );
 
-    if (targetFolderId != null && mounted) {
+    if (targetFolderId != null && context.mounted) {
       context.read<FileBrowserBloc>().add(CopyItemsRequested(
         fileIds: _selectedFileIds.toList(),
         folderIds: _selectedFolderIds.toList(),

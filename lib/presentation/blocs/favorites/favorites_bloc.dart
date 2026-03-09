@@ -1,5 +1,5 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/entities/favorite_item.dart';
 import '../../../core/repositories/favorites_repository.dart';
@@ -16,9 +16,9 @@ class LoadFavorites extends FavoritesEvent {
 }
 
 class AddFavorite extends FavoritesEvent {
+  const AddFavorite({required this.itemType, required this.itemId});
   final String itemType;
   final String itemId;
-  const AddFavorite({required this.itemType, required this.itemId});
   @override
   List<Object?> get props => [itemType, itemId];
 }

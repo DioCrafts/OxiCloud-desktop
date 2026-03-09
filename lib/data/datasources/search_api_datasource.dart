@@ -4,9 +4,9 @@ import 'api_client.dart';
 
 /// Raw REST calls to OxiCloud server for search operations.
 class SearchApiDataSource {
-  final ApiClient _apiClient;
-
   SearchApiDataSource(this._apiClient);
+
+  final ApiClient _apiClient;
 
   Dio get _dio => _apiClient.dio;
 
@@ -19,7 +19,7 @@ class SearchApiDataSource {
   }) async {
     final params = <String, dynamic>{
       if (query != null && query.isNotEmpty) 'query': query,
-      if (folderId != null) 'folder_id': folderId,
+      ?'folder_id': folderId,
       'limit': limit,
       'offset': offset,
     };

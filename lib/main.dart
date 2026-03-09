@@ -31,8 +31,6 @@ import 'src/rust/frb_generated.dart';
 bool get isDesktop =>
     Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
-/// Check if current platform is mobile
-bool get _isMobile => Platform.isAndroid || Platform.isIOS;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

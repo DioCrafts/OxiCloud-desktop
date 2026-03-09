@@ -1,4 +1,5 @@
 /// Utility extensions used across the application.
+library;
 
 /// Readable byte formatting (reusable across entities and UI).
 extension ByteFormatting on int {

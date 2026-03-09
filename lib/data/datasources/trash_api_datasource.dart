@@ -4,9 +4,9 @@ import 'api_client.dart';
 
 /// Raw REST calls to OxiCloud server for trash operations.
 class TrashApiDataSource {
-  final ApiClient _apiClient;
-
   TrashApiDataSource(this._apiClient);
+
+  final ApiClient _apiClient;
 
   Dio get _dio => _apiClient.dio;
 
