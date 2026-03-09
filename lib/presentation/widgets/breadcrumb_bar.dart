@@ -8,14 +8,14 @@ import '../theme/oxicloud_colors.dart';
 /// Displays the current path as clickable segments. Tapping a segment
 /// navigates back to that folder level.
 class BreadcrumbBar extends StatelessWidget {
-  final List<BreadcrumbItem> items;
-  final ValueChanged<int> onTap;
-
   const BreadcrumbBar({
     super.key,
     required this.items,
     required this.onTap,
   });
+
+  final List<BreadcrumbItem> items;
+  final ValueChanged<int> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +34,7 @@ class BreadcrumbBar extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: items.length,
-              separatorBuilder: (_, __) => const Padding(
+              separatorBuilder: (_, _) => const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
                 child: Icon(
                   Icons.chevron_right,

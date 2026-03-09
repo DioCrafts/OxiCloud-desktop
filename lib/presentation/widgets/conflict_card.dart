@@ -2,15 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Card widget to display and resolve sync conflicts
 class ConflictCard extends StatelessWidget {
-  final String conflictId;
-  final String filePath;
-  final DateTime localModified;
-  final DateTime remoteModified;
-  final int localSize;
-  final int remoteSize;
-  final String conflictType;
-  final ValueChanged<ConflictResolution>? onResolve;
-
   const ConflictCard({
     super.key,
     required this.conflictId,
@@ -22,6 +13,15 @@ class ConflictCard extends StatelessWidget {
     required this.conflictType,
     this.onResolve,
   });
+
+  final String conflictId;
+  final String filePath;
+  final DateTime localModified;
+  final DateTime remoteModified;
+  final int localSize;
+  final int remoteSize;
+  final String conflictType;
+  final ValueChanged<ConflictResolution>? onResolve;
 
   @override
   Widget build(BuildContext context) {
@@ -158,12 +158,6 @@ class ConflictCard extends StatelessWidget {
 }
 
 class _VersionInfo extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final DateTime modified;
-  final int size;
-  final Color color;
-
   const _VersionInfo({
     required this.label,
     required this.icon,
@@ -172,6 +166,12 @@ class _VersionInfo extends StatelessWidget {
     required this.color,
   });
 
+  final String label;
+  final IconData icon;
+  final DateTime modified;
+  final int size;
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -179,9 +179,9 @@ class _VersionInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,17 +228,17 @@ class _VersionInfo extends StatelessWidget {
 }
 
 class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback? onPressed;
-
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.color,
     this.onPressed,
   });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {

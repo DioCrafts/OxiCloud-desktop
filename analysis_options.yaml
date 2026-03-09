@@ -8,6 +8,7 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/src/rust/**"
+    - "rust_builder/**"
   errors:
     invalid_annotation_target: ignore
   language:

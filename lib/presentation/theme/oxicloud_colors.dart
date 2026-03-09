@@ -35,18 +35,18 @@ class OxiColors {
   // ── Primary tints ───────────────────────────────────────────────────────
   static const Color primaryBgTint = Color(0xFFFFF5F3);
   static const Color primaryBgTintLight = Color(0xFFFFF8F6);
-  static Color primaryFocusRing = primary.withOpacity(0.1);
-  static Color primaryShadow = primary.withOpacity(0.3);
-  static Color primaryShadowHover = primary.withOpacity(0.4);
+  static Color primaryFocusRing = primary.withValues(alpha: 0.1);
+  static Color primaryShadow = primary.withValues(alpha: 0.3);
+  static Color primaryShadowHover = primary.withValues(alpha: 0.4);
 
   // ── Sidebar / Dark chrome ───────────────────────────────────────────────
   static const Color sidebarTop = Color(0xFF2A3042);
   static const Color sidebarBottom = Color(0xFF232838);
-  static Color sidebarBorder = Colors.white.withOpacity(0.07);
-  static Color sidebarTextInactive = Colors.white.withOpacity(0.65);
+  static Color sidebarBorder = Colors.white.withValues(alpha: 0.07);
+  static Color sidebarTextInactive = Colors.white.withValues(alpha: 0.65);
   static const Color sidebarTextActive = Colors.white;
-  static Color sidebarActiveBg = primary.withOpacity(0.12);
-  static Color sidebarHoverBg = Colors.white.withOpacity(0.06);
+  static Color sidebarActiveBg = primary.withValues(alpha: 0.12);
+  static Color sidebarHoverBg = Colors.white.withValues(alpha: 0.06);
 
   static const LinearGradient sidebarGradient = LinearGradient(
     begin: Alignment.topCenter,
@@ -115,7 +115,7 @@ class OxiColors {
   // ── Shadows (as BoxShadow lists) ────────────────────────────────────────
   static List<BoxShadow> get cardShadow => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha: 0.05),
           blurRadius: 3,
           offset: const Offset(0, 1),
         ),
@@ -123,7 +123,7 @@ class OxiColors {
 
   static List<BoxShadow> get cardHoverShadow => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withValues(alpha: 0.08),
           blurRadius: 15,
           offset: const Offset(0, 5),
         ),
@@ -131,7 +131,7 @@ class OxiColors {
 
   static List<BoxShadow> get primaryButtonShadow => [
         BoxShadow(
-          color: primary.withOpacity(0.3),
+          color: primary.withValues(alpha: 0.3),
           blurRadius: 15,
           offset: const Offset(0, 4),
         ),
@@ -139,7 +139,7 @@ class OxiColors {
 
   static List<BoxShadow> get primaryButtonHoverShadow => [
         BoxShadow(
-          color: primary.withOpacity(0.4),
+          color: primary.withValues(alpha: 0.4),
           blurRadius: 20,
           offset: const Offset(0, 6),
         ),
@@ -147,7 +147,7 @@ class OxiColors {
 
   static List<BoxShadow> get modalShadow => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.25),
+          color: Colors.black.withValues(alpha: 0.25),
           blurRadius: 60,
           offset: const Offset(0, 20),
         ),
@@ -155,16 +155,16 @@ class OxiColors {
 
   static List<BoxShadow> get sidebarShadow => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.15),
+          color: Colors.black.withValues(alpha: 0.15),
           blurRadius: 12,
           offset: const Offset(2, 0),
         ),
       ];
 
   // ── Radii ───────────────────────────────────────────────────────────────
-  static const double radiusSmall = 8.0;
-  static const double radiusMedium = 12.0;
-  static const double radiusLarge = 16.0;
-  static const double radiusXLarge = 20.0;
-  static const double radiusPill = 50.0;
+  static const double radiusSmall = 8;
+  static const double radiusMedium = 12;
+  static const double radiusLarge = 16;
+  static const double radiusXLarge = 20;
+  static const double radiusPill = 50;
 }

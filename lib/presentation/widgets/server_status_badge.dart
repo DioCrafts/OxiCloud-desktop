@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Badge that shows the server connection status
 class ServerStatusBadge extends StatelessWidget {
-  final ServerConnectionStatus status;
-  final String? serverName;
-  final bool showLabel;
-  final VoidCallback? onTap;
-
   const ServerStatusBadge({
     super.key,
     required this.status,
@@ -14,6 +9,11 @@ class ServerStatusBadge extends StatelessWidget {
     this.showLabel = true,
     this.onTap,
   });
+
+  final ServerConnectionStatus status;
+  final String? serverName;
+  final bool showLabel;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +27,9 @@ class ServerStatusBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
