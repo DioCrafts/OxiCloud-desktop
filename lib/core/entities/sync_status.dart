@@ -2,24 +2,12 @@ import 'package:equatable/equatable.dart';
 
 /// Overall sync status
 class SyncStatus extends Equatable {
-  final bool isSyncing;
-  final String? currentOperation;
-  final double progressPercent;
-  final int itemsSynced;
-  final int itemsTotal;
-  final DateTime? lastSyncTime;
-  final DateTime? nextSyncTime;
-  final int pendingUploads;
-  final int pendingDownloads;
-  final int conflicts;
-  final int errors;
-
   const SyncStatus({
     required this.isSyncing,
-    this.currentOperation,
     required this.progressPercent,
     required this.itemsSynced,
     required this.itemsTotal,
+    this.currentOperation,
     this.lastSyncTime,
     this.nextSyncTime,
     this.pendingUploads = 0,
@@ -37,6 +25,18 @@ class SyncStatus extends Equatable {
       itemsTotal: 0,
     );
   }
+
+  final bool isSyncing;
+  final String? currentOperation;
+  final double progressPercent;
+  final int itemsSynced;
+  final int itemsTotal;
+  final DateTime? lastSyncTime;
+  final DateTime? nextSyncTime;
+  final int pendingUploads;
+  final int pendingDownloads;
+  final int conflicts;
+  final int errors;
 
   /// Whether there are pending operations
   bool get hasPending => pendingUploads > 0 || pendingDownloads > 0;
@@ -92,14 +92,6 @@ class SyncStatus extends Equatable {
 
 /// Sync result after a sync operation
 class SyncResult extends Equatable {
-  final bool success;
-  final int itemsUploaded;
-  final int itemsDownloaded;
-  final int itemsDeleted;
-  final int conflicts;
-  final List<String> errors;
-  final Duration duration;
-
   const SyncResult({
     required this.success,
     required this.itemsUploaded,
@@ -109,6 +101,14 @@ class SyncResult extends Equatable {
     required this.errors,
     required this.duration,
   });
+
+  final bool success;
+  final int itemsUploaded;
+  final int itemsDownloaded;
+  final int itemsDeleted;
+  final int conflicts;
+  final List<String> errors;
+  final Duration duration;
 
   /// Total items synced
   int get totalSynced => itemsUploaded + itemsDownloaded + itemsDeleted;
@@ -143,14 +143,6 @@ class SyncResult extends Equatable {
 
 /// Sync conflict
 class SyncConflict extends Equatable {
-  final String id;
-  final String itemPath;
-  final DateTime localModified;
-  final DateTime remoteModified;
-  final int localSize;
-  final int remoteSize;
-  final ConflictType type;
-
   const SyncConflict({
     required this.id,
     required this.itemPath,
@@ -160,6 +152,14 @@ class SyncConflict extends Equatable {
     required this.remoteSize,
     required this.type,
   });
+
+  final String id;
+  final String itemPath;
+  final DateTime localModified;
+  final DateTime remoteModified;
+  final int localSize;
+  final int remoteSize;
+  final ConflictType type;
 
   /// File name from path
   String get fileName => itemPath.split('/').last;

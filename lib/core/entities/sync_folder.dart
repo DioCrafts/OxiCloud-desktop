@@ -2,13 +2,6 @@ import 'package:equatable/equatable.dart';
 
 /// Sync folder entity for selective sync
 class SyncFolder extends Equatable {
-  final String id;
-  final String name;
-  final String path;
-  final int sizeBytes;
-  final int itemCount;
-  final bool isSelected;
-
   const SyncFolder({
     required this.id,
     required this.name,
@@ -17,6 +10,13 @@ class SyncFolder extends Equatable {
     required this.itemCount,
     required this.isSelected,
   });
+
+  final String id;
+  final String name;
+  final String path;
+  final int sizeBytes;
+  final int itemCount;
+  final bool isSelected;
 
   /// Create a copy with different selection state
   SyncFolder copyWith({bool? isSelected}) {
@@ -48,16 +48,6 @@ class SyncFolder extends Equatable {
 
 /// Sync item entity
 class SyncItem extends Equatable {
-  final String id;
-  final String path;
-  final String name;
-  final bool isDirectory;
-  final int size;
-  final SyncItemStatus status;
-  final SyncDirection direction;
-  final DateTime? localModified;
-  final DateTime? remoteModified;
-
   const SyncItem({
     required this.id,
     required this.path,
@@ -69,6 +59,16 @@ class SyncItem extends Equatable {
     this.localModified,
     this.remoteModified,
   });
+
+  final String id;
+  final String path;
+  final String name;
+  final bool isDirectory;
+  final int size;
+  final SyncItemStatus status;
+  final SyncDirection direction;
+  final DateTime? localModified;
+  final DateTime? remoteModified;
 
   @override
   List<Object?> get props => [

@@ -9,10 +9,10 @@ import '../datasources/share_api_datasource.dart';
 import '../mappers/trash_share_search_mapper.dart';
 
 class ShareRepositoryImpl implements ShareRepository {
+  ShareRepositoryImpl(this._dataSource);
+
   final ShareApiDataSource _dataSource;
   final Logger _logger = Logger();
-
-  ShareRepositoryImpl(this._dataSource);
 
   @override
   Future<Either<ShareFailure, PaginatedResult<ShareItem>>> listShares({
@@ -31,7 +31,7 @@ class ShareRepositoryImpl implements ShareRepository {
       return Right(PaginatedResult(items: items, pagination: pagination));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'listing shares'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error listing shares: $e');
       return Left(UnknownShareFailure(e.toString()));
     }
@@ -44,7 +44,7 @@ class ShareRepositoryImpl implements ShareRepository {
       return Right(ShareMapper.fromJson(raw));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'getting share'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error getting share: $e');
       return Left(UnknownShareFailure(e.toString()));
     }
@@ -72,7 +72,7 @@ class ShareRepositoryImpl implements ShareRepository {
       return Right(ShareMapper.fromJson(raw));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'creating share'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error creating share: $e');
       return Left(UnknownShareFailure(e.toString()));
     }
@@ -87,7 +87,7 @@ class ShareRepositoryImpl implements ShareRepository {
   }) async {
     try {
       final body = <String, dynamic>{
-        if (password != null) 'password': password,
+        ?'password': password,
         if (expiresAt != null)
           'expires_at': expiresAt.millisecondsSinceEpoch ~/ 1000,
         if (permissions != null)
@@ -97,7 +97,7 @@ class ShareRepositoryImpl implements ShareRepository {
       return Right(ShareMapper.fromJson(raw));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'updating share'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error updating share: $e');
       return Left(UnknownShareFailure(e.toString()));
     }
@@ -110,7 +110,7 @@ class ShareRepositoryImpl implements ShareRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'deleting share'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error deleting share: $e');
       return Left(UnknownShareFailure(e.toString()));
     }
@@ -135,7 +135,7 @@ class ShareRepositoryImpl implements ShareRepository {
     }
     _logger.e('Share DioException ($action): $e');
     return UnknownShareFailure(
-      e.response?.data?['error']?.toString() ?? e.message ?? action,
+      (e.response?.data as Map<String, dynamic>?)?['error']?.toString() ?? e.message ?? action,
     );
   }
 }

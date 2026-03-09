@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/repositories/sync_repository.dart';
 import '../main.dart' show navigatorKey;
-
 import 'blocs/auth/auth_bloc.dart';
 import 'blocs/settings/settings_bloc.dart';
 import 'pages/activity_page.dart';
 import 'pages/favorites_page.dart';
+import 'pages/file_browser_page.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/recent_page.dart';
-import 'pages/settings_page.dart';
+import 'pages/search_page.dart';
 import 'pages/selective_sync_page.dart';
-import 'pages/file_browser_page.dart';
+import 'pages/settings_page.dart';
+import 'pages/shares_page.dart';
 import 'pages/sync_history_page.dart';
 import 'pages/trash_page.dart';
-import 'pages/shares_page.dart';
-import 'pages/search_page.dart';
 import 'shell/adaptive_shell.dart';
 import 'theme/oxicloud_theme.dart';
 
@@ -34,9 +32,7 @@ class OxiCloudApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: OxiCloudTheme.light(),
       darkTheme: OxiCloudTheme.dark(),
-      themeMode: ThemeMode.system,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

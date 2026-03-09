@@ -36,94 +36,79 @@ Future<void> configureDependencies() async {
   // Data Sources
   // ============================================================================
 
-  getIt.registerLazySingleton<RustBridgeDataSource>(
-    () => RustBridgeDataSource(),
-  );
+  getIt
+    ..registerLazySingleton<RustBridgeDataSource>(
+      RustBridgeDataSource.new,
+    )
+    ..registerLazySingleton<ApiClient>(
+      ApiClient.new,
+    )
+    ..registerLazySingleton<FileBrowserApiDataSource>(
+      () => FileBrowserApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<TrashApiDataSource>(
+      () => TrashApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<ShareApiDataSource>(
+      () => ShareApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<SearchApiDataSource>(
+      () => SearchApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<FavoritesApiDataSource>(
+      () => FavoritesApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<RecentApiDataSource>(
+      () => RecentApiDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<ChunkedUploadDataSource>(
+      () => ChunkedUploadDataSource(getIt<ApiClient>()),
+    )
+    ..registerLazySingleton<BatchApiDataSource>(
+      () => BatchApiDataSource(getIt<ApiClient>()),
+    )
 
-  getIt.registerLazySingleton<ApiClient>(
-    () => ApiClient(),
-  );
+    // ==========================================================================
+    // Repositories
+    // ==========================================================================
 
-  getIt.registerLazySingleton<FileBrowserApiDataSource>(
-    () => FileBrowserApiDataSource(getIt<ApiClient>()),
-  );
+    ..registerLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(
+        getIt<RustBridgeDataSource>(),
+        getIt<ApiClient>(),
+      ),
+    )
+    ..registerLazySingleton<SyncRepository>(
+      () => SyncRepositoryImpl(getIt<RustBridgeDataSource>()),
+    )
+    ..registerLazySingleton<FileBrowserRepository>(
+      () => FileBrowserRepositoryImpl(
+        getIt<FileBrowserApiDataSource>(),
+        getIt<ChunkedUploadDataSource>(),
+        getIt<BatchApiDataSource>(),
+      ),
+    )
+    ..registerLazySingleton<TrashRepository>(
+      () => TrashRepositoryImpl(getIt<TrashApiDataSource>()),
+    )
+    ..registerLazySingleton<ShareRepository>(
+      () => ShareRepositoryImpl(getIt<ShareApiDataSource>()),
+    )
+    ..registerLazySingleton<SearchRepository>(
+      () => SearchRepositoryImpl(getIt<SearchApiDataSource>()),
+    )
+    ..registerLazySingleton<FavoritesRepository>(
+      () => FavoritesRepositoryImpl(getIt<FavoritesApiDataSource>()),
+    )
+    ..registerLazySingleton<RecentRepository>(
+      () => RecentRepositoryImpl(getIt<RecentApiDataSource>()),
+    )
 
-  getIt.registerLazySingleton<TrashApiDataSource>(
-    () => TrashApiDataSource(getIt<ApiClient>()),
-  );
+    // ==========================================================================
+    // Platform services
+    // ==========================================================================
 
-  getIt.registerLazySingleton<ShareApiDataSource>(
-    () => ShareApiDataSource(getIt<ApiClient>()),
-  );
-
-  getIt.registerLazySingleton<SearchApiDataSource>(
-    () => SearchApiDataSource(getIt<ApiClient>()),
-  );
-
-  getIt.registerLazySingleton<FavoritesApiDataSource>(
-    () => FavoritesApiDataSource(getIt<ApiClient>()),
-  );
-
-  getIt.registerLazySingleton<RecentApiDataSource>(
-    () => RecentApiDataSource(getIt<ApiClient>()),
-  );
-
-  getIt.registerLazySingleton<ChunkedUploadDataSource>(
-    () => ChunkedUploadDataSource(getIt<ApiClient>()),
-  );
-
-  getIt.registerLazySingleton<BatchApiDataSource>(
-    () => BatchApiDataSource(getIt<ApiClient>()),
-  );
-
-  // ============================================================================
-  // Repositories
-  // ============================================================================
-
-  getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(
-      getIt<RustBridgeDataSource>(),
-      getIt<ApiClient>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<SyncRepository>(
-    () => SyncRepositoryImpl(getIt<RustBridgeDataSource>()),
-  );
-
-  getIt.registerLazySingleton<FileBrowserRepository>(
-    () => FileBrowserRepositoryImpl(
-      getIt<FileBrowserApiDataSource>(),
-      getIt<ChunkedUploadDataSource>(),
-      getIt<BatchApiDataSource>(),
-    ),
-  );
-
-  getIt.registerLazySingleton<TrashRepository>(
-    () => TrashRepositoryImpl(getIt<TrashApiDataSource>()),
-  );
-
-  getIt.registerLazySingleton<ShareRepository>(
-    () => ShareRepositoryImpl(getIt<ShareApiDataSource>()),
-  );
-
-  getIt.registerLazySingleton<SearchRepository>(
-    () => SearchRepositoryImpl(getIt<SearchApiDataSource>()),
-  );
-
-  getIt.registerLazySingleton<FavoritesRepository>(
-    () => FavoritesRepositoryImpl(getIt<FavoritesApiDataSource>()),
-  );
-
-  getIt.registerLazySingleton<RecentRepository>(
-    () => RecentRepositoryImpl(getIt<RecentApiDataSource>()),
-  );
-
-  // ============================================================================
-  // Platform services
-  // ============================================================================
-
-  getIt.registerLazySingleton<SystemTrayService>(
-    () => SystemTrayService(),
-  );
+    ..registerLazySingleton<SystemTrayService>(
+      SystemTrayService.new,
+    );
 }

@@ -16,10 +16,6 @@ class CheckAuthStatus extends AuthEvent {
 }
 
 class LoginSubmitted extends AuthEvent {
-  final String serverUrl;
-  final String username;
-  final String password;
-
   const LoginSubmitted({
     required this.serverUrl,
     required this.username,

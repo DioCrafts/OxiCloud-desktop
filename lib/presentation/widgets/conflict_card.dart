@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 /// Card widget to display and resolve sync conflicts
 class ConflictCard extends StatelessWidget {
   const ConflictCard({
-    super.key,
     required this.conflictId,
     required this.filePath,
     required this.localModified,
@@ -11,6 +10,7 @@ class ConflictCard extends StatelessWidget {
     required this.localSize,
     required this.remoteSize,
     required this.conflictType,
+    super.key,
     this.onResolve,
   });
 

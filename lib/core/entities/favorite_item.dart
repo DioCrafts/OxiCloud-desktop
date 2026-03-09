@@ -2,13 +2,6 @@ import 'package:equatable/equatable.dart';
 
 /// Favorite item entity
 class FavoriteItem extends Equatable {
-  final String id;
-  final String itemId;
-  final String itemType; // 'file' or 'folder'
-  final String name;
-  final String path;
-  final DateTime addedAt;
-
   const FavoriteItem({
     required this.id,
     required this.itemId,
@@ -17,6 +10,13 @@ class FavoriteItem extends Equatable {
     required this.path,
     required this.addedAt,
   });
+
+  final String id;
+  final String itemId;
+  final String itemType; // 'file' or 'folder'
+  final String name;
+  final String path;
+  final DateTime addedAt;
 
   bool get isFile => itemType == 'file';
   bool get isFolder => itemType == 'folder';
@@ -27,6 +27,17 @@ class FavoriteItem extends Equatable {
 
 /// Recent item entity
 class RecentItem extends Equatable {
+  const RecentItem({
+    required this.id,
+    required this.itemId,
+    required this.itemType,
+    required this.name,
+    required this.path,
+    required this.accessedAt,
+    this.mimeType,
+    this.size,
+  });
+
   final String id;
   final String itemId;
   final String itemType; // 'file' or 'folder'
@@ -35,17 +46,6 @@ class RecentItem extends Equatable {
   final String? mimeType;
   final int? size;
   final DateTime accessedAt;
-
-  const RecentItem({
-    required this.id,
-    required this.itemId,
-    required this.itemType,
-    required this.name,
-    required this.path,
-    this.mimeType,
-    this.size,
-    required this.accessedAt,
-  });
 
   bool get isFile => itemType == 'file';
   bool get isFolder => itemType == 'folder';

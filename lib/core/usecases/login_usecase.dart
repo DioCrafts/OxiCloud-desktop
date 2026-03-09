@@ -5,9 +5,9 @@ import '../repositories/auth_repository.dart';
 
 /// Login use case
 class LoginUseCase {
-  final AuthRepository _repository;
-
   LoginUseCase(this._repository);
+
+  final AuthRepository _repository;
 
   Future<Either<AuthFailure, User>> call(AuthCredentials credentials) async {
     // Validate credentials first
@@ -22,9 +22,9 @@ class LoginUseCase {
 
 /// Logout use case
 class LogoutUseCase {
-  final AuthRepository _repository;
-
   LogoutUseCase(this._repository);
+
+  final AuthRepository _repository;
 
   Future<Either<AuthFailure, void>> call() async {
     return _repository.logout();
@@ -33,15 +33,15 @@ class LogoutUseCase {
 
 /// Check authentication status use case
 class CheckAuthUseCase {
-  final AuthRepository _repository;
-
   CheckAuthUseCase(this._repository);
+
+  final AuthRepository _repository;
 
   Future<Either<AuthFailure, User?>> call() async {
     final isLoggedIn = await _repository.isLoggedIn();
     
     return isLoggedIn.fold(
-      (failure) => Left(failure),
+      Left.new,
       (loggedIn) async {
         if (!loggedIn) return const Right(null);
         return _repository.getCurrentUser();

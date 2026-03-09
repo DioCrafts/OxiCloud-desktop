@@ -83,7 +83,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
             return ListView.separated(
               itemCount: state.items.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final item = state.items[index];
                 return _buildFavoriteTile(context, item);

@@ -2,11 +2,6 @@ import 'package:equatable/equatable.dart';
 
 /// User entity
 class User extends Equatable {
-  final String id;
-  final String username;
-  final String serverUrl;
-  final ServerInfo serverInfo;
-
   const User({
     required this.id,
     required this.username,
@@ -14,21 +9,17 @@ class User extends Equatable {
     required this.serverInfo,
   });
 
+  final String id;
+  final String username;
+  final String serverUrl;
+  final ServerInfo serverInfo;
+
   @override
   List<Object?> get props => [id, username, serverUrl, serverInfo];
 }
 
 /// Server information
 class ServerInfo extends Equatable {
-  final String url;
-  final String version;
-  final String name;
-  final String webdavUrl;
-  final int quotaTotal;
-  final int quotaUsed;
-  final bool supportsDeltaSync;
-  final bool supportsChunkedUpload;
-
   const ServerInfo({
     required this.url,
     required this.version,
@@ -39,6 +30,15 @@ class ServerInfo extends Equatable {
     required this.supportsDeltaSync,
     required this.supportsChunkedUpload,
   });
+
+  final String url;
+  final String version;
+  final String name;
+  final String webdavUrl;
+  final int quotaTotal;
+  final int quotaUsed;
+  final bool supportsDeltaSync;
+  final bool supportsChunkedUpload;
 
   /// Available quota in bytes
   int get quotaAvailable => quotaTotal - quotaUsed;

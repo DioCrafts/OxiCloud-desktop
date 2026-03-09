@@ -9,10 +9,10 @@ import '../datasources/search_api_datasource.dart';
 import '../mappers/trash_share_search_mapper.dart';
 
 class SearchRepositoryImpl implements SearchRepository {
+  SearchRepositoryImpl(this._dataSource);
+
   final SearchApiDataSource _dataSource;
   final Logger _logger = Logger();
-
-  SearchRepositoryImpl(this._dataSource);
 
   @override
   Future<Either<SearchFailure, SearchResults>> search(
@@ -31,7 +31,7 @@ class SearchRepositoryImpl implements SearchRepository {
       return Right(SearchMapper.resultsFromJson(raw));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'searching'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error searching: $e');
       return Left(UnknownSearchFailure(e.toString()));
     }
@@ -47,7 +47,7 @@ class SearchRepositoryImpl implements SearchRepository {
       return Right(SearchMapper.resultsFromJson(raw));
     } on DioException catch (e) {
       return Left(_mapDioError(e, 'advanced search'));
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Error in advanced search: $e');
       return Left(UnknownSearchFailure(e.toString()));
     }
@@ -64,7 +64,7 @@ class SearchRepositoryImpl implements SearchRepository {
     }
     _logger.e('Search DioException ($action): $e');
     return UnknownSearchFailure(
-      e.response?.data?['error']?.toString() ?? e.message ?? action,
+      (e.response?.data as Map<String, dynamic>?)?['error']?.toString() ?? e.message ?? action,
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -39,7 +38,7 @@ class SystemTrayService with TrayListener {
 
       _initialised = true;
       _logger.i('System tray initialised');
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.e('Failed to initialise system tray: $e');
     }
   }
@@ -102,7 +101,7 @@ class SystemTrayService with TrayListener {
   Future<String> _resolveIconPath(String assetKey) async {
     // 1. Development: project-relative file exists
     final projectFile = File(assetKey);
-    if (await projectFile.exists()) {
+    if (projectFile.existsSync()) {
       return projectFile.absolute.path;
     }
 
@@ -119,7 +118,7 @@ class SystemTrayService with TrayListener {
     ];
 
     for (final candidate in candidates) {
-      if (await File(candidate).exists()) return candidate;
+      if (File(candidate).existsSync()) return candidate;
     }
 
     // 3. Fallback: copy from rootBundle to temp
@@ -134,7 +133,7 @@ class SystemTrayService with TrayListener {
         ),
       );
       return tempFile.path;
-    } catch (e) {
+    } on Exception catch (e) {
       _logger.w('Could not resolve tray icon: $e');
       return assetKey;
     }

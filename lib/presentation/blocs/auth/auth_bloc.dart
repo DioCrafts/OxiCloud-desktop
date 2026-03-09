@@ -12,13 +12,13 @@ part 'auth_state.dart';
 // ============================================================================
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository _authRepository;
-
   AuthBloc(this._authRepository) : super(const AuthInitial()) {
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<LoginSubmitted>(_onLoginSubmitted);
     on<LogoutRequested>(_onLogoutRequested);
   }
+
+  final AuthRepository _authRepository;
 
   Future<void> _onCheckAuthStatus(
     CheckAuthStatus event,
@@ -40,7 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (isLoggedIn) async {
         if (isLoggedIn) {
           final userResult = await _authRepository.getCurrentUser();
-          userResult.fold(
+          await userResult.fold(
             (failure) async {
               final serverUrl = await _authRepository.getStoredServerUrl();
               final username = await _authRepository.getStoredUsername();

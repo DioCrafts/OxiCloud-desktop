@@ -9,12 +9,6 @@ import 'system_tray_service.dart';
 /// - Close-to-tray behaviour (minimize instead of quit)
 /// - Graceful Rust core shutdown on real quit
 class DesktopWindowManager with WindowListener {
-  final SystemTrayService _trayService;
-  final RustBridgeDataSource _rustDataSource;
-
-  bool _minimizeToTray;
-  bool _forceQuit = false;
-
   DesktopWindowManager({
     required SystemTrayService trayService,
     required RustBridgeDataSource rustDataSource,
@@ -22,6 +16,12 @@ class DesktopWindowManager with WindowListener {
   })  : _trayService = trayService,
         _rustDataSource = rustDataSource,
         _minimizeToTray = minimizeToTray;
+
+  final SystemTrayService _trayService;
+  final RustBridgeDataSource _rustDataSource;
+
+  bool _minimizeToTray;
+  bool _forceQuit = false;
 
   /// Call once at startup to configure the window and wire listeners.
   Future<void> init() async {
@@ -56,12 +56,13 @@ class DesktopWindowManager with WindowListener {
   }
 
   /// Whether the app should minimize to tray on close.
+  bool get minimizeToTray => _minimizeToTray;
   set minimizeToTray(bool value) => _minimizeToTray = value;
 
   // ── WindowListener ──────────────────────────────────────────────────────
 
   @override
-  void onWindowClose() async {
+  Future<void> onWindowClose() async {
     if (_forceQuit) {
       // Real quit: shut down Rust core, then exit
       await _rustDataSource.shutdown();
@@ -108,7 +109,7 @@ Future<void> initDesktopWindow() async {
     title: 'OxiCloud',
   );
 
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
   });

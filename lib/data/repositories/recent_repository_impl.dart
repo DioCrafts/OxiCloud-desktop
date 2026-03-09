@@ -6,9 +6,9 @@ import '../../core/repositories/recent_repository.dart';
 import '../datasources/recent_api_datasource.dart';
 
 class RecentRepositoryImpl implements RecentRepository {
-  final RecentApiDataSource _dataSource;
-
   RecentRepositoryImpl(this._dataSource);
+
+  final RecentApiDataSource _dataSource;
 
   @override
   Future<Either<RecentFailure, List<RecentItem>>> getRecent() async {
@@ -27,7 +27,7 @@ class RecentRepositoryImpl implements RecentRepository {
       return Right(items);
     } on DioException catch (e) {
       return Left(NetworkRecentFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownRecentFailure(e.toString()));
     }
   }
@@ -39,7 +39,7 @@ class RecentRepositoryImpl implements RecentRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(NetworkRecentFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownRecentFailure(e.toString()));
     }
   }
@@ -51,7 +51,7 @@ class RecentRepositoryImpl implements RecentRepository {
       return const Right(null);
     } on DioException catch (e) {
       return Left(NetworkRecentFailure(e.message ?? 'Network error'));
-    } catch (e) {
+    } on Exception catch (e) {
       return Left(UnknownRecentFailure(e.toString()));
     }
   }

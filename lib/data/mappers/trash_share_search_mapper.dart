@@ -1,6 +1,6 @@
-import '../../core/entities/trash_item.dart';
-import '../../core/entities/share_item.dart';
 import '../../core/entities/search_results.dart';
+import '../../core/entities/share_item.dart';
+import '../../core/entities/trash_item.dart';
 import 'file_browser_mapper.dart';
 
 // =============================================================================

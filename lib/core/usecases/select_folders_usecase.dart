@@ -5,9 +5,9 @@ import '../repositories/sync_repository.dart';
 
 /// Get remote folders use case (for selective sync)
 class GetRemoteFoldersUseCase {
-  final SyncRepository _repository;
-
   GetRemoteFoldersUseCase(this._repository);
+
+  final SyncRepository _repository;
 
   Future<Either<SyncFailure, List<SyncFolder>>> call() async {
     return _repository.getRemoteFolders();

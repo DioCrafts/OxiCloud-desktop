@@ -29,9 +29,9 @@ enum ShellDestination { home, files, favorites, recent, search, shares, trash, s
 
 class ShellScope extends InheritedWidget {
   const ShellScope({
-    super.key,
     required this.navigateTo,
     required super.child,
+    super.key,
   });
 
   final void Function(ShellDestination destination) navigateTo;

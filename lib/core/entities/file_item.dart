@@ -8,6 +8,17 @@ import '../../presentation/theme/oxicloud_colors.dart';
 // =============================================================================
 
 class FileItem extends Equatable {
+  const FileItem({
+    required this.id,
+    required this.name,
+    required this.path,
+    required this.size,
+    required this.mimeType,
+    required this.createdAt,
+    required this.modifiedAt,
+    this.folderId,
+  });
+
   final String id;
   final String name;
   final String path;
@@ -16,17 +27,6 @@ class FileItem extends Equatable {
   final String? folderId;
   final DateTime createdAt;
   final DateTime modifiedAt;
-
-  const FileItem({
-    required this.id,
-    required this.name,
-    required this.path,
-    required this.size,
-    required this.mimeType,
-    this.folderId,
-    required this.createdAt,
-    required this.modifiedAt,
-  });
 
   /// File extension without dot, lowercase.
   String get extension =>
@@ -55,6 +55,16 @@ class FileItem extends Equatable {
 // =============================================================================
 
 class FolderItem extends Equatable {
+  const FolderItem({
+    required this.id,
+    required this.name,
+    required this.path,
+    required this.createdAt,
+    required this.modifiedAt,
+    this.parentId,
+    this.isRoot = false,
+  });
+
   final String id;
   final String name;
   final String path;
@@ -62,16 +72,6 @@ class FolderItem extends Equatable {
   final DateTime createdAt;
   final DateTime modifiedAt;
   final bool isRoot;
-
-  const FolderItem({
-    required this.id,
-    required this.name,
-    required this.path,
-    this.parentId,
-    required this.createdAt,
-    required this.modifiedAt,
-    this.isRoot = false,
-  });
 
   @override
   List<Object?> get props =>
@@ -83,11 +83,11 @@ class FolderItem extends Equatable {
 // =============================================================================
 
 class BreadcrumbItem extends Equatable {
+  const BreadcrumbItem({required this.name, this.id});
+
   /// Folder id — `null` means root.
   final String? id;
   final String name;
-
-  const BreadcrumbItem({this.id, required this.name});
 
   @override
   List<Object?> get props => [id, name];

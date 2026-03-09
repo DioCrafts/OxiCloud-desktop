@@ -4,12 +4,12 @@ import 'api_client.dart';
 
 /// Chunked upload data source matching OxiCloud server's /api/uploads endpoint
 class ChunkedUploadDataSource {
+  ChunkedUploadDataSource(this._apiClient);
+
   final ApiClient _apiClient;
 
   /// Default chunk size: 5 MB
   static const int defaultChunkSize = 5 * 1024 * 1024;
-
-  ChunkedUploadDataSource(this._apiClient);
 
   /// Initiate a chunked upload session.
   /// POST /api/uploads
@@ -24,8 +24,8 @@ class ChunkedUploadDataSource {
       data: {
         'file_name': fileName,
         'total_size': totalSize,
-        if (folderId != null) 'folder_id': folderId,
-        if (mimeType != null) 'mime_type': mimeType,
+        'folder_id': ?folderId,
+        'mime_type': ?mimeType,
       },
     );
 
@@ -46,7 +46,7 @@ class ChunkedUploadDataSource {
     required int offset,
     required int totalSize,
   }) async {
-    await _apiClient.dio.patch(
+    await _apiClient.dio.patch<dynamic>(
       'api/uploads/$uploadId',
       data: Stream.fromIterable([chunkData]),
       options: Options(
@@ -61,7 +61,7 @@ class ChunkedUploadDataSource {
   /// Check upload progress.
   /// HEAD /api/uploads/{uploadId}
   Future<int> getUploadOffset(String uploadId) async {
-    final response = await _apiClient.dio.head('api/uploads/$uploadId');
+    final response = await _apiClient.dio.head<dynamic>('api/uploads/$uploadId');
     final offset = response.headers.value('Upload-Offset');
     return offset != null ? int.tryParse(offset) ?? 0 : 0;
   }
@@ -78,7 +78,7 @@ class ChunkedUploadDataSource {
   /// Cancel / abort the upload.
   /// DELETE /api/uploads/{uploadId}
   Future<void> cancel(String uploadId) async {
-    await _apiClient.dio.delete('api/uploads/$uploadId');
+    await _apiClient.dio.delete<dynamic>('api/uploads/$uploadId');
   }
 
   /// Upload a large file using chunked upload.
@@ -100,8 +100,8 @@ class ChunkedUploadDataSource {
 
     // 2. Upload chunks
     final chunkSize = session.chunkSize;
-    final raf = await file.open(mode: FileMode.read);
-    int offset = 0;
+    final raf = await file.open();
+    var offset = 0;
 
     try {
       while (offset < totalSize) {
@@ -127,19 +127,19 @@ class ChunkedUploadDataSource {
     }
 
     // 3. Complete
-    return await complete(session.uploadId);
+    return complete(session.uploadId);
   }
 }
 
 /// Represents an active chunked upload session
 class ChunkedUploadSession {
-  final String uploadId;
-  final int chunkSize;
-  final int totalChunks;
-
   const ChunkedUploadSession({
     required this.uploadId,
     required this.chunkSize,
     required this.totalChunks,
   });
+
+  final String uploadId;
+  final int chunkSize;
+  final int totalChunks;
 }
