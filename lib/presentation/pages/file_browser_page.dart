@@ -370,7 +370,6 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
 
   String? _getThumbnailUrl(FileItem file) {
     if (file.fileType == FileType.image) {
-      final repo = context.read<FileBrowserBloc>();
       // Access repository through bloc for thumbnail URL
       return null; // Thumbnails loaded via repository
     }

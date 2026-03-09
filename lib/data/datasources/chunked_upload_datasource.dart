@@ -24,8 +24,8 @@ class ChunkedUploadDataSource {
       data: {
         'file_name': fileName,
         'total_size': totalSize,
-        ?folderId: 'folder_id',
-        ?mimeType: 'mime_type',
+        'folder_id': ?folderId,
+        'mime_type': ?mimeType,
       },
     );
 

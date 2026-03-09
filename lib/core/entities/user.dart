@@ -20,15 +20,6 @@ class User extends Equatable {
 
 /// Server information
 class ServerInfo extends Equatable {
-  final String url;
-  final String version;
-  final String name;
-  final String webdavUrl;
-  final int quotaTotal;
-  final int quotaUsed;
-  final bool supportsDeltaSync;
-  final bool supportsChunkedUpload;
-
   const ServerInfo({
     required this.url,
     required this.version,
@@ -39,6 +30,15 @@ class ServerInfo extends Equatable {
     required this.supportsDeltaSync,
     required this.supportsChunkedUpload,
   });
+
+  final String url;
+  final String version;
+  final String name;
+  final String webdavUrl;
+  final int quotaTotal;
+  final int quotaUsed;
+  final bool supportsDeltaSync;
+  final bool supportsChunkedUpload;
 
   /// Available quota in bytes
   int get quotaAvailable => quotaTotal - quotaUsed;

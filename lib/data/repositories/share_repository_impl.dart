@@ -135,7 +135,7 @@ class ShareRepositoryImpl implements ShareRepository {
     }
     _logger.e('Share DioException ($action): $e');
     return UnknownShareFailure(
-      e.response?.data?['error']?.toString() ?? e.message ?? action,
+      (e.response?.data as Map<String, dynamic>?)?['error']?.toString() ?? e.message ?? action,
     );
   }
 }
