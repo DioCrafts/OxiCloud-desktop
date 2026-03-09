@@ -1,7 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
 import 'package:oxicloud_app/core/entities/sync_folder.dart';
 import 'package:oxicloud_app/core/entities/sync_status.dart';
@@ -17,11 +17,11 @@ void main() {
 
   setUp(() {
     mockSyncRepository = MockSyncRepository();
-    
+
     // Default mock for status stream
     when(() => mockSyncRepository.syncStatusStream)
         .thenAnswer((_) => const Stream<SyncStatus>.empty());
-    
+
     syncBloc = SyncBloc(mockSyncRepository);
   });
 

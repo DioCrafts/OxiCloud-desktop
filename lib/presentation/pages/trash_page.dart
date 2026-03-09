@@ -111,7 +111,7 @@ class _TrashPageState extends State<TrashPage> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(height: 1),
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
         final item = items[index];
         return _TrashItemTile(
@@ -186,15 +186,15 @@ class _TrashPageState extends State<TrashPage> {
 // =============================================================================
 
 class _TrashItemTile extends StatelessWidget {
-  final TrashItem item;
-  final VoidCallback onRestore;
-  final VoidCallback onDelete;
-
   const _TrashItemTile({
     required this.item,
     required this.onRestore,
     required this.onDelete,
   });
+
+  final TrashItem item;
+  final VoidCallback onRestore;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {

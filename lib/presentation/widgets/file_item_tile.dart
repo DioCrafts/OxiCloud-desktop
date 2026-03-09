@@ -8,16 +8,6 @@ import '../theme/oxicloud_colors.dart';
 // =============================================================================
 
 class FolderTile extends StatelessWidget {
-  final FolderItem folder;
-  final VoidCallback onTap;
-  final VoidCallback? onRename;
-  final VoidCallback? onDelete;
-  final VoidCallback? onFavoriteToggle;
-  final VoidCallback? onDownloadZip;
-  final bool isFavorite;
-  final bool isSelected;
-  final VoidCallback? onLongPress;
-
   const FolderTile({
     super.key,
     required this.folder,
@@ -31,16 +21,26 @@ class FolderTile extends StatelessWidget {
     this.onLongPress,
   });
 
+  final FolderItem folder;
+  final VoidCallback onTap;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onDownloadZip;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       selected: isSelected,
-      selectedTileColor: OxiColors.primary.withOpacity(0.08),
+      selectedTileColor: OxiColors.primary.withValues(alpha: 0.08),
       leading: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: OxiColors.navFilesInactive.withOpacity(0.15),
+          color: OxiColors.navFilesInactive.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Stack(
@@ -91,17 +91,6 @@ class FolderTile extends StatelessWidget {
 // =============================================================================
 
 class FileTile extends StatelessWidget {
-  final FileItem file;
-  final VoidCallback? onTap;
-  final VoidCallback? onRename;
-  final VoidCallback? onDelete;
-  final VoidCallback? onDownload;
-  final VoidCallback? onFavoriteToggle;
-  final bool isFavorite;
-  final bool isSelected;
-  final VoidCallback? onLongPress;
-  final String? thumbnailUrl;
-
   const FileTile({
     super.key,
     required this.file,
@@ -116,6 +105,17 @@ class FileTile extends StatelessWidget {
     this.thumbnailUrl,
   });
 
+  final FileItem file;
+  final VoidCallback? onTap;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final String? thumbnailUrl;
+
   @override
   Widget build(BuildContext context) {
     final fileType = file.fileType;
@@ -124,7 +124,7 @@ class FileTile extends StatelessWidget {
 
     return ListTile(
       selected: isSelected,
-      selectedTileColor: OxiColors.primary.withOpacity(0.08),
+      selectedTileColor: OxiColors.primary.withValues(alpha: 0.08),
       leading: _buildLeading(fileType, color, icon),
       title: Text(
         file.name,
@@ -158,7 +158,7 @@ class FileTile extends StatelessWidget {
           width: 40,
           height: 40,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildIconContainer(color, icon),
+          errorBuilder: (_, _, _) => _buildIconContainer(color, icon),
         ),
       );
     }
@@ -170,7 +170,7 @@ class FileTile extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Stack(
@@ -194,15 +194,6 @@ class FileTile extends StatelessWidget {
 // =============================================================================
 
 class FolderGridCard extends StatelessWidget {
-  final FolderItem folder;
-  final VoidCallback onTap;
-  final VoidCallback? onRename;
-  final VoidCallback? onDelete;
-  final VoidCallback? onFavoriteToggle;
-  final bool isFavorite;
-  final bool isSelected;
-  final VoidCallback? onLongPress;
-
   const FolderGridCard({
     super.key,
     required this.folder,
@@ -215,6 +206,15 @@ class FolderGridCard extends StatelessWidget {
     this.onLongPress,
   });
 
+  final FolderItem folder;
+  final VoidCallback onTap;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -226,7 +226,7 @@ class FolderGridCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
       ),
-      color: isSelected ? OxiColors.primary.withOpacity(0.05) : null,
+      color: isSelected ? OxiColors.primary.withValues(alpha: 0.05) : null,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -283,17 +283,6 @@ class FolderGridCard extends StatelessWidget {
 // =============================================================================
 
 class FileGridCard extends StatelessWidget {
-  final FileItem file;
-  final VoidCallback? onTap;
-  final VoidCallback? onRename;
-  final VoidCallback? onDelete;
-  final VoidCallback? onDownload;
-  final VoidCallback? onFavoriteToggle;
-  final bool isFavorite;
-  final bool isSelected;
-  final VoidCallback? onLongPress;
-  final String? thumbnailUrl;
-
   const FileGridCard({
     super.key,
     required this.file,
@@ -307,6 +296,17 @@ class FileGridCard extends StatelessWidget {
     this.onLongPress,
     this.thumbnailUrl,
   });
+
+  final FileItem file;
+  final VoidCallback? onTap;
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final bool isFavorite;
+  final bool isSelected;
+  final VoidCallback? onLongPress;
+  final String? thumbnailUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -323,7 +323,7 @@ class FileGridCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
       ),
-      color: isSelected ? OxiColors.primary.withOpacity(0.05) : null,
+      color: isSelected ? OxiColors.primary.withValues(alpha: 0.05) : null,
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -369,7 +369,7 @@ class FileGridCard extends StatelessWidget {
           width: 36,
           height: 36,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Icon(icon, color: color, size: 36),
+          errorBuilder: (_, _, _) => Icon(icon, color: color, size: 36),
         ),
       );
     }
@@ -393,16 +393,16 @@ class FileGridCard extends StatelessWidget {
 // =============================================================================
 
 class UploadProgressOverlay extends StatelessWidget {
-  final String fileName;
-  final double progress;
-  final int percent;
-
   const UploadProgressOverlay({
     super.key,
     required this.fileName,
     required this.progress,
     required this.percent,
   });
+
+  final String fileName;
+  final double progress;
+  final int percent;
 
   @override
   Widget build(BuildContext context) {
@@ -414,7 +414,7 @@ class UploadProgressOverlay extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -466,12 +466,6 @@ class UploadProgressOverlay extends StatelessWidget {
 // =============================================================================
 
 class MultiSelectActionBar extends StatelessWidget {
-  final int selectedCount;
-  final VoidCallback onDelete;
-  final VoidCallback onMove;
-  final VoidCallback onCopy;
-  final VoidCallback onClearSelection;
-
   const MultiSelectActionBar({
     super.key,
     required this.selectedCount,
@@ -480,6 +474,12 @@ class MultiSelectActionBar extends StatelessWidget {
     required this.onCopy,
     required this.onClearSelection,
   });
+
+  final int selectedCount;
+  final VoidCallback onDelete;
+  final VoidCallback onMove;
+  final VoidCallback onCopy;
+  final VoidCallback onClearSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -529,13 +529,6 @@ class MultiSelectActionBar extends StatelessWidget {
 // =============================================================================
 
 class _ContextMenuButton extends StatelessWidget {
-  final VoidCallback? onRename;
-  final VoidCallback? onDelete;
-  final VoidCallback? onDownload;
-  final VoidCallback? onFavoriteToggle;
-  final VoidCallback? onDownloadZip;
-  final bool isFavorite;
-
   const _ContextMenuButton({
     this.onRename,
     this.onDelete,
@@ -544,6 +537,13 @@ class _ContextMenuButton extends StatelessWidget {
     this.onDownloadZip,
     this.isFavorite = false,
   });
+
+  final VoidCallback? onRename;
+  final VoidCallback? onDelete;
+  final VoidCallback? onDownload;
+  final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onDownloadZip;
+  final bool isFavorite;
 
   @override
   Widget build(BuildContext context) {

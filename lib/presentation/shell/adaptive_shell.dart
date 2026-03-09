@@ -28,13 +28,13 @@ enum ShellDestination { home, files, favorites, recent, search, shares, trash, s
 // =============================================================================
 
 class ShellScope extends InheritedWidget {
-  final void Function(ShellDestination destination) navigateTo;
-
   const ShellScope({
     super.key,
     required this.navigateTo,
     required super.child,
   });
+
+  final void Function(ShellDestination destination) navigateTo;
 
   /// Returns null when the widget is not inside a shell (standalone page).
   static ShellScope? maybeOf(BuildContext context) =>
@@ -72,19 +72,19 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
     if (!_isDesktop) {
       if (dest == ShellDestination.trash) {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const TrashPage()),
+          MaterialPageRoute<void>(builder: (_) => const TrashPage()),
         );
         return;
       }
       if (dest == ShellDestination.favorites) {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const FavoritesPage()),
+          MaterialPageRoute<void>(builder: (_) => const FavoritesPage()),
         );
         return;
       }
       if (dest == ShellDestination.recent) {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const RecentPage()),
+          MaterialPageRoute<void>(builder: (_) => const RecentPage()),
         );
         return;
       }
@@ -131,15 +131,15 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
 // =============================================================================
 
 class _DesktopLayout extends StatelessWidget {
-  final ShellDestination selected;
-  final ValueChanged<ShellDestination> onSelected;
-  final List<Widget> pages;
-
   const _DesktopLayout({
     required this.selected,
     required this.onSelected,
     required this.pages,
   });
+
+  final ShellDestination selected;
+  final ValueChanged<ShellDestination> onSelected;
+  final List<Widget> pages;
 
   // Desktop shows all 6 destinations
   static const _destinations = ShellDestination.values;
@@ -248,15 +248,15 @@ class _DesktopLayout extends StatelessWidget {
 // =============================================================================
 
 class _MobileLayout extends StatelessWidget {
-  final ShellDestination selected;
-  final ValueChanged<ShellDestination> onSelected;
-  final List<Widget> pages;
-
   const _MobileLayout({
     required this.selected,
     required this.onSelected,
     required this.pages,
   });
+
+  final ShellDestination selected;
+  final ValueChanged<ShellDestination> onSelected;
+  final List<Widget> pages;
 
   // Mobile shows 5 destinations (Trash, Favorites, Recent accessed via Home)
   static const _navDests = [

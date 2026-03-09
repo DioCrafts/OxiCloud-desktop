@@ -22,7 +22,7 @@ class OxiCloudTheme {
   // ── Private builder ─────────────────────────────────────────────────────
 
   static ThemeData _buildTheme(Brightness brightness) {
-    final bool isLight = brightness == Brightness.light;
+    final isLight = brightness == Brightness.light;
 
     final colorScheme = ColorScheme.fromSeed(
       seedColor: OxiColors.primary,
@@ -45,7 +45,6 @@ class OxiCloudTheme {
           isLight ? OxiColors.pageBg : OxiColors.darkPageBg,
 
       // ── Typography ────────────────────────────────────────────────────
-      fontFamily: null, // system font stack
       textTheme: textTheme,
 
       // ── AppBar ────────────────────────────────────────────────────────
@@ -94,7 +93,7 @@ class OxiCloudTheme {
           ),
         ).copyWith(
           shadowColor: WidgetStatePropertyAll(
-            OxiColors.primary.withOpacity(0.3),
+            OxiColors.primary.withValues(alpha: 0.3),
           ),
           elevation: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.hovered)) return 6;
@@ -286,15 +285,11 @@ class OxiCloudTheme {
       // ── Scrollbar ─────────────────────────────────────────────────────
       scrollbarTheme: ScrollbarThemeData(
         thumbColor: WidgetStatePropertyAll(
-          Colors.black.withOpacity(0.2),
+          Colors.black.withValues(alpha: 0.2),
         ),
         radius: const Radius.circular(4),
         thickness: const WidgetStatePropertyAll(8),
       ),
-
-      // ── CircleAvatar ──────────────────────────────────────────────────
-      // CircleAvatar doesn't have a theme; handled in the widget tree.
-      // Use OxiColors.primaryGradient for avatar backgrounds.
 
       // ── NavigationRail (for desktop sidebar) ──────────────────────────
       navigationRailTheme: NavigationRailThemeData(
@@ -310,12 +305,11 @@ class OxiCloudTheme {
   // ── Text theme ──────────────────────────────────────────────────────────
 
   static TextTheme _buildTextTheme(bool isLight) {
-    final Color heading = isLight ? OxiColors.textHeading : OxiColors.darkTextHeading;
-    final Color body = isLight ? OxiColors.textBody : OxiColors.darkTextBody;
-    final Color secondary = isLight ? OxiColors.textSecondary : OxiColors.darkTextSecondary;
+    final heading = isLight ? OxiColors.textHeading : OxiColors.darkTextHeading;
+    final body = isLight ? OxiColors.textBody : OxiColors.darkTextBody;
+    final secondary = isLight ? OxiColors.textSecondary : OxiColors.darkTextSecondary;
 
     return TextTheme(
-      // Display / Headline
       headlineLarge: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w700,
@@ -332,8 +326,6 @@ class OxiCloudTheme {
         fontWeight: FontWeight.w600,
         color: heading,
       ),
-
-      // Title
       titleLarge: TextStyle(
         fontSize: 19,
         fontWeight: FontWeight.w700,
@@ -350,8 +342,6 @@ class OxiCloudTheme {
         fontWeight: FontWeight.w600,
         color: heading,
       ),
-
-      // Body
       bodyLarge: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w400,
@@ -367,8 +357,6 @@ class OxiCloudTheme {
         fontWeight: FontWeight.w400,
         color: secondary,
       ),
-
-      // Label
       labelLarge: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,

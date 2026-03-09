@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 /// Widget that displays the current sync status with an animated indicator
 class SyncStatusIndicator extends StatefulWidget {
-  final SyncState state;
-  final double size;
-  final Color? color;
-
   const SyncStatusIndicator({
     super.key,
     required this.state,
     this.size = 24,
     this.color,
   });
+
+  final SyncState state;
+  final double size;
+  final Color? color;
 
   @override
   State<SyncStatusIndicator> createState() => _SyncStatusIndicatorState();
@@ -43,8 +43,9 @@ class _SyncStatusIndicatorState extends State<SyncStatusIndicator>
     if (widget.state == SyncState.syncing) {
       _controller.repeat();
     } else {
-      _controller.stop();
-      _controller.reset();
+      _controller
+        ..stop()
+        ..reset();
     }
   }
 

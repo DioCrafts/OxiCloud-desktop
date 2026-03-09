@@ -2,13 +2,6 @@ import 'package:flutter/material.dart';
 
 /// Widget to display storage usage as a progress bar
 class StorageUsageBar extends StatelessWidget {
-  final int usedBytes;
-  final int totalBytes;
-  final double height;
-  final Color? usedColor;
-  final Color? backgroundColor;
-  final bool showLabels;
-
   const StorageUsageBar({
     super.key,
     required this.usedBytes,
@@ -19,12 +12,19 @@ class StorageUsageBar extends StatelessWidget {
     this.showLabels = true,
   });
 
+  final int usedBytes;
+  final int totalBytes;
+  final double height;
+  final Color? usedColor;
+  final Color? backgroundColor;
+  final bool showLabels;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final percentage = totalBytes > 0 ? usedBytes / totalBytes : 0.0;
     final clampedPercentage = percentage.clamp(0.0, 1.0);
-    
+
     // Color based on usage level
     final defaultColor = _getColorForUsage(clampedPercentage);
     final fgColor = usedColor ?? defaultColor;
@@ -120,16 +120,16 @@ class StorageUsageBar extends StatelessWidget {
 
 /// Compact storage indicator showing just the percentage and icon
 class StorageIndicator extends StatelessWidget {
-  final int usedBytes;
-  final int totalBytes;
-  final VoidCallback? onTap;
-
   const StorageIndicator({
     super.key,
     required this.usedBytes,
     required this.totalBytes,
     this.onTap,
   });
+
+  final int usedBytes;
+  final int totalBytes;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

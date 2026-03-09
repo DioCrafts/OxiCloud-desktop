@@ -1,15 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 /// Circular progress ring widget for displaying sync progress
 class ProgressRing extends StatelessWidget {
-  final double progress; // 0.0 to 1.0
-  final double size;
-  final double strokeWidth;
-  final Color? backgroundColor;
-  final Color? progressColor;
-  final Widget? child;
-
   const ProgressRing({
     super.key,
     required this.progress,
@@ -19,6 +13,13 @@ class ProgressRing extends StatelessWidget {
     this.progressColor,
     this.child,
   });
+
+  final double progress; // 0.0 to 1.0
+  final double size;
+  final double strokeWidth;
+  final Color? backgroundColor;
+  final Color? progressColor;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class ProgressRing extends StatelessWidget {
               progressColor: fgColor,
             ),
           ),
-          if (child != null) child!,
+          ?child,
         ],
       ),
     );
@@ -49,17 +50,17 @@ class ProgressRing extends StatelessWidget {
 }
 
 class _ProgressRingPainter extends CustomPainter {
-  final double progress;
-  final double strokeWidth;
-  final Color backgroundColor;
-  final Color progressColor;
-
   _ProgressRingPainter({
     required this.progress,
     required this.strokeWidth,
     required this.backgroundColor,
     required this.progressColor,
   });
+
+  final double progress;
+  final double strokeWidth;
+  final Color backgroundColor;
+  final Color progressColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -103,15 +104,6 @@ class _ProgressRingPainter extends CustomPainter {
 
 /// Animated version of ProgressRing
 class AnimatedProgressRing extends StatelessWidget {
-  final double progress;
-  final double size;
-  final double strokeWidth;
-  final Color? backgroundColor;
-  final Color? progressColor;
-  final Widget? child;
-  final Duration duration;
-  final Curve curve;
-
   const AnimatedProgressRing({
     super.key,
     required this.progress,
@@ -123,6 +115,15 @@ class AnimatedProgressRing extends StatelessWidget {
     this.duration = const Duration(milliseconds: 300),
     this.curve = Curves.easeInOut,
   });
+
+  final double progress;
+  final double size;
+  final double strokeWidth;
+  final Color? backgroundColor;
+  final Color? progressColor;
+  final Widget? child;
+  final Duration duration;
+  final Curve curve;
 
   @override
   Widget build(BuildContext context) {
