@@ -67,6 +67,11 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
+
       - name: Build Linux release
         run: flutter build linux --release
 
@@ -277,6 +282,11 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
+
       - name: Build Windows release
         run: flutter build windows --release
 
@@ -303,10 +313,15 @@ jobs:
           AppVersion=$version
           AppPublisher=DioCrafts
           AppPublisherURL=https://github.com/DioCrafts/OxiCloud
+          AppSupportURL=https://github.com/DioCrafts/OxiCloud/issues
           DefaultDirName={autopf}\OxiCloud
           DefaultGroupName=OxiCloud
           OutputDir=.
           OutputBaseFilename=OxiCloud-windows-x64-setup
+          SetupIconFile=assets\icons\installer_icon.ico
+          UninstallDisplayIcon={app}\oxicloud_app.exe
+          WizardImageFile=assets\icons\installer_wizard.bmp
+          WizardSmallImageFile=assets\icons\installer_wizard_small.bmp
           Compression=lzma
           SolidCompression=yes
           WizardStyle=modern
@@ -325,8 +340,8 @@ jobs:
           Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
           [Icons]
-          Name: "{group}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"
-          Name: "{autodesktop}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; Tasks: desktopicon
+          Name: "{group}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; IconFilename: "{app}\oxicloud_app.exe"
+          Name: "{autodesktop}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; IconFilename: "{app}\oxicloud_app.exe"; Tasks: desktopicon
           Name: "{userstartup}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; Tasks: launchstartup
 
           [Run]
@@ -385,6 +400,11 @@ jobs:
 
       - name: Install Flutter dependencies
         run: flutter pub get
+
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
 
       - name: Build macOS release
         run: flutter build macos --release
@@ -477,6 +497,11 @@ jobs:
       - name: Install Flutter dependencies
         run: flutter pub get
 
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
+
       - name: Decode keystore
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
@@ -561,6 +586,11 @@ jobs:
 
       - name: Install Flutter dependencies
         run: flutter pub get
+
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
 
       - name: Install CocoaPods
         run: |
