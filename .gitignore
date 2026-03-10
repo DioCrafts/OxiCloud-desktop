@@ -54,6 +54,8 @@ rust/src/frb_generated.web.rs
 # build_runner / freezed / json_serializable
 *.g.dart
 *.freezed.dart
+# Exception: include flutter_rust_bridge generated freezed files needed for analysis
+!lib/src/rust/domain/entities/sync_item.freezed.dart
 *.mocks.dart
 *.config.dart
 

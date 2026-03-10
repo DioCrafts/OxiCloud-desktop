@@ -654,10 +654,11 @@ class _FileBrowserPageState extends State<FileBrowserPage> {
     );
 
     if ((confirmed ?? false) && context.mounted) {
+      final bloc = context.read<FileBrowserBloc>();
       if (isFolder) {
-        context.read<FileBrowserBloc>().add(DeleteFolderRequested(id));
+        bloc.add(DeleteFolderRequested(id));
       } else {
-        context.read<FileBrowserBloc>().add(DeleteFileRequested(id));
+        bloc.add(DeleteFileRequested(id));
       }
     }
   }

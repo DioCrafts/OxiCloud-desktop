@@ -310,7 +310,7 @@ class _HomePageState extends State<HomePage> {
               _buildActionCard(
                 icon: Icons.folder,
                 label: 'Open Sync Folder',
-                onTap: () => _openSyncFolder(),
+                onTap: _openSyncFolder,
               ),
               _buildActionCard(
                 icon: Icons.folder_special,
