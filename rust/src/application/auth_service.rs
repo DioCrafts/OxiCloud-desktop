@@ -2,13 +2,13 @@
 //!
 //! Authentication service for managing user sessions.
 
+use chrono::Utc;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use chrono::Utc;
 
-use crate::domain::entities::{AuthCredentials, AuthSession, ServerInfo, AuthError};
-use crate::domain::ports::{StoragePort, AuthPort};
 use crate::api::AuthResult;
+use crate::domain::entities::{AuthCredentials, AuthError, AuthSession, ServerInfo};
+use crate::domain::ports::{AuthPort, StoragePort};
 
 /// Authentication service
 pub struct AuthService {
@@ -27,7 +27,8 @@ impl AuthService {
 
     /// Login with credentials
     pub async fn login(&self, credentials: AuthCredentials) -> Result<AuthResult, AuthError> {
-        credentials.validate()
+        credentials
+            .validate()
             .map_err(|_e| AuthError::InvalidCredentials)?;
 
         let client = reqwest::Client::new();
@@ -46,7 +47,9 @@ impl AuthService {
             return Err(AuthError::InvalidCredentials);
         }
 
-        let login_response: LoginResponse = response.json().await
+        let login_response: LoginResponse = response
+            .json()
+            .await
             .map_err(|e| AuthError::NetworkError(format!("Invalid response: {}", e)))?;
 
         let user_id = login_response.user.id.clone();
@@ -55,17 +58,19 @@ impl AuthService {
         let quota_used = login_response.user.storage_used_bytes;
 
         // Compute expires_at from expires_in (seconds from now)
-        let expires_at = login_response.expires_in.map(|secs| {
-            Utc::now() + chrono::Duration::seconds(secs)
-        });
+        let expires_at = login_response
+            .expires_in
+            .map(|secs| Utc::now() + chrono::Duration::seconds(secs));
 
         // Get server version info
-        let server_info = self.fetch_server_info(
-            &credentials.server_url,
-            &login_response.access_token,
-            quota_total,
-            quota_used,
-        ).await?;
+        let server_info = self
+            .fetch_server_info(
+                &credentials.server_url,
+                &login_response.access_token,
+                quota_total,
+                quota_used,
+            )
+            .await?;
 
         // Create session
         let session = AuthSession {
@@ -79,7 +84,9 @@ impl AuthService {
         };
 
         // Save session
-        self.storage.save_session(&session).await
+        self.storage
+            .save_session(&session)
+            .await
             .map_err(|e| AuthError::StorageError(e.to_string()))?;
 
         *self.session.write().await = Some(session);
@@ -130,7 +137,9 @@ impl AuthService {
 
     /// Get current server info
     pub async fn get_server_info(&self) -> Option<ServerInfo> {
-        self.session.read().await
+        self.session
+            .read()
+            .await
             .as_ref()
             .map(|s| s.server_info.clone())
     }
@@ -155,7 +164,9 @@ impl AuthService {
 
     /// Refresh the access token
     async fn refresh_token(&self, session: &AuthSession) -> Result<(), AuthError> {
-        let refresh_token = session.refresh_token.as_ref()
+        let refresh_token = session
+            .refresh_token
+            .as_ref()
             .ok_or_else(|| AuthError::RefreshFailed("No refresh token".to_string()))?;
 
         let client = reqwest::Client::new();
@@ -171,10 +182,14 @@ impl AuthService {
             .map_err(|e| AuthError::NetworkError(e.to_string()))?;
 
         if !response.status().is_success() {
-            return Err(AuthError::RefreshFailed("Refresh request failed".to_string()));
+            return Err(AuthError::RefreshFailed(
+                "Refresh request failed".to_string(),
+            ));
         }
 
-        let refresh_response: RefreshResponse = response.json().await
+        let refresh_response: RefreshResponse = response
+            .json()
+            .await
             .map_err(|e| AuthError::NetworkError(format!("Invalid response: {}", e)))?;
 
         let mut updated_session = session.clone();
@@ -182,11 +197,13 @@ impl AuthService {
         if let Some(new_refresh) = refresh_response.refresh_token {
             updated_session.refresh_token = Some(new_refresh);
         }
-        updated_session.expires_at = refresh_response.expires_in.map(|secs| {
-            Utc::now() + chrono::Duration::seconds(secs)
-        });
+        updated_session.expires_at = refresh_response
+            .expires_in
+            .map(|secs| Utc::now() + chrono::Duration::seconds(secs));
 
-        self.storage.save_session(&updated_session).await
+        self.storage
+            .save_session(&updated_session)
+            .await
             .map_err(|e| AuthError::StorageError(e.to_string()))?;
 
         *self.session.write().await = Some(updated_session);
@@ -213,11 +230,10 @@ impl AuthService {
 
         let (version, name) = match version_response {
             Ok(resp) if resp.status().is_success() => {
-                let info: VersionResponse = resp.json().await
-                    .unwrap_or(VersionResponse {
-                        name: "OxiCloud".to_string(),
-                        version: "unknown".to_string(),
-                    });
+                let info: VersionResponse = resp.json().await.unwrap_or(VersionResponse {
+                    name: "OxiCloud".to_string(),
+                    version: "unknown".to_string(),
+                });
                 (info.version, info.name)
             }
             _ => ("unknown".to_string(), "OxiCloud".to_string()),
