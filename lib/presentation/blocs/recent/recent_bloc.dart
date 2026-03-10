@@ -50,6 +50,8 @@ class RecentError extends RecentState {
 
 // BLoC
 class RecentBloc extends Bloc<RecentEvent, RecentState> {
+  final RecentRepository _repository;
+
   RecentBloc(this._repository) : super(const RecentInitial()) {
     on<LoadRecent>(_onLoad);
     on<ClearRecentRequested>(_onClear);
