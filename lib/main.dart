@@ -35,32 +35,51 @@ bool get isDesktop =>
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Flutter-Rust Bridge
-  await RustLib.init();
+  try {
+    // Initialize Flutter-Rust Bridge
+    await RustLib.init();
 
-  // Initialize dependency injection
-  await configureDependencies();
+    // Initialize dependency injection
+    await configureDependencies();
 
-  // Initialize Rust core
-  final rustDataSource = getIt<RustBridgeDataSource>();
-  await rustDataSource.initialize();
+    // Initialize Rust core
+    final rustDataSource = getIt<RustBridgeDataSource>();
+    await rustDataSource.initialize();
 
-  // Initialize system tray + window manager for desktop
-  if (isDesktop) {
-    final trayService = getIt<SystemTrayService>();
-    await trayService.init();
+    // Initialize system tray + window manager for desktop
+    if (isDesktop) {
+      final trayService = getIt<SystemTrayService>();
+      await trayService.init();
 
-    final windowManager = DesktopWindowManager(
-      trayService: trayService,
-      rustDataSource: rustDataSource,
-    );
-    await windowManager.init();
+      final windowManager = DesktopWindowManager(
+        trayService: trayService,
+        rustDataSource: rustDataSource,
+      );
+      await windowManager.init();
 
-    // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
-    trayService.onSyncNow = _syncNowFromTray;
+      // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
+      trayService.onSyncNow = _syncNowFromTray;
+    }
+
+    runApp(const OxiCloudAppWrapper());
+  } catch (e, stackTrace) {
+    debugPrint('Fatal initialization error: $e');
+    debugPrint('$stackTrace');
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(
+              'OxiCloud failed to start.\n\nError: $e',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ),
+        ),
+      ),
+    ));
   }
-
-  runApp(const OxiCloudAppWrapper());
 }
 
 /// Global key so the tray can trigger sync without a BuildContext.

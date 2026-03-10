@@ -47,6 +47,11 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Generate Flutter-Rust Bridge bindings
+        run: |
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
+
       - name: Flutter analyze
         run: flutter analyze --no-fatal-infos
 
@@ -99,6 +104,8 @@ jobs:
       - name: Build
         run: |
           flutter pub get
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
           flutter build linux --release
 
   # ── Build Android ──────────────────────────────────────────────────────
@@ -139,6 +146,8 @@ jobs:
       - name: Build
         run: |
           flutter pub get
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
           flutter build apk --debug
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
@@ -172,6 +181,8 @@ jobs:
       - name: Build
         run: |
           flutter pub get
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
           flutter build windows --release
 
   # ── Build macOS ──────────────────────────────────────────────────────
@@ -203,4 +214,6 @@ jobs:
       - name: Build
         run: |
           flutter pub get
+          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          flutter_rust_bridge_codegen generate
           flutter build macos --release
