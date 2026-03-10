@@ -29,6 +29,7 @@ mixin _$SyncStatus {
       SyncStatus_Conflict(:final field0) => conflict(field0),
       SyncStatus_Error(:final field0) => error(field0),
       SyncStatus_Ignored() => ignored(),
+      _ => throw UnsupportedError('Unsupported SyncStatus subtype: $this'),
     };
   }
 
@@ -51,6 +52,7 @@ mixin _$SyncStatus {
       SyncStatus_Error(:final field0) =>
         error != null ? error(field0) : orElse(),
       SyncStatus_Ignored() => ignored != null ? ignored() : orElse(),
+      _ => orElse(),
     };
   }
 
@@ -70,6 +72,7 @@ mixin _$SyncStatus {
       SyncStatus_Conflict() => conflict(this as SyncStatus_Conflict),
       SyncStatus_Error() => error(this as SyncStatus_Error),
       SyncStatus_Ignored() => ignored(this as SyncStatus_Ignored),
+      _ => throw UnsupportedError('Unsupported SyncStatus subtype: $this'),
     };
   }
 
@@ -96,6 +99,7 @@ mixin _$SyncStatus {
         error != null ? error(this as SyncStatus_Error) : orElse(),
       SyncStatus_Ignored() =>
         ignored != null ? ignored(this as SyncStatus_Ignored) : orElse(),
+      _ => orElse(),
     };
   }
 }
