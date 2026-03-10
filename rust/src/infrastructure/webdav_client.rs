@@ -18,6 +18,7 @@ pub struct WebDavClient {
 }
 
 #[derive(Clone)]
+#[allow(dead_code)]
 struct WebDavConfig {
     base_url: String,
     username: String,

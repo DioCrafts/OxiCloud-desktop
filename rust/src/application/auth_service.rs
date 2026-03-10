@@ -8,7 +8,7 @@ use tokio::sync::RwLock;
 
 use crate::api::AuthResult;
 use crate::domain::entities::{AuthCredentials, AuthError, AuthSession, ServerInfo};
-use crate::domain::ports::{AuthPort, StoragePort};
+use crate::domain::ports::StoragePort;
 
 /// Authentication service
 pub struct AuthService {
@@ -267,6 +267,7 @@ impl AuthService {
 
 /// User info in login response
 #[derive(serde::Deserialize)]
+#[allow(dead_code)]
 struct LoginUserDto {
     id: String,
     username: String,
@@ -282,6 +283,7 @@ struct LoginUserDto {
 
 /// Login response from POST /api/auth/login
 #[derive(serde::Deserialize)]
+#[allow(dead_code)]
 struct LoginResponse {
     user: LoginUserDto,
     access_token: String,

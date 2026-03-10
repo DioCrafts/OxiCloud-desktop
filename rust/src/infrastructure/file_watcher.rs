@@ -36,6 +36,7 @@ impl NotifyFileWatcher {
     }
 
     /// Convert notify event to our file event
+    #[allow(dead_code)]
     fn convert_event(&self, event: NotifyEvent) -> Option<FileEvent> {
         if self.paused.load(Ordering::Relaxed) {
             return None;
@@ -104,11 +105,12 @@ impl FileWatcherPort for NotifyFileWatcher {
                         timestamp: Utc::now(),
                     };
 
-                    // Can't await here, so we use blocking read
-                    // In production, use a channel to send events
-                    let callback_guard = callback.blocking_read();
-                    if let Some(ref cb) = *callback_guard {
-                        cb(file_event);
+                    // Can't await here, so we use try_read to avoid panicking
+                    // inside a tokio runtime context
+                    if let Ok(callback_guard) = callback.try_read() {
+                        if let Some(ref cb) = *callback_guard {
+                            cb(file_event);
+                        }
                     }
                 }
             })
@@ -198,23 +200,24 @@ mod tests {
     use super::*;
     use std::fs::File;
     use std::io::Write;
+    use std::sync::Mutex;
     use tempfile::tempdir;
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
     async fn test_file_watcher() {
         let watcher = NotifyFileWatcher::new().unwrap();
         let dir = tempdir().unwrap();
 
-        // Setup callback
-        let events = Arc::new(RwLock::new(Vec::<FileEvent>::new()));
+        // Use std::sync::Mutex since callback runs on notify's OS thread
+        let events = Arc::new(Mutex::new(Vec::<FileEvent>::new()));
         let events_clone = events.clone();
 
-        watcher.set_callback(Box::new(move |event| {
-            let events = events_clone.clone();
-            tokio::spawn(async move {
-                events.write().await.push(event);
-            });
-        }));
+        {
+            let mut guard = watcher.callback.write().await;
+            *guard = Some(Box::new(move |event| {
+                events_clone.lock().unwrap().push(event);
+            }));
+        }
 
         // Start watching
         watcher.watch(&dir.path().to_path_buf()).await.unwrap();
@@ -228,7 +231,7 @@ mod tests {
         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
         // Check events were captured
-        let captured = events.read().await;
+        let captured = events.lock().unwrap();
         assert!(!captured.is_empty());
     }
 }

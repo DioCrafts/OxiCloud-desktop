@@ -1,3 +1,6 @@
+// Allow flutter_rust_bridge macro cfg checks
+#![allow(unexpected_cfgs)]
+
 //! # OxiCloud Core
 //!
 //! Cross-platform sync engine for OxiCloud, providing:
