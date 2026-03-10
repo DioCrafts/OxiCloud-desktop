@@ -10,8 +10,7 @@ use tokio::sync::RwLock;
 use crate::application::auth_service::AuthService;
 use crate::application::sync_service::SyncService;
 use crate::domain::entities::{
-    AuthCredentials, ConflictInfo, ConflictResolution, ConflictType, ServerInfo, SyncConfig,
-    SyncDirection, SyncItem, SyncStatus,
+    AuthCredentials, ConflictResolution, ConflictType, ServerInfo, SyncConfig, SyncItem,
 };
 use crate::infrastructure::file_watcher::NotifyFileWatcher;
 use crate::infrastructure::sqlite_storage::SqliteStorage;

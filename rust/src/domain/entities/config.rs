@@ -165,6 +165,16 @@ fn matches_glob(pattern: &str, path: &str) -> bool {
         return path.contains(&pattern[1..]);
     }
 
+    // Pattern like ".*" - match any path component starting with "."
+    if pattern.ends_with("*") {
+        let prefix = &pattern[..pattern.len() - 1];
+        // Check if path or any component starts with the prefix
+        return path.starts_with(prefix)
+            || path
+                .split('/')
+                .any(|component| component.starts_with(prefix));
+    }
+
     path.contains(pattern)
 }
 

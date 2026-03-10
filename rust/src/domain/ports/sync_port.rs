@@ -2,7 +2,6 @@
 //!
 //! Port interface for remote synchronization operations (WebDAV).
 
-use crate::domain::entities::{SyncConfig, SyncItem};
 use async_trait::async_trait;
 
 /// Result type for sync operations

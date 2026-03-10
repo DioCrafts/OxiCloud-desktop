@@ -168,10 +168,10 @@ impl SyncService {
 
     /// Perform full synchronization
     async fn do_full_sync(&self) -> Result<(u32, u32, u32, Vec<String>), String> {
-        let config = self.config.read().await;
+        let _config = self.config.read().await;
         let mut uploaded = 0u32;
         let mut downloaded = 0u32;
-        let mut conflicts = 0u32;
+        let conflicts = 0u32;
         let mut errors = Vec::new();
 
         // 1. Get local state
@@ -182,7 +182,7 @@ impl SyncService {
             .map_err(|e| format!("Failed to get pending items: {}", e))?;
 
         // 2. Get remote state
-        let remote_items = self
+        let _remote_items = self
             .remote
             .list_directory("/")
             .await
