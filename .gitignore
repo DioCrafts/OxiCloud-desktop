@@ -50,6 +50,8 @@ lib/generated/
 rust/src/frb_generated.rs
 rust/src/frb_generated.io.rs
 rust/src/frb_generated.web.rs
+# Exception: include stub frb_generated.rs so cargo fmt can resolve the module
+!rust/src/frb_generated.rs
 
 # build_runner / freezed / json_serializable
 *.g.dart
