@@ -13,13 +13,13 @@ pub type WatcherResult<T> = Result<T, WatcherError>;
 pub enum WatcherError {
     #[error("Watch failed: {0}")]
     WatchFailed(String),
-    
+
     #[error("Path not found: {0}")]
     PathNotFound(String),
-    
+
     #[error("Permission denied: {0}")]
     PermissionDenied(String),
-    
+
     #[error("Internal error: {0}")]
     InternalError(String),
 }
@@ -42,13 +42,13 @@ pub enum FileEventType {
 pub struct FileEvent {
     /// Event type
     pub event_type: FileEventType,
-    
+
     /// Path affected
     pub path: PathBuf,
-    
+
     /// Whether it's a directory
     pub is_directory: bool,
-    
+
     /// Timestamp of the event
     pub timestamp: chrono::DateTime<chrono::Utc>,
 }
@@ -73,28 +73,28 @@ pub type FileEventCallback = Box<dyn Fn(FileEvent) + Send + Sync>;
 pub trait FileWatcherPort: Send + Sync {
     /// Start watching a directory (recursively)
     async fn watch(&self, path: &PathBuf) -> WatcherResult<()>;
-    
+
     /// Stop watching a directory
     async fn unwatch(&self, path: &PathBuf) -> WatcherResult<()>;
-    
+
     /// Stop all watches
     async fn unwatch_all(&self) -> WatcherResult<()>;
-    
+
     /// Set the event callback
     fn set_callback(&self, callback: FileEventCallback);
-    
+
     /// Get list of watched paths
     fn get_watched_paths(&self) -> Vec<PathBuf>;
-    
+
     /// Check if a path is being watched
     fn is_watching(&self, path: &PathBuf) -> bool;
-    
+
     /// Pause watching (temporarily stop events)
     fn pause(&self);
-    
+
     /// Resume watching
     fn resume(&self);
-    
+
     /// Check if watcher is paused
     fn is_paused(&self) -> bool;
 }

@@ -4,8 +4,8 @@
 //! local storage and the OxiCloud server.
 
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
 use flutter_rust_bridge::frb;
+use serde::{Deserialize, Serialize};
 
 /// Represents a syncable item (file or folder)
 #[frb]
@@ -13,37 +13,37 @@ use flutter_rust_bridge::frb;
 pub struct SyncItem {
     /// Unique identifier
     pub id: String,
-    
+
     /// Relative path from sync root
     pub path: String,
-    
+
     /// File name
     pub name: String,
-    
+
     /// Whether this is a directory
     pub is_directory: bool,
-    
+
     /// File size in bytes (0 for directories)
     pub size: u64,
-    
+
     /// Content hash (for change detection)
     pub content_hash: Option<String>,
-    
+
     /// Local modification time
     pub local_modified: Option<DateTime<Utc>>,
-    
+
     /// Remote modification time  
     pub remote_modified: Option<DateTime<Utc>>,
-    
+
     /// Current sync status
     pub status: SyncStatus,
-    
+
     /// Sync direction
     pub direction: SyncDirection,
-    
+
     /// ETag from server (for efficient sync)
     pub etag: Option<String>,
-    
+
     /// MIME type
     pub mime_type: Option<String>,
 }
@@ -73,7 +73,7 @@ impl SyncItem {
             mime_type: None,
         }
     }
-    
+
     /// Create a new SyncItem from remote metadata
     pub fn from_remote(
         id: String,
@@ -100,17 +100,17 @@ impl SyncItem {
             mime_type,
         }
     }
-    
+
     /// Check if item needs syncing
     pub fn needs_sync(&self) -> bool {
         matches!(self.status, SyncStatus::Pending | SyncStatus::Error(_))
     }
-    
+
     /// Check if there's a conflict
     pub fn has_conflict(&self) -> bool {
         matches!(self.status, SyncStatus::Conflict(_))
     }
-    
+
     /// Get the newer modified time
     pub fn newer_modified(&self) -> Option<DateTime<Utc>> {
         match (self.local_modified, self.remote_modified) {
@@ -191,7 +191,7 @@ pub enum ConflictResolution {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_sync_item_from_local() {
         let item = SyncItem::from_local(
@@ -202,13 +202,13 @@ mod tests {
             Utc::now(),
             Some("abc123".to_string()),
         );
-        
+
         assert!(!item.is_directory);
         assert_eq!(item.size, 1024);
         assert_eq!(item.direction, SyncDirection::Upload);
         assert!(item.needs_sync());
     }
-    
+
     #[test]
     fn test_sync_item_conflict() {
         let mut item = SyncItem::from_local(
@@ -219,12 +219,12 @@ mod tests {
             Utc::now(),
             None,
         );
-        
+
         item.status = SyncStatus::Conflict(ConflictInfo {
             conflict_type: ConflictType::BothModified,
             detected_at: Utc::now(),
         });
-        
+
         assert!(item.has_conflict());
     }
 }
