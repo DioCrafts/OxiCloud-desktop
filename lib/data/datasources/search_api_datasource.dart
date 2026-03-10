@@ -19,7 +19,7 @@ class SearchApiDataSource {
   }) async {
     final params = <String, dynamic>{
       if (query != null && query.isNotEmpty) 'query': query,
-      ?'folder_id': folderId,
+      if (folderId != null) 'folder_id': folderId,
       'limit': limit,
       'offset': offset,
     };

@@ -81,7 +81,7 @@ class FileBrowserApiDataSource {
   /// Upload a file via multipart.
   Future<Map<String, dynamic>> uploadFile(File file, String? folderId) async {
     final formData = FormData.fromMap({
-      ?'folder_id': folderId,
+      if (folderId != null) 'folder_id': folderId,
       'file': await MultipartFile.fromFile(
         file.path,
         filename: file.uri.pathSegments.last,

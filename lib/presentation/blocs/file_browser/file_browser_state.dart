@@ -23,13 +23,6 @@ class FileBrowserLoading extends FileBrowserState {
 
 /// Folder contents loaded successfully.
 class FileBrowserLoaded extends FileBrowserState {
-  final List<FolderItem> folders;
-  final List<FileItem> files;
-  final List<BreadcrumbItem> breadcrumbs;
-  final String? currentFolderId;
-  final ViewMode viewMode;
-  final bool isActionInProgress;
-
   const FileBrowserLoaded({
     required this.folders,
     required this.files,
@@ -38,6 +31,13 @@ class FileBrowserLoaded extends FileBrowserState {
     this.viewMode = ViewMode.list,
     this.isActionInProgress = false,
   });
+
+  final List<FolderItem> folders;
+  final List<FileItem> files;
+  final List<BreadcrumbItem> breadcrumbs;
+  final String? currentFolderId;
+  final ViewMode viewMode;
+  final bool isActionInProgress;
 
   /// Total items (folders + files).
   int get totalItems => folders.length + files.length;
@@ -70,9 +70,9 @@ class FileBrowserLoaded extends FileBrowserState {
 
 /// Error while loading folder.
 class FileBrowserError extends FileBrowserState {
-  final String message;
-
   const FileBrowserError(this.message);
+
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -80,15 +80,15 @@ class FileBrowserError extends FileBrowserState {
 
 /// File upload is in progress with progress tracking.
 class FileBrowserUploadProgress extends FileBrowserState {
-  final String fileName;
-  final int bytesSent;
-  final int bytesTotal;
-
   const FileBrowserUploadProgress({
     required this.fileName,
     required this.bytesSent,
     required this.bytesTotal,
   });
+
+  final String fileName;
+  final int bytesSent;
+  final int bytesTotal;
 
   double get progress => bytesTotal > 0 ? bytesSent / bytesTotal : 0;
   int get percent => (progress * 100).round();
@@ -99,9 +99,9 @@ class FileBrowserUploadProgress extends FileBrowserState {
 
 /// Transient success message (create, rename, delete completed).
 class FileBrowserActionSuccess extends FileBrowserState {
-  final String message;
-
   const FileBrowserActionSuccess(this.message);
+
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -109,9 +109,9 @@ class FileBrowserActionSuccess extends FileBrowserState {
 
 /// Transient error message from an action.
 class FileBrowserActionError extends FileBrowserState {
-  final String message;
-
   const FileBrowserActionError(this.message);
+
+  final String message;
 
   @override
   List<Object?> get props => [message];

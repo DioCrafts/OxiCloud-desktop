@@ -1,5 +1,5 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/entities/favorite_item.dart';
 import '../../../core/repositories/recent_repository.dart';
@@ -35,23 +35,21 @@ class RecentLoading extends RecentState {
 }
 
 class RecentLoaded extends RecentState {
-  final List<RecentItem> items;
   const RecentLoaded(this.items);
+  final List<RecentItem> items;
   @override
   List<Object?> get props => [items];
 }
 
 class RecentError extends RecentState {
-  final String message;
   const RecentError(this.message);
+  final String message;
   @override
   List<Object?> get props => [message];
 }
 
 // BLoC
 class RecentBloc extends Bloc<RecentEvent, RecentState> {
-  final RecentRepository _repository;
-
   RecentBloc(this._repository) : super(const RecentInitial()) {
     on<LoadRecent>(_onLoad);
     on<ClearRecentRequested>(_onClear);
