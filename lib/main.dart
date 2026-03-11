@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'core/repositories/auth_repository.dart';
 import 'core/repositories/favorites_repository.dart';
@@ -37,7 +39,9 @@ void main() async {
 
   try {
     // Initialize Flutter-Rust Bridge
+    debugPrint('OxiCloud: Initializing RustLib...');
     await RustLib.init();
+    debugPrint('OxiCloud: RustLib initialized successfully');
 
     // Initialize dependency injection
     await configureDependencies();
@@ -48,23 +52,30 @@ void main() async {
 
     // Initialize system tray + window manager for desktop
     if (isDesktop) {
-      final trayService = getIt<SystemTrayService>();
-      await trayService.init();
+      try {
+        final trayService = getIt<SystemTrayService>();
+        await trayService.init();
 
-      final windowManager = DesktopWindowManager(
-        trayService: trayService,
-        rustDataSource: rustDataSource,
-      );
-      await windowManager.init();
+        final windowManager = DesktopWindowManager(
+          trayService: trayService,
+          rustDataSource: rustDataSource,
+        );
+        await windowManager.init();
 
-      // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
-      trayService.onSyncNow = _syncNowFromTray;
+        // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
+        trayService.onSyncNow = _syncNowFromTray;
+      } catch (e, stackTrace) {
+        // Desktop services are non-critical; log and continue
+        debugPrint('Warning: Desktop service init failed: $e');
+        debugPrint('$stackTrace');
+      }
     }
 
     runApp(const OxiCloudAppWrapper());
   } catch (e, stackTrace) {
     debugPrint('Fatal initialization error: $e');
     debugPrint('$stackTrace');
+    await _writeErrorLog('$e\n$stackTrace');
     runApp(MaterialApp(
       home: Scaffold(
         body: Center(
@@ -79,6 +90,22 @@ void main() async {
         ),
       ),
     ));
+  }
+}
+
+/// Write error log to a file for diagnosing release-build failures.
+Future<void> _writeErrorLog(String message) async {
+  try {
+    final dir = await getApplicationSupportDirectory();
+    final logFile = File('${dir.path}/oxicloud_crash.log');
+    final timestamp = DateTime.now().toIso8601String();
+    await logFile.writeAsString(
+      '[$timestamp]\n$message\n\n',
+      mode: FileMode.append,
+    );
+    debugPrint('Error log written to: ${logFile.path}');
+  } catch (_) {
+    // Can't log – ignore silently
   }
 }
 
