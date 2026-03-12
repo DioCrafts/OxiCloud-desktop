@@ -27,6 +27,12 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
+  // Show the window immediately so it is visible even if Dart-side
+  // initialization (Rust FFI, database, etc.) takes a long time or hangs.
+  // The window_manager plugin may re-hide it later via waitUntilReadyToShow,
+  // so we also keep the next-frame callback as a fallback.
+  this->Show();
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });

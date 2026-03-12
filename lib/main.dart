@@ -16,6 +16,8 @@ import 'core/repositories/trash_repository.dart';
 import 'data/datasources/favorites_api_datasource.dart';
 import 'data/datasources/rust_bridge_datasource.dart';
 import 'injection.dart';
+import 'package:window_manager/window_manager.dart';
+
 import 'platform/desktop_window.dart';
 import 'platform/system_tray_service.dart';
 import 'presentation/app.dart';
@@ -96,6 +98,25 @@ class _OxiCloudBootstrapState extends State<OxiCloudBootstrap> {
 
   Future<void> _initializeApp() async {
     try {
+      // FIRST: make sure the window is visible on desktop, even if later
+      // initialization steps hang. The window_manager plugin may have hidden
+      // the window during native plugin registration.
+      if (isDesktop) {
+        try {
+          await windowManager.ensureInitialized();
+          await windowManager.setTitle('OxiCloud');
+          await windowManager.setSize(const Size(1200, 800));
+          await windowManager.setMinimumSize(const Size(800, 600));
+          await windowManager.center();
+          await windowManager.show();
+          await windowManager.focus();
+          debugPrint('OxiCloud: Window shown');
+        } catch (e) {
+          debugPrint('OxiCloud: window_manager early show failed: $e');
+        }
+      }
+
+      // THEN: heavy async initialization
       debugPrint('OxiCloud: Initializing RustLib...');
       await RustLib.init();
       debugPrint('OxiCloud: RustLib initialized successfully');
@@ -105,17 +126,17 @@ class _OxiCloudBootstrapState extends State<OxiCloudBootstrap> {
       final rustDataSource = getIt<RustBridgeDataSource>();
       await rustDataSource.initialize();
 
-      // Desktop services (tray + window manager)
+      // Desktop services (tray + close-to-tray)
       if (isDesktop) {
         try {
           final trayService = getIt<SystemTrayService>();
           await trayService.init();
 
-          final windowManager = DesktopWindowManager(
+          final desktopWm = DesktopWindowManager(
             trayService: trayService,
             rustDataSource: rustDataSource,
           );
-          await windowManager.init();
+          await desktopWm.init();
 
           trayService.onSyncNow = _syncNowFromTray;
         } catch (e, stackTrace) {
