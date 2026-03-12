@@ -7,13 +7,3 @@ dart_output: lib/src/rust/
 
 # Dart formatter settings
 dart_format_line_length: 100
-
-# Enable various features
-full_dep: true
-
-# Customize codegen
-dart_enums_style: true
-
-# Mobile support - iOS C header for static library
-c_output: ios/Runner/bridge_generated.h
-extra_headers: ios/Runner/bridge_generated.h

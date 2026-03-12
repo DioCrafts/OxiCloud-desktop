@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:logger/logger.dart';
 import 'package:oxicloud_app/src/rust/api/oxicloud.dart' as rust;
+import 'package:path/path.dart' as p;
 import 'package:oxicloud_app/src/rust/domain/entities/auth.dart';
 import 'package:oxicloud_app/src/rust/domain/entities/config.dart';
 import 'package:oxicloud_app/src/rust/domain/entities/sync_item.dart' as domain;
@@ -21,7 +22,13 @@ class RustBridgeDataSource {
     try {
       final appDir = await getApplicationSupportDirectory();
       final syncFolder = await _getDefaultSyncFolder();
-      final dbPath = '${appDir.path}/oxicloud.db';
+      final dbPath = p.join(appDir.path, 'oxicloud.db');
+
+      // Ensure the sync folder exists before initializing Rust
+      final syncDir = Directory(syncFolder);
+      if (!syncDir.existsSync()) {
+        syncDir.createSync(recursive: true);
+      }
 
       _logger
         ..i('Initializing Rust core')
@@ -69,11 +76,11 @@ class RustBridgeDataSource {
   Future<String> _getDefaultSyncFolder() async {
     if (Platform.isAndroid || Platform.isIOS) {
       final dir = await getApplicationDocumentsDirectory();
-      return '${dir.path}/OxiCloud';
+      return p.join(dir.path, 'OxiCloud');
     } else {
       final home = Platform.environment['HOME'] ??
           Platform.environment['USERPROFILE'] ?? '.';
-      return '$home/OxiCloud';
+      return p.join(home, 'OxiCloud');
     }
   }
 
@@ -257,7 +264,7 @@ class RustBridgeDataSource {
   Future<void> updateConfig(SyncConfigDto config) async {
     _ensureInitialized();
     final appDir = await getApplicationSupportDirectory();
-    final dbPath = '${appDir.path}/oxicloud.db';
+    final dbPath = p.join(appDir.path, 'oxicloud.db');
     await rust.updateConfig(
       config: SyncConfig(
         syncFolder: config.syncFolder,
