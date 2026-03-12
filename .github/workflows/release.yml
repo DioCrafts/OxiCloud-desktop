@@ -293,6 +293,23 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
+      - name: Verify Windows build artifacts
+        shell: pwsh
+        run: |
+          $exePath = "build\windows\x64\runner\Release\OxiCloud.exe"
+          $dllPath = "build\windows\x64\runner\Release\oxicloud_core.dll"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "MISSING: $exePath"
+            exit 1
+          }
+          Write-Host "OK: $exePath ($(( Get-Item $exePath ).Length / 1MB) MB)"
+          if (-not (Test-Path $dllPath)) {
+            Write-Error "MISSING: $dllPath — Rust native library not bundled!"
+            Get-ChildItem "build\windows\x64\runner\Release" | ForEach-Object { Write-Host $_.Name }
+            exit 1
+          }
+          Write-Host "OK: $dllPath ($(( Get-Item $dllPath ).Length / 1MB) MB)"
+
       - name: Package — ZIP
         shell: pwsh
         run: |

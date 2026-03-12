@@ -28,8 +28,13 @@ class SystemTrayService with TrayListener {
     if (_initialised) return;
 
     try {
+      // On Windows, tray_manager requires .ico format
+      final effectiveAsset = Platform.isWindows
+          ? 'assets/icons/installer_icon.ico'
+          : iconAssetPath;
+
       // tray_manager needs a real filesystem path, not an asset key.
-      final iconPath = await _resolveIconPath(iconAssetPath);
+      final iconPath = await _resolveIconPath(effectiveAsset);
 
       await trayManager.setIcon(iconPath);
       await trayManager.setToolTip('OxiCloud — Sync client');
@@ -126,7 +131,8 @@ class SystemTrayService with TrayListener {
     try {
       final byteData = await rootBundle.load(assetKey);
       final tempDir = await getTemporaryDirectory();
-      final tempFile = File(p.join(tempDir.path, 'oxicloud_tray_icon.png'));
+      final ext = Platform.isWindows ? 'ico' : 'png';
+      final tempFile = File(p.join(tempDir.path, 'oxicloud_tray_icon.$ext'));
       await tempFile.writeAsBytes(
         byteData.buffer.asUint8List(
           byteData.offsetInBytes,
