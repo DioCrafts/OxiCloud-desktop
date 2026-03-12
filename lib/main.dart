@@ -33,64 +33,14 @@ import 'src/rust/frb_generated.dart';
 bool get isDesktop =>
     Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    // Initialize Flutter-Rust Bridge
-    debugPrint('OxiCloud: Initializing RustLib...');
-    await RustLib.init();
-    debugPrint('OxiCloud: RustLib initialized successfully');
-
-    // Initialize dependency injection
-    await configureDependencies();
-
-    // Initialize Rust core
-    final rustDataSource = getIt<RustBridgeDataSource>();
-    await rustDataSource.initialize();
-
-    // Initialize system tray + window manager for desktop
-    if (isDesktop) {
-      try {
-        final trayService = getIt<SystemTrayService>();
-        await trayService.init();
-
-        final windowManager = DesktopWindowManager(
-          trayService: trayService,
-          rustDataSource: rustDataSource,
-        );
-        await windowManager.init();
-
-        // Wire "Sync Now" tray action to the SyncBloc (deferred until app is built)
-        trayService.onSyncNow = _syncNowFromTray;
-      } catch (e, stackTrace) {
-        // Desktop services are non-critical; log and continue
-        debugPrint('Warning: Desktop service init failed: $e');
-        debugPrint('$stackTrace');
-      }
-    }
-
-    runApp(const OxiCloudAppWrapper());
-  } catch (e, stackTrace) {
-    debugPrint('Fatal initialization error: $e');
-    debugPrint('$stackTrace');
-    await _writeErrorLog('$e\n$stackTrace');
-    runApp(MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Text(
-              'OxiCloud failed to start.\n\nError: $e',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-            ),
-          ),
-        ),
-      ),
-    ));
-  }
+  // Show the app immediately with a splash screen so the window becomes
+  // visible. On Windows the native window is only shown after Flutter
+  // renders its first frame (see flutter_window.cpp SetNextFrameCallback).
+  // If we await heavy init before runApp() the window stays invisible.
+  runApp(const OxiCloudBootstrap());
 }
 
 /// Write error log to a file for diagnosing release-build failures.
@@ -120,6 +70,134 @@ void _syncNowFromTray() {
     } on Exception catch (_) {
       // BLoC not yet available
     }
+  }
+}
+
+// =============================================================================
+// Bootstrap widget — shows splash, runs init, then transitions to the real app.
+// =============================================================================
+
+class OxiCloudBootstrap extends StatefulWidget {
+  const OxiCloudBootstrap({super.key});
+
+  @override
+  State<OxiCloudBootstrap> createState() => _OxiCloudBootstrapState();
+}
+
+class _OxiCloudBootstrapState extends State<OxiCloudBootstrap> {
+  bool _ready = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    try {
+      debugPrint('OxiCloud: Initializing RustLib...');
+      await RustLib.init();
+      debugPrint('OxiCloud: RustLib initialized successfully');
+
+      await configureDependencies();
+
+      final rustDataSource = getIt<RustBridgeDataSource>();
+      await rustDataSource.initialize();
+
+      // Desktop services (tray + window manager)
+      if (isDesktop) {
+        try {
+          final trayService = getIt<SystemTrayService>();
+          await trayService.init();
+
+          final windowManager = DesktopWindowManager(
+            trayService: trayService,
+            rustDataSource: rustDataSource,
+          );
+          await windowManager.init();
+
+          trayService.onSyncNow = _syncNowFromTray;
+        } catch (e, stackTrace) {
+          debugPrint('Warning: Desktop service init failed: $e');
+          debugPrint('$stackTrace');
+        }
+      }
+
+      if (mounted) setState(() => _ready = true);
+    } catch (e, stackTrace) {
+      debugPrint('Fatal initialization error: $e');
+      debugPrint('$stackTrace');
+      await _writeErrorLog('$e\n$stackTrace');
+      if (mounted) setState(() => _error = e.toString());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error != null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: SelectableText(
+                'OxiCloud failed to start.\n\n$_error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (!_ready) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: const Color(0xFF1A1A2E),
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/icons/app_icon.png',
+                  width: 96,
+                  height: 96,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.cloud,
+                    size: 96,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'OxiCloud',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return const OxiCloudAppWrapper();
   }
 }
 
