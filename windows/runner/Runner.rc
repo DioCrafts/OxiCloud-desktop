@@ -92,9 +92,9 @@ BEGIN
             VALUE "CompanyName", "DioCrafts" "\0"
             VALUE "FileDescription", "OxiCloud - Fast, secure cloud storage sync" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "oxicloud_app" "\0"
+            VALUE "InternalName", "OxiCloud" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 DioCrafts. All rights reserved." "\0"
-            VALUE "OriginalFilename", "oxicloud_app.exe" "\0"
+            VALUE "OriginalFilename", "OxiCloud.exe" "\0"
             VALUE "ProductName", "OxiCloud" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

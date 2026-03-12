@@ -99,7 +99,7 @@ jobs:
           # Create launcher script
           cat > "$PKG_DIR/usr/bin/oxicloud" << 'LAUNCHER'
           #!/bin/bash
-          exec /usr/lib/oxicloud/oxicloud_app "$@"
+          exec /usr/lib/oxicloud/OxiCloud "$@"
           LAUNCHER
           chmod +x "$PKG_DIR/usr/bin/oxicloud"
 
@@ -166,7 +166,7 @@ jobs:
 
           cat > %{buildroot}/usr/bin/oxicloud << 'LAUNCHER'
           #!/bin/bash
-          exec /usr/lib/oxicloud/oxicloud_app "\$@"
+          exec /usr/lib/oxicloud/OxiCloud "\$@"
           LAUNCHER
           chmod +x %{buildroot}/usr/bin/oxicloud
 
@@ -207,7 +207,7 @@ jobs:
           cat > AppDir/AppRun << 'APPRUN'
           #!/bin/bash
           APPDIR="$(dirname "$(readlink -f "$0")")"
-          exec "$APPDIR/usr/bin/oxicloud_app" "$@"
+          exec "$APPDIR/usr/bin/OxiCloud" "$@"
           APPRUN
           chmod +x AppDir/AppRun
 
@@ -216,7 +216,7 @@ jobs:
           [Desktop Entry]
           Type=Application
           Name=OxiCloud
-          Exec=oxicloud_app
+          Exec=OxiCloud
           Icon=oxicloud
           Categories=Network;FileTransfer;Utility;
           DESKTOP
@@ -319,7 +319,7 @@ jobs:
           OutputDir=.
           OutputBaseFilename=OxiCloud-windows-x64-setup
           SetupIconFile=assets\icons\installer_icon.ico
-          UninstallDisplayIcon={app}\oxicloud_app.exe
+          UninstallDisplayIcon={app}\OxiCloud.exe
           WizardImageFile=assets\icons\installer_wizard.bmp
           WizardSmallImageFile=assets\icons\installer_wizard_small.bmp
           Compression=lzma
@@ -340,12 +340,12 @@ jobs:
           Source: "build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
           [Icons]
-          Name: "{group}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; IconFilename: "{app}\oxicloud_app.exe"
-          Name: "{autodesktop}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; IconFilename: "{app}\oxicloud_app.exe"; Tasks: desktopicon
-          Name: "{userstartup}\OxiCloud"; Filename: "{app}\oxicloud_app.exe"; Tasks: launchstartup
+          Name: "{group}\OxiCloud"; Filename: "{app}\OxiCloud.exe"; WorkingDir: "{app}"
+          Name: "{autodesktop}\OxiCloud"; Filename: "{app}\OxiCloud.exe"; WorkingDir: "{app}"; Tasks: desktopicon
+          Name: "{userstartup}\OxiCloud"; Filename: "{app}\OxiCloud.exe"; WorkingDir: "{app}"; Tasks: launchstartup
 
           [Run]
-          Filename: "{app}\oxicloud_app.exe"; Description: "Launch OxiCloud"; Flags: nowait postinstall skipifsilent
+          Filename: "{app}\OxiCloud.exe"; Description: "Launch OxiCloud"; Flags: nowait postinstall skipifsilent
           "@ | Out-File -FilePath "installer.iss" -Encoding UTF8
 
           # Download and run InnoSetup
