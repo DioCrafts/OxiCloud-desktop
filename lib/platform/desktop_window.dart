@@ -23,24 +23,14 @@ class DesktopWindowManager with WindowListener {
   bool _minimizeToTray;
   bool _forceQuit = false;
 
-  /// Call once at startup to configure the window and wire listeners.
+  /// Call once at startup to wire close-to-tray and tray callbacks.
+  ///
+  /// The window is expected to already be visible (shown early in main.dart
+  /// bootstrap). This method only sets up the close-to-tray behaviour and
+  /// tray action wiring — it does NOT call waitUntilReadyToShow to avoid
+  /// re-hiding an already-visible window.
   Future<void> init() async {
     await windowManager.ensureInitialized();
-
-    const windowOptions = WindowOptions(
-      size: Size(1200, 800),
-      minimumSize: Size(800, 600),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal,
-      title: 'OxiCloud',
-    );
-
-    await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
 
     // Prevent default close → we decide what to do in onWindowClose
     await windowManager.setPreventClose(true);
