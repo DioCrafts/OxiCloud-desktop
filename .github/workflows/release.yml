@@ -58,6 +58,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
             rust/target
@@ -69,7 +70,7 @@ jobs:
 
       - name: Generate Flutter-Rust Bridge bindings
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
           flutter_rust_bridge_codegen generate
 
       - name: Build Linux release
@@ -273,6 +274,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
             rust/target
@@ -284,7 +286,7 @@ jobs:
 
       - name: Generate Flutter-Rust Bridge bindings
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
           flutter_rust_bridge_codegen generate
 
       - name: Build Windows release
@@ -392,6 +394,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
             rust/target
@@ -403,7 +406,7 @@ jobs:
 
       - name: Generate Flutter-Rust Bridge bindings
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
           flutter_rust_bridge_codegen generate
 
       - name: Build macOS release
@@ -488,6 +491,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
             rust/target
@@ -499,7 +503,7 @@ jobs:
 
       - name: Generate Flutter-Rust Bridge bindings
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
           flutter_rust_bridge_codegen generate
 
       - name: Decode keystore
@@ -578,6 +582,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cargo/bin
             ~/.cargo/registry
             ~/.cargo/git
             rust/target
@@ -589,7 +594,7 @@ jobs:
 
       - name: Generate Flutter-Rust Bridge bindings
         run: |
-          dart pub global activate flutter_rust_bridge_codegen 2.11.1
+          cargo install flutter_rust_bridge_codegen --version 2.11.1 --locked
           flutter_rust_bridge_codegen generate
 
       - name: Install CocoaPods
