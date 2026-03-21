@@ -17,6 +17,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
+  // CRITICAL FIX: Set the working directory to the directory containing the
+  // executable. When launched from a Start Menu shortcut, desktop shortcut,
+  // or installer, Windows may set the CWD to an unrelated directory (e.g.
+  // C:\Windows\System32). flutter_rust_bridge's default library loader uses
+  // ioDirectory: '.' which resolves to CWD, so the Rust DLL would not be
+  // found. This ensures DLLs next to the .exe are always discoverable.
+  {
+    wchar_t exe_path[MAX_PATH];
+    if (GetModuleFileNameW(nullptr, exe_path, MAX_PATH)) {
+      // Strip the filename, keep only the directory
+      wchar_t *last_slash = wcsrchr(exe_path, L'\\');
+      if (last_slash) {
+        *last_slash = L'\0';
+        SetCurrentDirectoryW(exe_path);
+      }
+    }
+  }
+
   flutter::DartProject project(L"data");
 
   std::vector<std::string> command_line_arguments =

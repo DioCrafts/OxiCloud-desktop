@@ -33,6 +33,19 @@ bool FlutterWindow::OnCreate() {
   // so we also keep the next-frame callback as a fallback.
   this->Show();
 
+  // Ensure the window is NOT skipped in the taskbar — some plugins
+  // (e.g. window_manager) may accidentally set WS_EX_TOOLWINDOW which
+  // removes the window from the taskbar.
+  HWND hwnd = GetHandle();
+  if (hwnd) {
+    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    // Remove WS_EX_TOOLWINDOW (hides from taskbar) if present
+    exStyle &= ~WS_EX_TOOLWINDOW;
+    // Add WS_EX_APPWINDOW to force taskbar presence
+    exStyle |= WS_EX_APPWINDOW;
+    SetWindowLongPtr(hwnd, GWL_EXSTYLE, exStyle);
+  }
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
