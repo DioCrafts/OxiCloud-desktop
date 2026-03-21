@@ -34,15 +34,20 @@ struct SyncEngine {
 /// Must be called before any other operation.
 pub async fn initialize(config: SyncConfig) -> Result<(), String> {
     tracing::info!("Initializing sync engine");
+    tracing::info!("  Database path: {}", config.database_path);
+    tracing::info!("  Sync folder:   {}", config.sync_folder);
 
+    tracing::info!("Creating SQLite storage...");
     let storage = Arc::new(
         SqliteStorage::new(&config.database_path)
             .await
             .map_err(|e| format!("Failed to initialize storage: {}", e))?,
     );
 
+    tracing::info!("Creating WebDAV client...");
     let webdav = Arc::new(WebDavClient::new());
 
+    tracing::info!("Creating file watcher...");
     let watcher = Arc::new(
         NotifyFileWatcher::new()
             .map_err(|e| format!("Failed to initialize file watcher: {}", e))?,

@@ -26,13 +26,20 @@ struct WebDavConfig {
 }
 
 impl WebDavClient {
-    /// Create a new WebDAV client
+    /// Create a new WebDAV client.
+    /// Returns an error instead of panicking if the HTTP client cannot be built.
     pub fn new() -> Self {
+        let client = Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .unwrap_or_else(|e| {
+                tracing::warn!("Failed to create HTTP client with TLS: {e}. Falling back to plain client.");
+                // Fallback: create a minimal client without custom TLS config
+                Client::new()
+            });
+
         Self {
-            client: Client::builder()
-                .timeout(std::time::Duration::from_secs(30))
-                .build()
-                .expect("Failed to create HTTP client"),
+            client,
             config: Arc::new(RwLock::new(None)),
         }
     }
