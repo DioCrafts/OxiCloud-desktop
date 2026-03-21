@@ -78,8 +78,18 @@ class RustBridgeDataSource {
       final dir = await getApplicationDocumentsDirectory();
       return p.join(dir.path, 'OxiCloud');
     } else {
+      // On Windows USERPROFILE is the canonical home directory; on Linux/macOS
+      // it is HOME.  Never fall back to '.' — that would silently create an
+      // OxiCloud folder inside C:\Windows\System32 or wherever the CWD happens
+      // to be.
       final home = Platform.environment['HOME'] ??
-          Platform.environment['USERPROFILE'] ?? '.';
+          Platform.environment['USERPROFILE'];
+      if (home == null || home.isEmpty) {
+        // Last resort: use the user's documents directory (always valid)
+        final docs = await getApplicationDocumentsDirectory();
+        _logger.w('Neither HOME nor USERPROFILE set — falling back to ${docs.path}');
+        return p.join(docs.path, 'OxiCloud');
+      }
       return p.join(home, 'OxiCloud');
     }
   }
@@ -114,7 +124,7 @@ class RustBridgeDataSource {
 
   Future<bool> isLoggedIn() async {
     _ensureInitialized();
-    try { return await rust.isLoggedIn(); } on Exception catch (_) { return false; }
+    try { return await rust.isLoggedIn(); } on Exception catch (e) { _logger.w('isLoggedIn check failed: $e'); return false; }
   }
 
   Future<ServerInfoDto?> getServerInfo() async {
@@ -122,7 +132,7 @@ class RustBridgeDataSource {
     try {
       final info = await rust.getServerInfo();
       return info != null ? _mapServerInfo(info) : null;
-    } on Exception catch (_) { return null; }
+    } on Exception catch (e) { _logger.w('getServerInfo failed: $e'); return null; }
   }
 
   // ===========================================================================
@@ -153,7 +163,8 @@ class RustBridgeDataSource {
         itemsTotal: s.itemsTotal, lastSyncTime: s.lastSyncTime,
         nextSyncTime: s.nextSyncTime,
       );
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      _logger.w('getSyncStatus failed: $e');
       return SyncStatusDto(isSyncing: false, progressPercent: 0, itemsSynced: 0, itemsTotal: 0);
     }
   }
@@ -167,7 +178,7 @@ class RustBridgeDataSource {
         sizeBytes: f.sizeBytes.toInt(), itemCount: f.itemCount,
         isSelected: f.isSelected,
       )).toList();
-    } on Exception catch (_) { return []; }
+    } on Exception catch (e) { _logger.w('getRemoteFolders failed: $e'); return []; }
   }
 
   Future<void> setSyncFolders(List<String> ids) async {
@@ -177,7 +188,7 @@ class RustBridgeDataSource {
 
   Future<List<String>> getSyncFolders() async {
     _ensureInitialized();
-    try { return await rust.getSyncFolders(); } on Exception catch (_) { return []; }
+    try { return await rust.getSyncFolders(); } on Exception catch (e) { _logger.w('getSyncFolders failed: $e'); return []; }
   }
 
   Future<List<SyncConflictDto>> getConflicts() async {
@@ -190,7 +201,7 @@ class RustBridgeDataSource {
         localSize: c.localSize.toInt(), remoteSize: c.remoteSize.toInt(),
         conflictType: _mapConflictType(c.conflictType),
       )).toList();
-    } on Exception catch (_) { return []; }
+    } on Exception catch (e) { _logger.w('getConflicts failed: $e'); return []; }
   }
 
   Future<void> resolveConflict(String conflictId, String resolution) async {
@@ -220,7 +231,7 @@ class RustBridgeDataSource {
         localModified: i.localModified,
         remoteModified: i.remoteModified,
       )).toList();
-    } on Exception catch (_) { return []; }
+    } on Exception catch (e) { _logger.w('getPendingItems failed: $e'); return []; }
   }
 
   Future<List<SyncHistoryEntryDto>> getSyncHistory(int limit) async {
@@ -236,7 +247,7 @@ class RustBridgeDataSource {
         status: e.status,
         errorMessage: e.errorMessage,
       )).toList();
-    } on Exception catch (_) { return []; }
+    } on Exception catch (e) { _logger.w('getSyncHistory failed: $e'); return []; }
   }
 
   String _mapSyncStatus(domain.SyncStatus status) {
@@ -303,7 +314,8 @@ class RustBridgeDataSource {
         launchAtStartup: c.launchAtStartup,
         minimizeToTray: c.minimizeToTray,
       );
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      _logger.w('getConfig failed, returning defaults: $e');
       return SyncConfigDto(
         syncFolder: await _getDefaultSyncFolder(),
         syncIntervalSeconds: 300, maxUploadSpeedKbps: 0, maxDownloadSpeedKbps: 0,

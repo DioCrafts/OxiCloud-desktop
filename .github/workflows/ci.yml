@@ -191,22 +191,40 @@ jobs:
       - name: Verify Windows build artifacts
         shell: pwsh
         run: |
-          $exePath = "build\windows\x64\runner\Release\OxiCloud.exe"
-          $dllPath = "build\windows\x64\runner\Release\oxicloud_core.dll"
-          if (Test-Path $exePath) {
-            Write-Host "OK: $exePath exists ($(( Get-Item $exePath ).Length / 1MB) MB)"
-          } else {
-            Write-Error "MISSING: $exePath"
+          $releaseDir = "build\windows\x64\runner\Release"
+
+          # Critical files that must exist for the app to run
+          $requiredFiles = @(
+            "$releaseDir\OxiCloud.exe",
+            "$releaseDir\oxicloud_core.dll",
+            "$releaseDir\flutter_windows.dll",
+            "$releaseDir\data\flutter_assets\AssetManifest.json"
+          )
+
+          $allOk = $true
+          foreach ($file in $requiredFiles) {
+            if (Test-Path $file) {
+              $size = [math]::Round((Get-Item $file).Length / 1KB, 1)
+              Write-Host "OK: $file ($size KB)"
+            } else {
+              Write-Error "MISSING: $file"
+              $allOk = $false
+            }
+          }
+
+          # Check data directory exists
+          if (-not (Test-Path "$releaseDir\data")) {
+            Write-Error "MISSING: data directory"
+            $allOk = $false
+          }
+
+          if (-not $allOk) {
+            Write-Host "`nContents of Release directory:"
+            Get-ChildItem $releaseDir -Recurse | Select-Object FullName, Length
             exit 1
           }
-          if (Test-Path $dllPath) {
-            Write-Host "OK: $dllPath exists ($(( Get-Item $dllPath ).Length / 1MB) MB)"
-          } else {
-            Write-Error "MISSING: $dllPath — Rust cdylib was not bundled!"
-            Write-Host "Contents of Release directory:"
-            Get-ChildItem "build\windows\x64\runner\Release" -Recurse | Select-Object FullName, Length
-            exit 1
-          }
+
+          Write-Host "`nAll Windows build artifacts verified successfully."
 
   # ── Build macOS ──────────────────────────────────────────────────────
   build-macos:

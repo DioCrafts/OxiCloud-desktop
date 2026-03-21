@@ -296,19 +296,33 @@ jobs:
       - name: Verify Windows build artifacts
         shell: pwsh
         run: |
-          $exePath = "build\windows\x64\runner\Release\OxiCloud.exe"
-          $dllPath = "build\windows\x64\runner\Release\oxicloud_core.dll"
-          if (-not (Test-Path $exePath)) {
-            Write-Error "MISSING: $exePath"
+          $releaseDir = "build\windows\x64\runner\Release"
+
+          $requiredFiles = @(
+            "$releaseDir\OxiCloud.exe",
+            "$releaseDir\oxicloud_core.dll",
+            "$releaseDir\flutter_windows.dll",
+            "$releaseDir\data\flutter_assets\AssetManifest.json"
+          )
+
+          $allOk = $true
+          foreach ($file in $requiredFiles) {
+            if (Test-Path $file) {
+              $size = [math]::Round((Get-Item $file).Length / 1KB, 1)
+              Write-Host "OK: $file ($size KB)"
+            } else {
+              Write-Error "MISSING: $file"
+              $allOk = $false
+            }
+          }
+
+          if (-not $allOk) {
+            Write-Host "`nContents of Release directory:"
+            Get-ChildItem $releaseDir -Recurse | Select-Object FullName, Length
             exit 1
           }
-          Write-Host "OK: $exePath ($(( Get-Item $exePath ).Length / 1MB) MB)"
-          if (-not (Test-Path $dllPath)) {
-            Write-Error "MISSING: $dllPath — Rust native library not bundled!"
-            Get-ChildItem "build\windows\x64\runner\Release" | ForEach-Object { Write-Host $_.Name }
-            exit 1
-          }
-          Write-Host "OK: $dllPath ($(( Get-Item $dllPath ).Length / 1MB) MB)"
+
+          Write-Host "`nAll Windows build artifacts verified."
 
       - name: Package — ZIP
         shell: pwsh
@@ -366,6 +380,17 @@ jobs:
 
           [Run]
           Filename: "{app}\OxiCloud.exe"; Description: "Launch OxiCloud"; Flags: nowait postinstall skipifsilent
+
+          [Code]
+          function NeedsVCRedist: Boolean;
+          var
+            Version: String;
+          begin
+            // Check if VC++ 2015-2022 Redistributable is installed (x64)
+            Result := not RegQueryStringValue(HKEY_LOCAL_MACHINE,
+              'SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64',
+              'Version', Version);
+          end;
           "@ | Out-File -FilePath "installer.iss" -Encoding UTF8
 
           # Download and run InnoSetup
