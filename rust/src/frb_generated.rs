@@ -161,7 +161,7 @@ fn wire__crate__api__oxicloud__get_config_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_config().await?;
                     Ok(output_ok)
                 })()
@@ -182,7 +182,7 @@ fn wire__crate__api__oxicloud__get_conflicts_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_conflicts().await?;
                     Ok(output_ok)
                 })()
@@ -203,7 +203,7 @@ fn wire__crate__api__oxicloud__get_pending_items_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_pending_items().await?;
                     Ok(output_ok)
                 })()
@@ -224,7 +224,7 @@ fn wire__crate__api__oxicloud__get_remote_folders_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_remote_folders().await?;
                     Ok(output_ok)
                 })()
@@ -245,7 +245,7 @@ fn wire__crate__api__oxicloud__get_server_info_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_server_info().await?;
                     Ok(output_ok)
                 })()
@@ -266,7 +266,7 @@ fn wire__crate__api__oxicloud__get_sync_folders_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_sync_folders().await?;
                     Ok(output_ok)
                 })()
@@ -288,7 +288,7 @@ fn wire__crate__api__oxicloud__get_sync_history_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_sync_history(limit).await?;
                     Ok(output_ok)
                 })()
@@ -309,7 +309,7 @@ fn wire__crate__api__oxicloud__get_sync_status_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::get_sync_status().await?;
                     Ok(output_ok)
                 })()
@@ -330,7 +330,7 @@ fn wire__crate__api__simple__greet_impl(
         },
         move || {
             let api_name = name.cst_decode();
-            transform_result_dco::<_, (), ()>(Ok(crate::api::simple::greet(api_name)))
+            transform_result_dco::<_, String, ()>(Ok(crate::api::simple::greet(api_name)))
         },
     )
 }
@@ -365,7 +365,7 @@ fn wire__crate__api__oxicloud__initialize_impl(
         move || {
             let api_config = config.cst_decode();
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::initialize(api_config).await?;
                     Ok(output_ok)
                 })()
@@ -386,7 +386,7 @@ fn wire__crate__api__oxicloud__is_logged_in_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::is_logged_in().await?;
                     Ok(output_ok)
                 })()
@@ -413,7 +413,7 @@ fn wire__crate__api__oxicloud__login_impl(
             let api_username = username.cst_decode();
             let api_password = password.cst_decode();
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::login(
                         api_server_url,
                         api_username,
@@ -439,7 +439,7 @@ fn wire__crate__api__oxicloud__logout_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::logout().await?;
                     Ok(output_ok)
                 })()
@@ -465,7 +465,7 @@ fn wire__crate__api__oxicloud__resolve_conflict_impl(
             let api_resolution: crate::domain::entities::ConflictResolution =
                 resolution.cst_decode();
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::resolve_conflict(
                         api_conflict_id,
                         api_resolution,
@@ -492,7 +492,7 @@ fn wire__crate__api__oxicloud__set_sync_folders_impl(
         move || {
             let api_folder_ids = folder_ids.cst_decode();
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok =
                         crate::api::oxicloud::set_sync_folders(api_folder_ids).await?;
                     Ok(output_ok)
@@ -514,7 +514,7 @@ fn wire__crate__api__oxicloud__shutdown_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::shutdown().await?;
                     Ok(output_ok)
                 })()
@@ -535,7 +535,7 @@ fn wire__crate__api__oxicloud__start_sync_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::start_sync().await?;
                     Ok(output_ok)
                 })()
@@ -556,7 +556,7 @@ fn wire__crate__api__oxicloud__stop_sync_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::stop_sync().await?;
                     Ok(output_ok)
                 })()
@@ -577,7 +577,7 @@ fn wire__crate__api__oxicloud__sync_now_impl(
         },
         move || {
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::sync_now().await?;
                     Ok(output_ok)
                 })()
@@ -600,7 +600,7 @@ fn wire__crate__api__oxicloud__update_config_impl(
         move || {
             let api_config = config.cst_decode();
             move |context| async move {
-                transform_result_dco::<_, _, ()>((move || async move {
+                transform_result_dco::<_, _, String>((move || async move {
                     let output_ok = crate::api::oxicloud::update_config(api_config).await?;
                     Ok(output_ok)
                 })()
