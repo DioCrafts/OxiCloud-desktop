@@ -87,6 +87,4 @@ flutter:
   generate: true
 
   assets:
-    - assets/icons/
-    - assets/images/
     - assets/l10n/
