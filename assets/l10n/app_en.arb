@@ -1,0 +1,59 @@
+{
+  "@@locale": "en",
+  "appTitle": "OxiCloud",
+  "login": "Log in",
+  "register": "Register",
+  "username": "Username",
+  "password": "Password",
+  "email": "Email",
+  "logout": "Log out",
+  "files": "Files",
+  "photos": "Photos",
+  "favorites": "Favorites",
+  "recent": "Recent",
+  "trash": "Trash",
+  "shares": "Shares",
+  "settings": "Settings",
+  "search": "Search",
+  "upload": "Upload",
+  "download": "Download",
+  "delete": "Delete",
+  "rename": "Rename",
+  "move": "Move",
+  "copy": "Copy",
+  "createFolder": "Create folder",
+  "emptyTrash": "Empty trash",
+  "restore": "Restore",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "error": "Error",
+  "retry": "Retry",
+  "offline": "Offline",
+  "syncing": "Syncing…",
+  "syncComplete": "Sync complete",
+  "noFiles": "No files here",
+  "storageUsed": "{used} of {total} used",
+  "@storageUsed": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "uploadProgress": "Uploading {name}… {percent}%",
+  "@uploadProgress": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "percent": { "type": "int" }
+    }
+  },
+  "itemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "serverUrl": "Server URL",
+  "connectToServer": "Connect to server",
+  "welcomeTitle": "Welcome to OxiCloud",
+  "welcomeSubtitle": "Your self-hosted cloud"
+}

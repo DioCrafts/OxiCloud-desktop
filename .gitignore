@@ -1,0 +1,232 @@
+# ============================================================================
+# OxiCloud Desktop — .gitignore
+# Flutter multi-platform app (Android, iOS, Linux, macOS, Windows)
+# ============================================================================
+
+# -----------------------------------------------
+# OS-generated files
+# -----------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+*.swn
+
+# -----------------------------------------------
+# IDE / Editor configuration
+# -----------------------------------------------
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# Vim
+*.vim
+Session.vim
+.netrwhist
+
+# Emacs
+*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# -----------------------------------------------
+# Dart / Flutter
+# -----------------------------------------------
+
+# Dart tool cache & package config
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Flutter plugin registrations (auto-generated)
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter metadata (auto-generated, machine-specific)
+.metadata
+
+# Build output (all platforms)
+/build/
+**/build/
+
+# Test coverage
+/coverage/
+
+# Generated documentation
+**/doc/api/
+
+# Flutter last-build markers
+**/Flutter/.last_build_id
+
+# Symbolication & obfuscation
+app.*.symbols
+app.*.map.json
+
+# pubspec.lock — included for apps (recommended by Dart team)
+# If this were a package/library, uncomment the next line:
+# pubspec.lock
+
+# -----------------------------------------------
+# Code generation (build_runner / drift / json_serializable)
+# -----------------------------------------------
+# These files are regenerated with: flutter pub run build_runner build
+# Uncomment the lines below to ignore generated code
+# (regenerate with `dart run build_runner build --delete-conflicting-outputs`):
+# *.g.dart
+# *.freezed.dart
+# *.gr.dart
+# *.config.dart
+# *.mocks.dart
+# *.chopper.dart
+# *.reflectable.dart
+
+# -----------------------------------------------
+# Environment & secrets
+# -----------------------------------------------
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*.p12
+*.pem
+*.key
+secrets.yaml
+secrets.json
+google-services.json
+GoogleService-Info.plist
+
+# -----------------------------------------------
+# Logs & crash reports
+# -----------------------------------------------
+*.log
+*.log.*
+flutter_*.log
+crash_log_*.txt
+
+# -----------------------------------------------
+# Android-specific
+# -----------------------------------------------
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/.gradle/
+/android/captures/
+/android/local.properties
+/android/gradlew
+/android/gradlew.bat
+/android/**/GeneratedPluginRegistrant.java
+/android/.cxx/
+*.apk
+*.aab
+*.dex
+*.class
+*.pyc
+
+# -----------------------------------------------
+# iOS-specific
+# -----------------------------------------------
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/App.framework/
+/ios/Flutter/Flutter.framework/
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+/ios/Flutter/app.flx
+/ios/Flutter/app.zip
+/ios/Flutter/flutter_assets/
+/ios/Flutter/flutter_export_environment.sh
+/ios/ServiceDefinitions.json
+/ios/Runner/GeneratedPluginRegistrant.*
+/ios/**/dgph
+/ios/**/*.mode1v3
+/ios/**/*.mode2v3
+/ios/**/*.moved-aside
+/ios/**/*.pbxuser
+/ios/**/*.perspectivev3
+/ios/**/xcuserdata/
+/ios/**/*sync/
+/ios/**/DerivedData/
+/ios/**/.generated/
+/ios/Podfile.lock
+
+# -----------------------------------------------
+# macOS-specific
+# -----------------------------------------------
+/macos/Flutter/ephemeral/
+/macos/Pods/
+/macos/**/dgph
+/macos/**/xcuserdata/
+/macos/Podfile.lock
+
+# -----------------------------------------------
+# Linux-specific
+# -----------------------------------------------
+/linux/flutter/ephemeral/
+
+# -----------------------------------------------
+# Windows-specific
+# -----------------------------------------------
+/windows/flutter/ephemeral/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -----------------------------------------------
+# Web-specific (in case web support is added)
+# -----------------------------------------------
+/web/.dart_tool/
+
+# -----------------------------------------------
+# Archives & binaries (should never be committed)
+# -----------------------------------------------
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rar
+*.7z
+*.dmg
+*.iso
+*.exe
+*.msi
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.ipa
+*.app
+
+# -----------------------------------------------
+# Miscellaneous
+# -----------------------------------------------
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+*.bak
+*.tmp
+*.temp
+*.orig
