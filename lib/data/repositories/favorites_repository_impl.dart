@@ -7,7 +7,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   final FavoritesRemoteDatasource _remote;
 
   FavoritesRepositoryImpl({required FavoritesRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<List<FileEntity>> listFavorites() async {

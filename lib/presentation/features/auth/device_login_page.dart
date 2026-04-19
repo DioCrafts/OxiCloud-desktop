@@ -78,12 +78,16 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
           timer.cancel();
           interval += 5;
           _pollTimer = Timer.periodic(
-              Duration(seconds: interval), (t) => _poll(t, auth));
+            Duration(seconds: interval),
+            (t) => _poll(t, auth),
+          );
         } else if (result.isExpired || result.isDenied) {
           timer.cancel();
-          setState(() => _error = result.isDenied
-              ? 'Access denied by user'
-              : 'Device code expired');
+          setState(
+            () => _error = result.isDenied
+                ? 'Access denied by user'
+                : 'Device code expired',
+          );
         }
         // isPending → keep polling
       } catch (e) {
@@ -111,8 +115,8 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _error != null
-                      ? _buildError(theme)
-                      : _buildCodeDisplay(theme),
+                  ? _buildError(theme)
+                  : _buildCodeDisplay(theme),
             ),
           ),
         ),
@@ -147,8 +151,9 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
         const SizedBox(height: 8),
         Text(
           'Enter this code on your browser:',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         // Big user code
@@ -171,8 +176,9 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
         // Verification URL
         Text(
           auth.verificationUri,
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: theme.colorScheme.primary),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
         ),
         const SizedBox(height: 24),
         Row(
@@ -181,8 +187,9 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
             OutlinedButton.icon(
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: auth.userCode));
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Code copied')));
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Code copied')));
               },
               icon: const Icon(Icons.copy),
               label: const Text('Copy Code'),
@@ -203,8 +210,9 @@ class _DeviceLoginPageState extends ConsumerState<DeviceLoginPage> {
         const SizedBox(height: 8),
         Text(
           'Waiting for approval...',
-          style: theme.textTheme.bodySmall
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );

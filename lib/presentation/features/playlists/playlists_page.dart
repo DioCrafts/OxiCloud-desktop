@@ -102,15 +102,13 @@ class PlaylistsNotifier extends Notifier<PlaylistsState> {
   }
 
   void clearSelection() {
-    state = state.copyWith(
-      selected: null,
-      tracks: [],
-    );
+    state = state.copyWith(selected: null, tracks: []);
   }
 }
 
-final playlistsProvider =
-    NotifierProvider<PlaylistsNotifier, PlaylistsState>(PlaylistsNotifier.new);
+final playlistsProvider = NotifierProvider<PlaylistsNotifier, PlaylistsState>(
+  PlaylistsNotifier.new,
+);
 
 // --- UI ---
 
@@ -126,7 +124,8 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
   void initState() {
     super.initState();
     Future.microtask(
-        () => ref.read(playlistsProvider.notifier).loadPlaylists());
+      () => ref.read(playlistsProvider.notifier).loadPlaylists(),
+    );
   }
 
   @override
@@ -152,45 +151,46 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
                   ref.read(playlistsProvider.notifier).removeTrack(fileId),
             )
           : state.loading
-              ? const Center(child: CircularProgressIndicator())
-              : state.playlists.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.music_note_outlined,
-                              size: 64,
-                              color: theme.colorScheme.onSurfaceVariant),
-                          const SizedBox(height: 16),
-                          Text('No playlists yet',
-                              style: theme.textTheme.titleMedium),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.playlists.length,
-                      itemBuilder: (context, i) {
-                        final p = state.playlists[i];
-                        return Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.queue_music),
-                            title: Text(p.name),
-                            subtitle: Text(
-                                '${p.trackCount} tracks • ${_formatDuration(p.totalDuration)}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => ref
-                                  .read(playlistsProvider.notifier)
-                                  .deletePlaylist(p.id),
-                            ),
-                            onTap: () => ref
-                                .read(playlistsProvider.notifier)
-                                .selectPlaylist(p),
-                          ),
-                        );
-                      },
+          ? const Center(child: CircularProgressIndicator())
+          : state.playlists.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.music_note_outlined,
+                    size: 64,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 16),
+                  Text('No playlists yet', style: theme.textTheme.titleMedium),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.playlists.length,
+              itemBuilder: (context, i) {
+                final p = state.playlists[i];
+                return Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.queue_music),
+                    title: Text(p.name),
+                    subtitle: Text(
+                      '${p.trackCount} tracks • ${_formatDuration(p.totalDuration)}',
                     ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => ref
+                          .read(playlistsProvider.notifier)
+                          .deletePlaylist(p.id),
+                    ),
+                    onTap: () =>
+                        ref.read(playlistsProvider.notifier).selectPlaylist(p),
+                  ),
+                );
+              },
+            ),
     );
   }
 
@@ -212,22 +212,28 @@ class _PlaylistsPageState extends ConsumerState<PlaylistsPage> {
             const SizedBox(height: 8),
             TextField(
               controller: descCtrl,
-              decoration:
-                  const InputDecoration(labelText: 'Description (optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Description (optional)',
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Create')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Create'),
+          ),
         ],
       ),
     );
     if (result == true && nameCtrl.text.isNotEmpty) {
-      ref.read(playlistsProvider.notifier).createPlaylist(
+      ref
+          .read(playlistsProvider.notifier)
+          .createPlaylist(
             nameCtrl.text.trim(),
             descCtrl.text.isEmpty ? null : descCtrl.text.trim(),
           );
@@ -266,18 +272,18 @@ class _PlaylistDetail extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              IconButton(
-                  onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+              IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(playlist.name,
-                        style: theme.textTheme.titleLarge),
+                    Text(playlist.name, style: theme.textTheme.titleLarge),
                     if (playlist.description != null)
-                      Text(playlist.description!,
-                          style: theme.textTheme.bodySmall),
+                      Text(
+                        playlist.description!,
+                        style: theme.textTheme.bodySmall,
+                      ),
                   ],
                 ),
               ),
@@ -289,7 +295,8 @@ class _PlaylistDetail extends StatelessWidget {
           const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (tracks.isEmpty)
           const Expanded(
-              child: Center(child: Text('No tracks in this playlist')))
+            child: Center(child: Text('No tracks in this playlist')),
+          )
         else
           Expanded(
             child: ReorderableListView.builder(
@@ -300,16 +307,16 @@ class _PlaylistDetail extends StatelessWidget {
                 final t = tracks[i];
                 return ListTile(
                   key: ValueKey(t.fileId),
-                  leading: CircleAvatar(
-                    child: Text('${i + 1}'),
-                  ),
+                  leading: CircleAvatar(child: Text('${i + 1}')),
                   title: Text(t.title ?? t.filename),
-                  subtitle: Text([
-                    if (t.artist != null) t.artist!,
-                    if (t.album != null) t.album!,
-                    if (t.duration != null)
-                      '${t.duration! ~/ 60}:${(t.duration! % 60).toString().padLeft(2, '0')}',
-                  ].join(' • ')),
+                  subtitle: Text(
+                    [
+                      if (t.artist != null) t.artist!,
+                      if (t.album != null) t.album!,
+                      if (t.duration != null)
+                        '${t.duration! ~/ 60}:${(t.duration! % 60).toString().padLeft(2, '0')}',
+                    ].join(' • '),
+                  ),
                   trailing: IconButton(
                     icon: const Icon(Icons.remove_circle_outline),
                     onPressed: () => onRemoveTrack(t.fileId),

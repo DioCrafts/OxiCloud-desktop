@@ -22,12 +22,18 @@ class MobileDrawer extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.cloud_outlined,
-                      size: 40, color: theme.colorScheme.primary),
+                  Icon(
+                    Icons.cloud_outlined,
+                    size: 40,
+                    color: theme.colorScheme.primary,
+                  ),
                   const SizedBox(height: 8),
-                  Text('OxiCloud',
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(
+                    'OxiCloud',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -94,8 +100,10 @@ class MobileDrawer extends ConsumerWidget {
             const Divider(height: 1),
             ListTile(
               leading: Icon(Icons.logout, color: theme.colorScheme.error),
-              title: Text('Logout',
-                  style: TextStyle(color: theme.colorScheme.error)),
+              title: Text(
+                'Logout',
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 await ref.read(authRepositoryProvider).logout();

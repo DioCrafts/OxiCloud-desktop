@@ -66,11 +66,17 @@ class FileBrowserNotifier extends Notifier<FileBrowserState> {
   FileBrowserState build() => const FileBrowserState();
 
   Future<void> loadFolder(String? folderId) async {
-    state = state.copyWith(loading: true, error: null, currentFolderId: folderId);
+    state = state.copyWith(
+      loading: true,
+      error: null,
+      currentFolderId: folderId,
+    );
 
     try {
       if (folderId == null) {
-        final folders = await ref.read(folderRepositoryProvider).listRootFolders();
+        final folders = await ref
+            .read(folderRepositoryProvider)
+            .listRootFolders();
         final files = await ref.read(fileRepositoryProvider).listFiles();
         state = state.copyWith(
           folders: folders,
@@ -79,8 +85,9 @@ class FileBrowserNotifier extends Notifier<FileBrowserState> {
           breadcrumbs: [],
         );
       } else {
-        final contents =
-            await ref.read(folderRepositoryProvider).listFolderContents(folderId);
+        final contents = await ref
+            .read(folderRepositoryProvider)
+            .listFolderContents(folderId);
         state = state.copyWith(
           folders: contents.folders,
           files: contents.files,
@@ -120,7 +127,9 @@ class FileBrowserNotifier extends Notifier<FileBrowserState> {
     final size = await file.length();
     final mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
 
-    await ref.read(fileRepositoryProvider).uploadFile(
+    await ref
+        .read(fileRepositoryProvider)
+        .uploadFile(
           name: name,
           folderId: state.currentFolderId,
           fileStream: file.openRead(),
@@ -138,7 +147,9 @@ class FileBrowserNotifier extends Notifier<FileBrowserState> {
         await uploadFileFromPath(path);
         success++;
       } catch (e) {
-        state = state.copyWith(error: 'Failed to upload ${File(path).uri.pathSegments.last}: $e');
+        state = state.copyWith(
+          error: 'Failed to upload ${File(path).uri.pathSegments.last}: $e',
+        );
       }
     }
     return success;
@@ -165,7 +176,9 @@ class FileBrowserNotifier extends Notifier<FileBrowserState> {
 }
 
 final fileBrowserProvider =
-    NotifierProvider<FileBrowserNotifier, FileBrowserState>(FileBrowserNotifier.new);
+    NotifierProvider<FileBrowserNotifier, FileBrowserState>(
+      FileBrowserNotifier.new,
+    );
 
 // --- Page ---
 
@@ -183,7 +196,8 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
   void initState() {
     super.initState();
     Future.microtask(
-        () => ref.read(fileBrowserProvider.notifier).loadFolder(widget.folderId));
+      () => ref.read(fileBrowserProvider.notifier).loadFolder(widget.folderId),
+    );
   }
 
   @override
@@ -201,10 +215,7 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
     final totalItems = state.folders.length + state.files.length;
 
     final breadcrumbs = <BreadcrumbItem>[
-      BreadcrumbItem(
-        label: 'Home',
-        onTap: () => context.go('/files'),
-      ),
+      BreadcrumbItem(label: 'Home', onTap: () => context.go('/files')),
       ...state.breadcrumbs.map(
         (b) => BreadcrumbItem(
           label: b.name,
@@ -284,15 +295,19 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
       );
     }
 
-    final folderWidgets = state.folders.map((f) => _FolderTile(
-          folder: f,
-          onTap: () => context.go('/files/${f.id}'),
-          onContextMenu: (pos) => _showFolderContextMenu(context, f, pos),
-        ));
-    final fileWidgets = state.files.map((f) => _FileTile(
-          file: f,
-          onContextMenu: (pos) => _showFileContextMenu(context, f, pos),
-        ));
+    final folderWidgets = state.folders.map(
+      (f) => _FolderTile(
+        folder: f,
+        onTap: () => context.go('/files/${f.id}'),
+        onContextMenu: (pos) => _showFolderContextMenu(context, f, pos),
+      ),
+    );
+    final fileWidgets = state.files.map(
+      (f) => _FileTile(
+        file: f,
+        onContextMenu: (pos) => _showFileContextMenu(context, f, pos),
+      ),
+    );
     final items = [...folderWidgets, ...fileWidgets];
 
     if (isDesktop) {
@@ -347,8 +362,9 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
         );
       }
 
-      final count =
-          await ref.read(fileBrowserProvider.notifier).uploadFilesFromPaths(paths);
+      final count = await ref
+          .read(fileBrowserProvider.notifier)
+          .uploadFilesFromPaths(paths);
 
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -358,9 +374,9 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
       }
     }
   }
@@ -379,12 +395,15 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Uploading ${filePaths.length} dropped file(s)…')),
+        SnackBar(
+          content: Text('Uploading ${filePaths.length} dropped file(s)…'),
+        ),
       );
     }
 
-    final count =
-        await ref.read(fileBrowserProvider.notifier).uploadFilesFromPaths(filePaths);
+    final count = await ref
+        .read(fileBrowserProvider.notifier)
+        .uploadFilesFromPaths(filePaths);
 
     if (mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -395,7 +414,10 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
   }
 
   void _showFolderContextMenu(
-      BuildContext context, FolderEntity folder, Offset pos) {
+    BuildContext context,
+    FolderEntity folder,
+    Offset pos,
+  ) {
     AppContextMenu.show(
       context: context,
       position: pos,
@@ -444,8 +466,7 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
     );
   }
 
-  void _showFileContextMenu(
-      BuildContext context, FileEntity file, Offset pos) {
+  void _showFileContextMenu(BuildContext context, FileEntity file, Offset pos) {
     AppContextMenu.show(
       context: context,
       position: pos,
@@ -475,9 +496,9 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
             } catch (e) {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Download failed: $e')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
               }
             }
           },
@@ -504,15 +525,15 @@ class _FileBrowserPageState extends ConsumerState<FileBrowserPage> {
           label: file.isFavorite ? 'Remove favorite' : 'Add to favorites',
           onTap: () async {
             try {
-              await ref
-                  .read(fileBrowserProvider.notifier)
-                  .toggleFavorite(file);
+              await ref.read(fileBrowserProvider.notifier).toggleFavorite(file);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(file.isFavorite
-                        ? 'Removed from favorites'
-                        : 'Added to favorites'),
+                    content: Text(
+                      file.isFavorite
+                          ? 'Removed from favorites'
+                          : 'Added to favorites',
+                    ),
                   ),
                 );
               }
@@ -572,10 +593,12 @@ class _FolderTile extends StatelessWidget {
               children: [
                 Icon(Icons.folder, size: 48, color: Colors.amber.shade700),
                 const SizedBox(height: 8),
-                Text(folder.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center),
+                Text(
+                  folder.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -602,14 +625,22 @@ class _FileTile extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FileIcon(mimeType: file.mimeType, extension: file.extension, size: 48),
+              FileIcon(
+                mimeType: file.mimeType,
+                extension: file.extension,
+                size: 48,
+              ),
               const SizedBox(height: 8),
-              Text(file.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center),
-              Text(file.sizeFormatted,
-                  style: Theme.of(context).textTheme.bodySmall),
+              Text(
+                file.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                file.sizeFormatted,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),

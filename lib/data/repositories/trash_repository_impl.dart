@@ -7,7 +7,7 @@ class TrashRepositoryImpl implements TrashRepository {
   final TrashRemoteDatasource _remote;
 
   TrashRepositoryImpl({required TrashRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<List<TrashItemEntity>> listTrash() async {

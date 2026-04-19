@@ -41,5 +41,6 @@ class AppConfig {
   }
 
   @override
-  String toString() => 'AppConfig(server: $serverUrl, env: ${describeEnum(environment)})';
+  String toString() =>
+      'AppConfig(server: $serverUrl, env: ${describeEnum(environment)})';
 }

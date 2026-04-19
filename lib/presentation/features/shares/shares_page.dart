@@ -15,11 +15,7 @@ class SharesState {
   final bool loading;
   final String? error;
 
-  const SharesState({
-    this.shares = const [],
-    this.loading = false,
-    this.error,
-  });
+  const SharesState({this.shares = const [], this.loading = false, this.error});
 
   SharesState copyWith({
     List<ShareEntity>? shares,
@@ -56,8 +52,9 @@ class SharesNotifier extends Notifier<SharesState> {
   }
 }
 
-final sharesProvider =
-    NotifierProvider<SharesNotifier, SharesState>(SharesNotifier.new);
+final sharesProvider = NotifierProvider<SharesNotifier, SharesState>(
+  SharesNotifier.new,
+);
 
 // --- Page ---
 
@@ -103,14 +100,11 @@ class _SharesPageState extends ConsumerState<SharesPage> {
             final confirm = await AppDialogs.showConfirm(
               context: context,
               title: 'Delete share?',
-              message:
-                  'The link will no longer work. This cannot be undone.',
+              message: 'The link will no longer work. This cannot be undone.',
               isDanger: true,
             );
             if (confirm) {
-              ref
-                  .read(sharesProvider.notifier)
-                  .deleteShare(state.shares[i].id);
+              ref.read(sharesProvider.notifier).deleteShare(state.shares[i].id);
             }
           },
         ),
@@ -158,8 +152,10 @@ class _ShareTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: isExpired
-            ? TextStyle(decoration: TextDecoration.lineThrough,
-                color: theme.colorScheme.onSurfaceVariant)
+            ? TextStyle(
+                decoration: TextDecoration.lineThrough,
+                color: theme.colorScheme.onSurfaceVariant,
+              )
             : null,
       ),
       subtitle: Text(
@@ -173,8 +169,11 @@ class _ShareTile extends StatelessWidget {
           if (share.hasPassword)
             Padding(
               padding: const EdgeInsets.only(right: 4),
-              child: Icon(Icons.lock, size: 16,
-                  color: theme.colorScheme.onSurfaceVariant),
+              child: Icon(
+                Icons.lock,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           IconButton(
             icon: const Icon(Icons.copy),

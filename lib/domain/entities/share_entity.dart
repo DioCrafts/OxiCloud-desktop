@@ -29,8 +29,7 @@ class ShareEntity extends Equatable {
     this.accessCount = 0,
   });
 
-  bool get isExpired =>
-      expiresAt != null && DateTime.now().isAfter(expiresAt!);
+  bool get isExpired => expiresAt != null && DateTime.now().isAfter(expiresAt!);
 
   @override
   List<Object?> get props => [id, itemId, token];

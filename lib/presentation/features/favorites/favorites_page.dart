@@ -55,8 +55,9 @@ class FavoritesNotifier extends Notifier<FavoritesState> {
   }
 }
 
-final favoritesProvider =
-    NotifierProvider<FavoritesNotifier, FavoritesState>(FavoritesNotifier.new);
+final favoritesProvider = NotifierProvider<FavoritesNotifier, FavoritesState>(
+  FavoritesNotifier.new,
+);
 
 // --- Page ---
 
@@ -96,11 +97,15 @@ class _FavoritesPageState extends ConsumerState<FavoritesPage> {
           final file = state.items[i];
           return ListTile(
             leading: FileIcon(
-                mimeType: file.mimeType,
-                extension: file.extension,
-                size: 32),
-            title:
-                Text(file.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+              mimeType: file.mimeType,
+              extension: file.extension,
+              size: 32,
+            ),
+            title: Text(
+              file.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Text(file.sizeFormatted),
             trailing: IconButton(
               icon: const Icon(Icons.star, color: Colors.amber),

@@ -22,8 +22,7 @@ class AppContextMenu {
     required Offset position,
     required List<ContextMenuItem> items,
   }) {
-    final overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
     showMenu<void>(
       context: context,
@@ -38,11 +37,13 @@ class AppContextMenu {
           onTap: item.onTap,
           child: Row(
             children: [
-              Icon(item.icon,
-                  size: 20,
-                  color: item.isDanger
-                      ? Theme.of(context).colorScheme.error
-                      : null),
+              Icon(
+                item.icon,
+                size: 20,
+                color: item.isDanger
+                    ? Theme.of(context).colorScheme.error
+                    : null,
+              ),
               const SizedBox(width: 12),
               Text(
                 item.label,

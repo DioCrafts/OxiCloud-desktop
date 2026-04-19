@@ -27,56 +27,31 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/connect',
         builder: (context, state) => const ConnectPage(),
       ),
-      GoRoute(
-        path: '/setup',
-        builder: (context, state) => const SetupPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/setup', builder: (context, state) => const SetupPage()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/files',
         builder: (context, state) => const FileBrowserPage(),
       ),
       GoRoute(
         path: '/files/:folderId',
-        builder: (context, state) => FileBrowserPage(
-          folderId: state.pathParameters['folderId'],
-        ),
+        builder: (context, state) =>
+            FileBrowserPage(folderId: state.pathParameters['folderId']),
       ),
       GoRoute(
         path: '/favorites',
         builder: (context, state) => const FavoritesPage(),
       ),
-      GoRoute(
-        path: '/recent',
-        builder: (context, state) => const RecentPage(),
-      ),
-      GoRoute(
-        path: '/photos',
-        builder: (context, state) => const PhotosPage(),
-      ),
-      GoRoute(
-        path: '/trash',
-        builder: (context, state) => const TrashPage(),
-      ),
-      GoRoute(
-        path: '/search',
-        builder: (context, state) => const SearchPage(),
-      ),
-      GoRoute(
-        path: '/shares',
-        builder: (context, state) => const SharesPage(),
-      ),
+      GoRoute(path: '/recent', builder: (context, state) => const RecentPage()),
+      GoRoute(path: '/photos', builder: (context, state) => const PhotosPage()),
+      GoRoute(path: '/trash', builder: (context, state) => const TrashPage()),
+      GoRoute(path: '/search', builder: (context, state) => const SearchPage()),
+      GoRoute(path: '/shares', builder: (context, state) => const SharesPage()),
       GoRoute(
         path: '/playlists',
         builder: (context, state) => const PlaylistsPage(),
       ),
-      GoRoute(
-        path: '/admin',
-        builder: (context, state) => const AdminPage(),
-      ),
+      GoRoute(path: '/admin', builder: (context, state) => const AdminPage()),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
@@ -87,9 +62,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/s/:token',
-        builder: (context, state) => PublicSharePage(
-          token: state.pathParameters['token']!,
-        ),
+        builder: (context, state) =>
+            PublicSharePage(token: state.pathParameters['token']!),
       ),
     ],
     redirect: (context, state) async {
@@ -100,7 +74,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = token != null;
       final loc = state.matchedLocation;
       final isConnectRoute = loc == '/connect';
-      final isAuthRoute = loc == '/login' || loc == '/setup' || isConnectRoute || loc == '/device-login';
+      final isAuthRoute =
+          loc == '/login' ||
+          loc == '/setup' ||
+          isConnectRoute ||
+          loc == '/device-login';
 
       // No server configured → must connect first
       if (!hasServer && !isConnectRoute) return '/connect';

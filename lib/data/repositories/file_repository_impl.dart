@@ -17,9 +17,9 @@ class FileRepositoryImpl implements FileRepository {
     required FileRemoteDatasource remote,
     required AppDatabase db,
     required ConnectivityService connectivity,
-  })  : _remote = remote,
-        _db = db,
-        _connectivity = connectivity;
+  }) : _remote = remote,
+       _db = db,
+       _connectivity = connectivity;
 
   @override
   Future<List<FileEntity>> listFiles({String? folderId}) async {

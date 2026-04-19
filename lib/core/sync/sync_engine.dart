@@ -37,13 +37,15 @@ class SyncEngine extends ChangeNotifier {
     required FolderRepository folderRepo,
     required FavoritesRepository favoritesRepo,
     required TrashRepository trashRepo,
-  })  : _db = db,
-        _connectivity = connectivity,
-        _fileRepo = fileRepo,
-        _folderRepo = folderRepo,
-        _favoritesRepo = favoritesRepo,
-        _trashRepo = trashRepo {
-    _connectivitySub = _connectivity.onConnectivityChanged.listen((_) => _onConnectivityChanged());
+  }) : _db = db,
+       _connectivity = connectivity,
+       _fileRepo = fileRepo,
+       _folderRepo = folderRepo,
+       _favoritesRepo = favoritesRepo,
+       _trashRepo = trashRepo {
+    _connectivitySub = _connectivity.onConnectivityChanged.listen(
+      (_) => _onConnectivityChanged(),
+    );
   }
 
   void start({Duration interval = const Duration(seconds: 30)}) {
@@ -88,14 +90,16 @@ class SyncEngine extends ChangeNotifier {
 
   Future<void> enqueue(SyncTask task) async {
     final now = DateTime.now();
-    await _db.insertSyncOp(SyncQueueTableCompanion.insert(
-      operationType: task.operation.name,
-      itemId: task.entityId,
-      itemType: task.entityType,
-      payload: task.payload?.toString() ?? '{}',
-      createdAt: task.createdAt,
-      updatedAt: now,
-    ));
+    await _db.insertSyncOp(
+      SyncQueueTableCompanion.insert(
+        operationType: task.operation.name,
+        itemId: task.entityId,
+        itemType: task.entityType,
+        payload: task.payload?.toString() ?? '{}',
+        createdAt: task.createdAt,
+        updatedAt: now,
+      ),
+    );
     _pendingCount++;
     notifyListeners();
     if (_connectivity.isOnline) {
@@ -150,8 +154,11 @@ class SyncEngine extends ChangeNotifier {
           await _trashRepo.restoreItem(op.itemId);
 
         default:
-          await _db.updateSyncOpStatus(op.id, 'failed',
-              errorMessage: 'Unknown operation: ${op.operationType}');
+          await _db.updateSyncOpStatus(
+            op.id,
+            'failed',
+            errorMessage: 'Unknown operation: ${op.operationType}',
+          );
           return;
       }
 
@@ -159,17 +166,22 @@ class SyncEngine extends ChangeNotifier {
     } catch (e) {
       final newRetryCount = op.retryCount + 1;
       if (newRetryCount >= 5) {
-        await _db.updateSyncOpStatus(op.id, 'failed',
-            errorMessage: e.toString());
+        await _db.updateSyncOpStatus(
+          op.id,
+          'failed',
+          errorMessage: e.toString(),
+        );
         // Record as sync conflict for user resolution
-        await _db.insertSyncConflict(SyncConflictsTableCompanion.insert(
-          itemId: op.itemId,
-          itemType: op.itemType,
-          operationType: op.operationType,
-          payload: op.payload,
-          errorMessage: Value(e.toString()),
-          createdAt: DateTime.now(),
-        ));
+        await _db.insertSyncConflict(
+          SyncConflictsTableCompanion.insert(
+            itemId: op.itemId,
+            itemType: op.itemType,
+            operationType: op.operationType,
+            payload: op.payload,
+            errorMessage: Value(e.toString()),
+            createdAt: DateTime.now(),
+          ),
+        );
       } else {
         await _db.incrementSyncOpRetry(op.id);
       }

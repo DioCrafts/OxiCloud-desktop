@@ -167,23 +167,32 @@ class PlaylistRemoteDatasource {
     String? description,
   }) async {
     try {
-      final response = await _dio.post(ApiEndpoints.playlists, data: {
-        'name': name,
-        if (description != null) 'description': description,
-      });
+      final response = await _dio.post(
+        ApiEndpoints.playlists,
+        data: {
+          'name': name,
+          if (description != null) 'description': description,
+        },
+      );
       return PlaylistDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
   }
 
-  Future<PlaylistDto> update(String id,
-      {String? name, String? description}) async {
+  Future<PlaylistDto> update(
+    String id, {
+    String? name,
+    String? description,
+  }) async {
     try {
-      final response = await _dio.put(ApiEndpoints.playlistById(id), data: {
-        if (name != null) 'name': name,
-        if (description != null) 'description': description,
-      });
+      final response = await _dio.put(
+        ApiEndpoints.playlistById(id),
+        data: {
+          if (name != null) 'name': name,
+          if (description != null) 'description': description,
+        },
+      );
       return PlaylistDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -202,8 +211,7 @@ class PlaylistRemoteDatasource {
 
   Future<List<PlaylistTrackDto>> getTracks(String playlistId) async {
     try {
-      final response =
-          await _dio.get(ApiEndpoints.playlistTracks(playlistId));
+      final response = await _dio.get(ApiEndpoints.playlistTracks(playlistId));
       return (response.data as List<dynamic>)
           .map((e) => PlaylistTrackDto.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -212,13 +220,16 @@ class PlaylistRemoteDatasource {
     }
   }
 
-  Future<void> addTrack(String playlistId, String fileId,
-      {int? position}) async {
+  Future<void> addTrack(
+    String playlistId,
+    String fileId, {
+    int? position,
+  }) async {
     try {
-      await _dio.post(ApiEndpoints.playlistTracks(playlistId), data: {
-        'file_id': fileId,
-        if (position != null) 'position': position,
-      });
+      await _dio.post(
+        ApiEndpoints.playlistTracks(playlistId),
+        data: {'file_id': fileId, if (position != null) 'position': position},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -232,12 +243,12 @@ class PlaylistRemoteDatasource {
     }
   }
 
-  Future<void> reorderTracks(
-      String playlistId, List<String> fileIds) async {
+  Future<void> reorderTracks(String playlistId, List<String> fileIds) async {
     try {
-      await _dio.put(ApiEndpoints.playlistReorder(playlistId), data: {
-        'track_order': fileIds,
-      });
+      await _dio.put(
+        ApiEndpoints.playlistReorder(playlistId),
+        data: {'track_order': fileIds},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -246,12 +257,15 @@ class PlaylistRemoteDatasource {
   // Sharing
 
   Future<void> shareWith(
-      String playlistId, String userId, String permission) async {
+    String playlistId,
+    String userId,
+    String permission,
+  ) async {
     try {
-      await _dio.post(ApiEndpoints.playlistShare(playlistId), data: {
-        'user_id': userId,
-        'permission': permission,
-      });
+      await _dio.post(
+        ApiEndpoints.playlistShare(playlistId),
+        data: {'user_id': userId, 'permission': permission},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -259,8 +273,7 @@ class PlaylistRemoteDatasource {
 
   Future<void> unshare(String playlistId, String userId) async {
     try {
-      await _dio.delete(
-          ApiEndpoints.playlistShareUser(playlistId, userId));
+      await _dio.delete(ApiEndpoints.playlistShareUser(playlistId, userId));
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -268,8 +281,7 @@ class PlaylistRemoteDatasource {
 
   Future<List<PlaylistShareDto>> getShares(String playlistId) async {
     try {
-      final response =
-          await _dio.get(ApiEndpoints.playlistShares(playlistId));
+      final response = await _dio.get(ApiEndpoints.playlistShares(playlistId));
       return (response.data as List<dynamic>)
           .map((e) => PlaylistShareDto.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -283,8 +295,7 @@ class PlaylistRemoteDatasource {
   Future<AudioMetadataDto> getAudioMetadata(String fileId) async {
     try {
       final response = await _dio.get(ApiEndpoints.audioMetadata(fileId));
-      return AudioMetadataDto.fromJson(
-          response.data as Map<String, dynamic>);
+      return AudioMetadataDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

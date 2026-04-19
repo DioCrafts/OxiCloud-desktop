@@ -111,7 +111,7 @@ class ChunkedUploadDatasource {
 
   /// Get upload progress (HEAD).
   Future<({int offset, int total, int chunksComplete, int chunksTotal})>
-      getStatus(String uploadId) async {
+  getStatus(String uploadId) async {
     try {
       final response = await _dio.head(ApiEndpoints.uploadById(uploadId));
       final h = response.headers;
@@ -129,10 +129,10 @@ class ChunkedUploadDatasource {
   /// Finalize the upload — assembles chunks on server.
   Future<ChunkedUploadResult> complete(String uploadId) async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.uploadComplete(uploadId));
+      final response = await _dio.post(ApiEndpoints.uploadComplete(uploadId));
       return ChunkedUploadResult.fromJson(
-          response.data as Map<String, dynamic>);
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

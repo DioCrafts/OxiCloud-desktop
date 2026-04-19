@@ -36,9 +36,7 @@ class DesktopToolbar extends ConsumerWidget {
       child: Row(
         children: [
           // Breadcrumbs
-          Expanded(
-            child: BreadcrumbBar(items: breadcrumbs),
-          ),
+          Expanded(child: BreadcrumbBar(items: breadcrumbs)),
 
           // Search
           SizedBox(

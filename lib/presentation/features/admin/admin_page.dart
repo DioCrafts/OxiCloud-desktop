@@ -97,8 +97,9 @@ class AdminNotifier extends Notifier<AdminState> {
   }
 }
 
-final adminProvider =
-    NotifierProvider<AdminNotifier, AdminState>(AdminNotifier.new);
+final adminProvider = NotifierProvider<AdminNotifier, AdminState>(
+  AdminNotifier.new,
+);
 
 // --- UI ---
 
@@ -149,15 +150,19 @@ class _AdminPageState extends ConsumerState<AdminPage>
           if (state.error != null)
             Padding(
               padding: const EdgeInsets.all(8),
-              child: Text(state.error!,
-                  style: TextStyle(color: theme.colorScheme.error)),
+              child: Text(
+                state.error!,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ),
           Expanded(
             child: TabBarView(
               controller: _tabCtrl,
               children: [
                 _DashboardTab(
-                    dashboard: state.dashboard, loading: state.loading),
+                  dashboard: state.dashboard,
+                  loading: state.loading,
+                ),
                 _UsersTab(
                   users: state.users,
                   loading: state.loading,
@@ -201,9 +206,10 @@ class _DashboardTab extends StatelessWidget {
           _StatCard('Total Files', '${d.totalFiles}', Icons.insert_drive_file),
           _StatCard('Total Folders', '${d.totalFolders}', Icons.folder),
           _StatCard(
-              'Storage',
-              _formatBytes(d.totalStorageBytes),
-              Icons.storage),
+            'Storage',
+            _formatBytes(d.totalStorageBytes),
+            Icons.storage,
+          ),
           _StatCard('Version', d.serverVersion, Icons.info_outline),
           _StatCard('Backend', d.storageBackend, Icons.dns_outlined),
         ],
@@ -241,13 +247,19 @@ class _StatCard extends StatelessWidget {
             children: [
               Icon(icon, color: theme.colorScheme.primary),
               const SizedBox(height: 8),
-              Text(value,
-                  style: theme.textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w700)),
+              Text(
+                value,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(title,
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              Text(
+                title,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),
@@ -282,9 +294,7 @@ class _UsersTab extends StatelessWidget {
         final u = users[i];
         return Card(
           child: ListTile(
-            leading: CircleAvatar(
-              child: Text(u.username[0].toUpperCase()),
-            ),
+            leading: CircleAvatar(child: Text(u.username[0].toUpperCase())),
             title: Text(u.username),
             subtitle: Text('${u.role} • ${u.isActive ? 'Active' : 'Disabled'}'),
             trailing: Row(

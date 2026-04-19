@@ -18,7 +18,8 @@ class SearchMapper {
   }
 
   static List<SearchResultEntity> fromDtoList(
-      List<SearchResultResponseDto> dtos) {
+    List<SearchResultResponseDto> dtos,
+  ) {
     return dtos.map(fromDto).toList();
   }
 }

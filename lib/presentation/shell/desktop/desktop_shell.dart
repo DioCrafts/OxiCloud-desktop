@@ -30,10 +30,7 @@ class DesktopShell extends StatelessWidget {
               ],
             ),
           ),
-          DesktopStatusBar(
-            itemCount: itemCount,
-            selectedCount: selectedCount,
-          ),
+          DesktopStatusBar(itemCount: itemCount, selectedCount: selectedCount),
         ],
       ),
     );

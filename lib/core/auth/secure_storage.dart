@@ -5,10 +5,10 @@ class SecureStorage {
   final FlutterSecureStorage _storage;
 
   SecureStorage()
-      : _storage = const FlutterSecureStorage(
-          aOptions: AndroidOptions(encryptedSharedPreferences: true),
-          iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
-        );
+    : _storage = const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+      );
 
   // Tokens
   Future<void> saveAccessToken(String token) =>
@@ -23,11 +23,10 @@ class SecureStorage {
   Future<String?> getRefreshToken() =>
       _storage.read(key: Constants.keyRefreshToken);
 
-  Future<void> saveTokenExpiry(DateTime expiry) =>
-      _storage.write(
-        key: Constants.keyTokenExpiry,
-        value: expiry.toIso8601String(),
-      );
+  Future<void> saveTokenExpiry(DateTime expiry) => _storage.write(
+    key: Constants.keyTokenExpiry,
+    value: expiry.toIso8601String(),
+  );
 
   Future<DateTime?> getTokenExpiry() async {
     final raw = await _storage.read(key: Constants.keyTokenExpiry);
@@ -38,15 +37,13 @@ class SecureStorage {
   Future<void> saveServerUrl(String url) =>
       _storage.write(key: Constants.keyServerUrl, value: url);
 
-  Future<String?> getServerUrl() =>
-      _storage.read(key: Constants.keyServerUrl);
+  Future<String?> getServerUrl() => _storage.read(key: Constants.keyServerUrl);
 
   // User
   Future<void> saveUserId(String id) =>
       _storage.write(key: Constants.keyUserId, value: id);
 
-  Future<String?> getUserId() =>
-      _storage.read(key: Constants.keyUserId);
+  Future<String?> getUserId() => _storage.read(key: Constants.keyUserId);
 
   // Session management
   Future<bool> hasValidSession() async {

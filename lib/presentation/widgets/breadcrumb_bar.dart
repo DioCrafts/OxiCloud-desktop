@@ -25,13 +25,13 @@ class BreadcrumbBar extends StatelessWidget {
             if (i > 0)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(Icons.chevron_right,
-                    size: 18, color: theme.colorScheme.outline),
+                child: Icon(
+                  Icons.chevron_right,
+                  size: 18,
+                  color: theme.colorScheme.outline,
+                ),
               ),
-            _BreadcrumbChip(
-              item: items[i],
-              isLast: i == items.length - 1,
-            ),
+            _BreadcrumbChip(item: items[i], isLast: i == items.length - 1),
           ],
         ],
       ),
@@ -49,10 +49,10 @@ class _BreadcrumbChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final style = isLast
-        ? theme.textTheme.bodyMedium!
-            .copyWith(fontWeight: FontWeight.w600)
-        : theme.textTheme.bodyMedium!
-            .copyWith(color: theme.colorScheme.primary);
+        ? theme.textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w600)
+        : theme.textTheme.bodyMedium!.copyWith(
+            color: theme.colorScheme.primary,
+          );
 
     if (isLast || item.onTap == null) {
       return Text(item.label, style: style);

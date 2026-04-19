@@ -77,8 +77,9 @@ class AppConfigNotifier extends Notifier<AppConfig> {
   }
 }
 
-final appConfigProvider =
-    NotifierProvider<AppConfigNotifier, AppConfig>(AppConfigNotifier.new);
+final appConfigProvider = NotifierProvider<AppConfigNotifier, AppConfig>(
+  AppConfigNotifier.new,
+);
 
 final secureStorageProvider = Provider<SecureStorage>((ref) {
   return SecureStorage();
@@ -98,10 +99,7 @@ final dbPathProvider = FutureProvider<String>((ref) async {
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final dbPathAsync = ref.watch(dbPathProvider);
-  final path = dbPathAsync.maybeWhen(
-    data: (p) => p,
-    orElse: () => '',
-  );
+  final path = dbPathAsync.maybeWhen(data: (p) => p, orElse: () => '');
   final db = AppDatabase(openDatabase(path));
   ref.onDispose(db.close);
   return db;
@@ -216,43 +214,41 @@ final photosRepositoryProvider = Provider<PhotosRepository>((ref) {
 
 // --- Chunked Uploads ---
 
-final chunkedUploadDatasourceProvider =
-    Provider<ChunkedUploadDatasource>((ref) {
+final chunkedUploadDatasourceProvider = Provider<ChunkedUploadDatasource>((
+  ref,
+) {
   return ChunkedUploadDatasource(ref.watch(dioProvider));
 });
 
 // --- Batch ---
 
-final batchRemoteDatasourceProvider =
-    Provider<BatchRemoteDatasource>((ref) {
+final batchRemoteDatasourceProvider = Provider<BatchRemoteDatasource>((ref) {
   return BatchRemoteDatasource(ref.watch(dioProvider));
 });
 
 // --- OIDC ---
 
-final oidcRemoteDatasourceProvider =
-    Provider<OidcRemoteDatasource>((ref) {
+final oidcRemoteDatasourceProvider = Provider<OidcRemoteDatasource>((ref) {
   return OidcRemoteDatasource(ref.watch(dioProvider));
 });
 
 // --- Dedup ---
 
-final dedupRemoteDatasourceProvider =
-    Provider<DedupRemoteDatasource>((ref) {
+final dedupRemoteDatasourceProvider = Provider<DedupRemoteDatasource>((ref) {
   return DedupRemoteDatasource(ref.watch(dioProvider));
 });
 
 // --- Playlists ---
 
-final playlistRemoteDatasourceProvider =
-    Provider<PlaylistRemoteDatasource>((ref) {
+final playlistRemoteDatasourceProvider = Provider<PlaylistRemoteDatasource>((
+  ref,
+) {
   return PlaylistRemoteDatasource(ref.watch(dioProvider));
 });
 
 // --- Admin ---
 
-final adminRemoteDatasourceProvider =
-    Provider<AdminRemoteDatasource>((ref) {
+final adminRemoteDatasourceProvider = Provider<AdminRemoteDatasource>((ref) {
   return AdminRemoteDatasource(ref.watch(dioProvider));
 });
 
@@ -260,20 +256,20 @@ final adminRemoteDatasourceProvider =
 
 final appPasswordRemoteDatasourceProvider =
     Provider<AppPasswordRemoteDatasource>((ref) {
-  return AppPasswordRemoteDatasource(ref.watch(dioProvider));
-});
+      return AppPasswordRemoteDatasource(ref.watch(dioProvider));
+    });
 
 // --- Device Auth ---
 
-final deviceAuthRemoteDatasourceProvider =
-    Provider<DeviceAuthRemoteDatasource>((ref) {
-  return DeviceAuthRemoteDatasource(ref.watch(dioProvider));
-});
+final deviceAuthRemoteDatasourceProvider = Provider<DeviceAuthRemoteDatasource>(
+  (ref) {
+    return DeviceAuthRemoteDatasource(ref.watch(dioProvider));
+  },
+);
 
 // --- i18n ---
 
-final i18nRemoteDatasourceProvider =
-    Provider<I18nRemoteDatasource>((ref) {
+final i18nRemoteDatasourceProvider = Provider<I18nRemoteDatasource>((ref) {
   return I18nRemoteDatasource(ref.watch(dioProvider));
 });
 
@@ -281,5 +277,5 @@ final i18nRemoteDatasourceProvider =
 
 final publicShareRemoteDatasourceProvider =
     Provider<PublicShareRemoteDatasource>((ref) {
-  return PublicShareRemoteDatasource(ref.watch(dioProvider));
-});
+      return PublicShareRemoteDatasource(ref.watch(dioProvider));
+    });

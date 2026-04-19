@@ -7,7 +7,7 @@ class PhotosRepositoryImpl implements PhotosRepository {
   final PhotosRemoteDatasource _remote;
 
   PhotosRepositoryImpl({required PhotosRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<({List<FileEntity> photos, int? nextCursor})> listPhotos({

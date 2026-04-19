@@ -8,11 +8,7 @@ class DesktopStatusBar extends ConsumerWidget {
   final int? itemCount;
   final int? selectedCount;
 
-  const DesktopStatusBar({
-    super.key,
-    this.itemCount,
-    this.selectedCount,
-  });
+  const DesktopStatusBar({super.key, this.itemCount, this.selectedCount});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,8 +31,9 @@ class DesktopStatusBar extends ConsumerWidget {
               selectedCount != null && selectedCount! > 0
                   ? '$selectedCount of $itemCount selected'
                   : '$itemCount items',
-              style:
-                  theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.hintColor,
+              ),
             ),
           const Spacer(),
           ListenableBuilder(

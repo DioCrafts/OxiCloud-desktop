@@ -18,9 +18,9 @@ class FolderRepositoryImpl implements FolderRepository {
     required FolderRemoteDatasource remote,
     required AppDatabase db,
     required ConnectivityService connectivity,
-  })  : _remote = remote,
-        _db = db,
-        _connectivity = connectivity;
+  }) : _remote = remote,
+       _db = db,
+       _connectivity = connectivity;
 
   @override
   Future<List<FolderEntity>> listRootFolders() async {

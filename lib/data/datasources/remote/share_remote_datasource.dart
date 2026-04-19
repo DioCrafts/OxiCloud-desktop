@@ -11,8 +11,7 @@ class ShareRemoteDatasource {
 
   Future<ShareResponseDto> createShare(CreateShareRequestDto dto) async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.shares, data: dto.toJson());
+      final response = await _dio.post(ApiEndpoints.shares, data: dto.toJson());
       return ShareResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -41,10 +40,14 @@ class ShareRemoteDatasource {
   }
 
   Future<ShareResponseDto> updateShare(
-      String id, UpdateShareRequestDto dto) async {
+    String id,
+    UpdateShareRequestDto dto,
+  ) async {
     try {
-      final response =
-          await _dio.put(ApiEndpoints.shareById(id), data: dto.toJson());
+      final response = await _dio.put(
+        ApiEndpoints.shareById(id),
+        data: dto.toJson(),
+      );
       return ShareResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);

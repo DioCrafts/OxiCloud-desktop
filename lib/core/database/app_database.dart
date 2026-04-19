@@ -12,14 +12,16 @@ import 'tables/user_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [
-  FilesTable,
-  FoldersTable,
-  SyncQueueTable,
-  SyncConflictsTable,
-  CachedFilesTable,
-  UserTable,
-])
+@DriftDatabase(
+  tables: [
+    FilesTable,
+    FoldersTable,
+    SyncQueueTable,
+    SyncConflictsTable,
+    CachedFilesTable,
+    UserTable,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -28,13 +30,13 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.createTable(syncConflictsTable);
-          }
-        },
-      );
+    onCreate: (m) => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(syncConflictsTable);
+      }
+    },
+  );
 
   // --- Files ---
   Future<List<FilesTableData>> getFilesInFolder(String? folderId) {
@@ -51,8 +53,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<FilesTableData?> getFileById(String id) {
-    return (select(filesTable)..where((f) => f.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      filesTable,
+    )..where((f) => f.id.equals(id))).getSingleOrNull();
   }
 
   Future<void> upsertFile(FilesTableCompanion file) {
@@ -86,8 +89,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<FoldersTableData?> getFolderById(String id) {
-    return (select(foldersTable)..where((f) => f.id.equals(id)))
-        .getSingleOrNull();
+    return (select(
+      foldersTable,
+    )..where((f) => f.id.equals(id))).getSingleOrNull();
   }
 
   Future<void> upsertFolder(FoldersTableCompanion folder) {
@@ -109,10 +113,7 @@ class AppDatabase extends _$AppDatabase {
   // --- Sync Queue ---
   Future<List<SyncQueueTableData>> getPendingSyncOps({int limit = 10}) {
     return (select(syncQueueTable)
-          ..where(
-            (s) =>
-                s.status.equals('pending') | s.status.equals('failed'),
-          )
+          ..where((s) => s.status.equals('pending') | s.status.equals('failed'))
           ..orderBy([
             (s) => OrderingTerm.desc(s.priority),
             (s) => OrderingTerm.asc(s.createdAt),
@@ -140,9 +141,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> clearCompletedSyncOps() {
-    return (delete(syncQueueTable)
-          ..where((s) => s.status.equals('completed')))
-        .go();
+    return (delete(
+      syncQueueTable,
+    )..where((s) => s.status.equals('completed'))).go();
   }
 
   Future<void> incrementSyncOpRetry(int id) {
@@ -176,15 +177,16 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> deleteResolvedConflicts() {
-    return (delete(syncConflictsTable)
-          ..where((c) => c.resolvedAt.isNotNull()))
-        .go();
+    return (delete(
+      syncConflictsTable,
+    )..where((c) => c.resolvedAt.isNotNull())).go();
   }
 
   // --- Cached Files ---
   Future<CachedFilesTableData?> getCachedFile(String fileId) {
-    return (select(cachedFilesTable)..where((c) => c.fileId.equals(fileId)))
-        .getSingleOrNull();
+    return (select(
+      cachedFilesTable,
+    )..where((c) => c.fileId.equals(fileId))).getSingleOrNull();
   }
 
   Future<void> upsertCachedFile(CachedFilesTableCompanion entry) {
@@ -192,8 +194,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> deleteCachedFile(String fileId) {
-    return (delete(cachedFilesTable)..where((c) => c.fileId.equals(fileId)))
-        .go();
+    return (delete(
+      cachedFilesTable,
+    )..where((c) => c.fileId.equals(fileId))).go();
   }
 
   // --- User ---

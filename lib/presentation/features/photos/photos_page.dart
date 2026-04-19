@@ -56,8 +56,9 @@ class PhotosNotifier extends Notifier<PhotosState> {
   Future<void> load() async {
     state = const PhotosState(loading: true);
     try {
-      final result =
-          await ref.read(photosRepositoryProvider).listPhotos(limit: 100);
+      final result = await ref
+          .read(photosRepositoryProvider)
+          .listPhotos(limit: 100);
       state = PhotosState(
         photos: result.photos,
         nextCursor: result.nextCursor,
@@ -87,12 +88,14 @@ class PhotosNotifier extends Notifier<PhotosState> {
   }
 }
 
-final photosProvider =
-    NotifierProvider<PhotosNotifier, PhotosState>(PhotosNotifier.new);
+final photosProvider = NotifierProvider<PhotosNotifier, PhotosState>(
+  PhotosNotifier.new,
+);
 
 // Thumbnail cache provider — caches loaded thumbnails by file id
-final _thumbnailCacheProvider =
-    StateProvider<Map<String, Uint8List>>((ref) => {});
+final _thumbnailCacheProvider = StateProvider<Map<String, Uint8List>>(
+  (ref) => {},
+);
 
 // --- Page ---
 
@@ -172,10 +175,9 @@ class _PhotosPageState extends ConsumerState<PhotosPage> {
             sliver: SliverToBoxAdapter(
               child: Text(
                 group.label,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleSmall
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -183,9 +185,7 @@ class _PhotosPageState extends ConsumerState<PhotosPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverGrid(
               delegate: SliverChildBuilderDelegate(
-                (context, i) => _PhotoThumbnail(
-                  photo: group.photos[i],
-                ),
+                (context, i) => _PhotoThumbnail(photo: group.photos[i]),
                 childCount: group.photos.length,
               ),
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -211,8 +211,19 @@ class _PhotosPageState extends ConsumerState<PhotosPage> {
   List<_PhotoGroup> _groupByMonth(List<FileEntity> photos) {
     final Map<String, List<FileEntity>> map = {};
     final months = [
-      '', 'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     for (final photo in photos) {
@@ -271,9 +282,9 @@ class _PhotoThumbnailState extends ConsumerState<_PhotoThumbnail> {
       final bytes = await ref
           .read(fileRepositoryProvider)
           .getThumbnail(widget.photo.id, size: '256');
-      ref.read(_thumbnailCacheProvider.notifier).update(
-            (state) => {...state, widget.photo.id: bytes},
-          );
+      ref
+          .read(_thumbnailCacheProvider.notifier)
+          .update((state) => {...state, widget.photo.id: bytes});
       if (mounted) setState(() => _bytes = bytes);
     } catch (_) {
       if (mounted) setState(() => _failed = true);

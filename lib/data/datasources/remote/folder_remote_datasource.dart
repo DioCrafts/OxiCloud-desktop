@@ -32,7 +32,7 @@ class FolderRemoteDatasource {
   }
 
   Future<({List<FolderResponseDto> folders, List<FileResponseDto> files})>
-      listFolderContents(String folderId) async {
+  listFolderContents(String folderId) async {
     try {
       final response = await _dio.get(ApiEndpoints.folderListing(folderId));
       final data = response.data as Map<String, dynamic>;
@@ -52,8 +52,10 @@ class FolderRemoteDatasource {
 
   Future<FolderResponseDto> createFolder(CreateFolderRequestDto dto) async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.folders, data: dto.toJson());
+      final response = await _dio.post(
+        ApiEndpoints.folders,
+        data: dto.toJson(),
+      );
       return FolderResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -72,8 +74,7 @@ class FolderRemoteDatasource {
     }
   }
 
-  Future<FolderResponseDto> moveFolder(
-      String id, String? newParentId) async {
+  Future<FolderResponseDto> moveFolder(String id, String? newParentId) async {
     try {
       final response = await _dio.put(
         ApiEndpoints.folderMove(id),

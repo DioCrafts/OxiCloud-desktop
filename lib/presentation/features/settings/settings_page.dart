@@ -79,7 +79,9 @@ class AppPasswordsNotifier extends Notifier<AppPasswordsState> {
 }
 
 final appPasswordsProvider =
-    NotifierProvider<AppPasswordsNotifier, AppPasswordsState>(AppPasswordsNotifier.new);
+    NotifierProvider<AppPasswordsNotifier, AppPasswordsState>(
+      AppPasswordsNotifier.new,
+    );
 
 // --- Devices State ---
 
@@ -134,8 +136,9 @@ class DevicesNotifier extends Notifier<DevicesState> {
   }
 }
 
-final devicesProvider =
-    NotifierProvider<DevicesNotifier, DevicesState>(DevicesNotifier.new);
+final devicesProvider = NotifierProvider<DevicesNotifier, DevicesState>(
+  DevicesNotifier.new,
+);
 
 // --- UI ---
 
@@ -183,10 +186,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
           Expanded(
             child: TabBarView(
               controller: _tabCtrl,
-              children: const [
-                _AppPasswordsTab(),
-                _DevicesTab(),
-              ],
+              children: const [_AppPasswordsTab(), _DevicesTab()],
             ),
           ),
         ],
@@ -220,8 +220,10 @@ class _AppPasswordsTab extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text('App Passwords',
-                    style: theme.textTheme.titleMedium),
+                child: Text(
+                  'App Passwords',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
               FilledButton.icon(
                 onPressed: () => _showCreateDialog(context, ref),
@@ -234,36 +236,39 @@ class _AppPasswordsTab extends ConsumerWidget {
         if (state.error != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(state.error!,
-                style: TextStyle(color: theme.colorScheme.error)),
+            child: Text(
+              state.error!,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
           ),
         Expanded(
           child: state.loading && state.passwords.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : state.passwords.isEmpty
-                  ? const Center(child: Text('No app passwords'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: state.passwords.length,
-                      itemBuilder: (context, i) {
-                        final p = state.passwords[i];
-                        return Card(
-                          child: ListTile(
-                            leading: const Icon(Icons.key),
-                            title: Text(p.name),
-                            subtitle: Text(
-                                '${p.prefix}*** • Created ${p.createdAt}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              tooltip: 'Revoke',
-                              onPressed: () => ref
-                                  .read(appPasswordsProvider.notifier)
-                                  .revoke(p.id),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+              ? const Center(child: Text('No app passwords'))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: state.passwords.length,
+                  itemBuilder: (context, i) {
+                    final p = state.passwords[i];
+                    return Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.key),
+                        title: Text(p.name),
+                        subtitle: Text(
+                          '${p.prefix}*** • Created ${p.createdAt}',
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          tooltip: 'Revoke',
+                          onPressed: () => ref
+                              .read(appPasswordsProvider.notifier)
+                              .revoke(p.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -282,10 +287,13 @@ class _AppPasswordsTab extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Create')),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Create'),
+          ),
         ],
       ),
     );
@@ -295,7 +303,9 @@ class _AppPasswordsTab extends ConsumerWidget {
   }
 
   void _showCreatedDialog(
-      BuildContext context, AppPasswordCreateResult result) {
+    BuildContext context,
+    AppPasswordCreateResult result,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -305,15 +315,15 @@ class _AppPasswordsTab extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-                'Copy this password now. It will not be shown again.'),
+            const Text('Copy this password now. It will not be shown again.'),
             const SizedBox(height: 16),
             SelectableText(
               result.password,
               style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600),
+                fontFamily: 'monospace',
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -322,13 +332,15 @@ class _AppPasswordsTab extends ConsumerWidget {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: result.password));
               ScaffoldMessenger.of(ctx).showSnackBar(
-                  const SnackBar(content: Text('Copied to clipboard')));
+                const SnackBar(content: Text('Copied to clipboard')),
+              );
             },
             child: const Text('Copy'),
           ),
           FilledButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Done')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Done'),
+          ),
         ],
       ),
     );
@@ -352,8 +364,10 @@ class _DevicesTab extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child:
-                    Text('Authorized Devices', style: theme.textTheme.titleMedium),
+                child: Text(
+                  'Authorized Devices',
+                  style: theme.textTheme.titleMedium,
+                ),
               ),
               IconButton(
                 onPressed: () => ref.read(devicesProvider.notifier).load(),
@@ -365,40 +379,41 @@ class _DevicesTab extends ConsumerWidget {
         if (state.error != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(state.error!,
-                style: TextStyle(color: theme.colorScheme.error)),
+            child: Text(
+              state.error!,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
           ),
         Expanded(
           child: state.loading && state.devices.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : state.devices.isEmpty
-                  ? const Center(child: Text('No authorized devices'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: state.devices.length,
-                      itemBuilder: (context, i) {
-                        final d = state.devices[i];
-                        return Card(
-                          child: ListTile(
-                            leading: Icon(_platformIcon(d.platform)),
-                            title: Text(d.name),
-                            subtitle: Text(
-                              [
-                                if (d.platform != null) d.platform!,
-                                'Added ${d.createdAt}',
-                              ].join(' • '),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.link_off),
-                              tooltip: 'Revoke',
-                              onPressed: () => ref
-                                  .read(devicesProvider.notifier)
-                                  .revoke(d.id),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+              ? const Center(child: Text('No authorized devices'))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: state.devices.length,
+                  itemBuilder: (context, i) {
+                    final d = state.devices[i];
+                    return Card(
+                      child: ListTile(
+                        leading: Icon(_platformIcon(d.platform)),
+                        title: Text(d.name),
+                        subtitle: Text(
+                          [
+                            if (d.platform != null) d.platform!,
+                            'Added ${d.createdAt}',
+                          ].join(' • '),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.link_off),
+                          tooltip: 'Revoke',
+                          onPressed: () =>
+                              ref.read(devicesProvider.notifier).revoke(d.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
         ),
       ],
     );

@@ -8,7 +8,7 @@ class ShareRepositoryImpl implements ShareRepository {
   final ShareRemoteDatasource _remote;
 
   ShareRepositoryImpl({required ShareRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<ShareEntity> createShare({

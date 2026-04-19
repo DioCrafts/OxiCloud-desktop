@@ -18,8 +18,9 @@ class SearchRemoteDatasource {
       );
       final list = response.data as List<dynamic>;
       return list
-          .map((e) =>
-              SearchResultResponseDto.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => SearchResultResponseDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -27,7 +28,8 @@ class SearchRemoteDatasource {
   }
 
   Future<List<SearchResultResponseDto>> advancedSearch(
-      SearchCriteria criteria) async {
+    SearchCriteria criteria,
+  ) async {
     try {
       final body = <String, dynamic>{};
       if (criteria.nameContains != null) {
@@ -54,12 +56,12 @@ class SearchRemoteDatasource {
       body['offset'] = criteria.offset;
       body['sort_by'] = criteria.sortBy;
 
-      final response =
-          await _dio.post(ApiEndpoints.searchAdvanced, data: body);
+      final response = await _dio.post(ApiEndpoints.searchAdvanced, data: body);
       final list = response.data as List<dynamic>;
       return list
-          .map((e) =>
-              SearchResultResponseDto.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => SearchResultResponseDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);

@@ -15,11 +15,7 @@ class TrashState {
   final bool loading;
   final String? error;
 
-  const TrashState({
-    this.items = const [],
-    this.loading = false,
-    this.error,
-  });
+  const TrashState({this.items = const [], this.loading = false, this.error});
 
   TrashState copyWith({
     List<TrashItemEntity>? items,
@@ -66,8 +62,9 @@ class TrashNotifier extends Notifier<TrashState> {
   }
 }
 
-final trashProvider =
-    NotifierProvider<TrashNotifier, TrashState>(TrashNotifier.new);
+final trashProvider = NotifierProvider<TrashNotifier, TrashState>(
+  TrashNotifier.new,
+);
 
 // --- Page ---
 

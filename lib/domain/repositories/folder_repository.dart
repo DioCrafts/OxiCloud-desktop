@@ -22,10 +22,7 @@ abstract class FolderRepository {
   Future<FolderEntity> getFolder(String id);
 
   /// Create a new folder.
-  Future<FolderEntity> createFolder({
-    required String name,
-    String? parentId,
-  });
+  Future<FolderEntity> createFolder({required String name, String? parentId});
 
   /// Rename a folder.
   Future<FolderEntity> renameFolder(String id, String newName);

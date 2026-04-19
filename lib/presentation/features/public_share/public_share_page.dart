@@ -94,15 +94,15 @@ class _PublicSharePageState extends ConsumerState<PublicSharePage> {
       final ds = ref.read(publicShareRemoteDatasourceProvider);
       await ds.download(widget.token, savePath);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Download complete')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Download complete')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _downloading = false);
@@ -117,24 +117,26 @@ class _PublicSharePageState extends ConsumerState<PublicSharePage> {
         child: _loading
             ? const CircularProgressIndicator()
             : _error != null
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.error_outline,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.error),
-                      const SizedBox(height: 16),
-                      Text(_error!,
-                          style: Theme.of(context).textTheme.bodyLarge),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                          onPressed: _loadShareInfo,
-                          child: const Text('Retry')),
-                    ],
-                  )
-                : _needsPassword
-                    ? _buildPasswordForm()
-                    : _buildShareDetails(),
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(_error!, style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: _loadShareInfo,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              )
+            : _needsPassword
+            ? _buildPasswordForm()
+            : _buildShareDetails(),
       ),
     );
   }
@@ -147,8 +149,10 @@ class _PublicSharePageState extends ConsumerState<PublicSharePage> {
         children: [
           const Icon(Icons.lock_outline, size: 48),
           const SizedBox(height: 16),
-          Text('This share is password-protected',
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'This share is password-protected',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 16),
           SizedBox(
             width: 300,
@@ -163,10 +167,7 @@ class _PublicSharePageState extends ConsumerState<PublicSharePage> {
             ),
           ),
           const SizedBox(height: 16),
-          FilledButton(
-            onPressed: _verifyPassword,
-            child: const Text('Unlock'),
-          ),
+          FilledButton(onPressed: _verifyPassword, child: const Text('Unlock')),
         ],
       ),
     );
@@ -186,17 +187,20 @@ class _PublicSharePageState extends ConsumerState<PublicSharePage> {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: 16),
-          Text(info.name,
-              style: Theme.of(context).textTheme.headlineSmall),
+          Text(info.name, style: Theme.of(context).textTheme.headlineSmall),
           if (info.size != null) ...[
             const SizedBox(height: 8),
-            Text(_formatSize(info.size!),
-                style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              _formatSize(info.size!),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
           if (info.expiresAt != null) ...[
             const SizedBox(height: 8),
-            Text('Expires: ${info.expiresAt}',
-                style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              'Expires: ${info.expiresAt}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
           const SizedBox(height: 24),
           if (isFile)

@@ -14,11 +14,7 @@ class RecentState {
   final bool loading;
   final String? error;
 
-  const RecentState({
-    this.items = const [],
-    this.loading = false,
-    this.error,
-  });
+  const RecentState({this.items = const [], this.loading = false, this.error});
 
   RecentState copyWith({
     List<FileEntity>? items,
@@ -55,8 +51,9 @@ class RecentNotifier extends Notifier<RecentState> {
   }
 }
 
-final recentProvider =
-    NotifierProvider<RecentNotifier, RecentState>(RecentNotifier.new);
+final recentProvider = NotifierProvider<RecentNotifier, RecentState>(
+  RecentNotifier.new,
+);
 
 // --- Page ---
 
@@ -96,13 +93,18 @@ class _RecentPageState extends ConsumerState<RecentPage> {
           final file = state.items[i];
           return ListTile(
             leading: FileIcon(
-                mimeType: file.mimeType,
-                extension: file.extension,
-                size: 32),
-            title:
-                Text(file.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+              mimeType: file.mimeType,
+              extension: file.extension,
+              size: 32,
+            ),
+            title: Text(
+              file.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             subtitle: Text(
-                '${file.sizeFormatted} · ${_formatDate(file.modifiedAt)}'),
+              '${file.sizeFormatted} · ${_formatDate(file.modifiedAt)}',
+            ),
           );
         },
       );

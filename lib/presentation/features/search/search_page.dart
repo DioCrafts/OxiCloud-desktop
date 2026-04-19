@@ -65,8 +65,9 @@ class SearchNotifier extends Notifier<SearchState> {
   Future<void> advancedSearch(SearchCriteria criteria) async {
     state = state.copyWith(loading: true, error: null);
     try {
-      final results =
-          await ref.read(searchRepositoryProvider).advancedSearch(criteria);
+      final results = await ref
+          .read(searchRepositoryProvider)
+          .advancedSearch(criteria);
       state = state.copyWith(results: results, loading: false);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
@@ -79,15 +80,17 @@ class SearchNotifier extends Notifier<SearchState> {
       return;
     }
     try {
-      final suggestions =
-          await ref.read(searchRepositoryProvider).suggest(query);
+      final suggestions = await ref
+          .read(searchRepositoryProvider)
+          .suggest(query);
       state = state.copyWith(suggestions: suggestions);
     } catch (_) {}
   }
 }
 
-final searchProvider =
-    NotifierProvider<SearchNotifier, SearchState>(SearchNotifier.new);
+final searchProvider = NotifierProvider<SearchNotifier, SearchState>(
+  SearchNotifier.new,
+);
 
 // --- Page ---
 
@@ -137,10 +140,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             leading: item.isFolder
                 ? Icon(Icons.folder, color: Colors.amber.shade700)
                 : FileIcon(mimeType: item.mimeType, size: 32),
-            title:
-                Text(item.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-            subtitle:
-                Text(item.path, maxLines: 1, overflow: TextOverflow.ellipsis),
+            title: Text(
+              item.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              item.path,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             trailing: item.relevanceScore != null
                 ? Text(
                     '${(item.relevanceScore! * 100).toStringAsFixed(0)}%',
@@ -177,10 +186,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     : null,
                 border: const OutlineInputBorder(),
               ),
-              onSubmitted: (q) =>
-                  ref.read(searchProvider.notifier).search(q),
-              onChanged: (q) =>
-                  ref.read(searchProvider.notifier).suggest(q),
+              onSubmitted: (q) => ref.read(searchProvider.notifier).search(q),
+              onChanged: (q) => ref.read(searchProvider.notifier).suggest(q),
             ),
           ),
           // Suggestions chips

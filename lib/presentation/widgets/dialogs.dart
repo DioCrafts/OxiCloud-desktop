@@ -75,7 +75,8 @@ class AppDialogs {
             onPressed: () => Navigator.pop(ctx, true),
             style: isDanger
                 ? FilledButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error)
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  )
                 : null,
             child: Text(confirmLabel),
           ),
@@ -85,14 +86,16 @@ class AppDialogs {
     return result ?? false;
   }
 
-  static void showSnack(BuildContext context, String message,
-      {bool isError = false}) {
+  static void showSnack(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
-        backgroundColor:
-            isError ? Theme.of(context).colorScheme.error : null,
+        backgroundColor: isError ? Theme.of(context).colorScheme.error : null,
       ),
     );
   }

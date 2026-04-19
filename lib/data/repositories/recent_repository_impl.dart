@@ -7,7 +7,7 @@ class RecentRepositoryImpl implements RecentRepository {
   final RecentRemoteDatasource _remote;
 
   RecentRepositoryImpl({required RecentRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<List<FileEntity>> listRecent() async {

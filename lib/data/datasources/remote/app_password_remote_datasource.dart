@@ -62,7 +62,8 @@ class AppPasswordRemoteDatasource {
         data: {'name': name},
       );
       return AppPasswordCreateResult.fromJson(
-          response.data as Map<String, dynamic>);
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

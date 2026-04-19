@@ -36,10 +36,12 @@ class _ConnectPageState extends ConsumerState<ConnectPage> {
       if (url.endsWith('/')) url = url.substring(0, url.length - 1);
 
       // Verify the server is reachable by calling /api/version
-      final testDio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
+      final testDio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
       await testDio.get('$url/api/version');
 
       // Server is valid — save and proceed
@@ -95,13 +97,18 @@ class _ConnectPageState extends ConsumerState<ConnectPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.cloud_outlined,
-                        size: 64, color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.cloud_outlined,
+                      size: 64,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(height: 16),
                     Text('OxiCloud', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 8),
-                    Text('Connect to your server',
-                        style: theme.textTheme.bodyMedium),
+                    Text(
+                      'Connect to your server',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 32),
                     TextFormField(
                       controller: _urlCtrl,
@@ -134,14 +141,20 @@ class _ConnectPageState extends ConsumerState<ConnectPage> {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          Icon(Icons.error_outline,
-                              size: 16, color: theme.colorScheme.error),
+                          Icon(
+                            Icons.error_outline,
+                            size: 16,
+                            color: theme.colorScheme.error,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(_error!,
-                                style: TextStyle(
-                                    color: theme.colorScheme.error,
-                                    fontSize: 13)),
+                            child: Text(
+                              _error!,
+                              style: TextStyle(
+                                color: theme.colorScheme.error,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -155,8 +168,9 @@ class _ConnectPageState extends ConsumerState<ConnectPage> {
                             ? const SizedBox(
                                 height: 18,
                                 width: 18,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.arrow_forward),
                         label: Text(_loading ? 'Connecting…' : 'Connect'),

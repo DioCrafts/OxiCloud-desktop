@@ -41,10 +41,8 @@ class PublicShareRemoteDatasource {
   /// Get info about a public share by token.
   Future<PublicShareInfo> getShareInfo(String token) async {
     try {
-      final response =
-          await _dio.get(ApiEndpoints.publicShareAccess(token));
-      return PublicShareInfo.fromJson(
-          response.data as Map<String, dynamic>);
+      final response = await _dio.get(ApiEndpoints.publicShareAccess(token));
+      return PublicShareInfo.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -67,10 +65,7 @@ class PublicShareRemoteDatasource {
   /// Download the shared file.
   Future<void> download(String token, String savePath) async {
     try {
-      await _dio.download(
-        ApiEndpoints.publicShareDownload(token),
-        savePath,
-      );
+      await _dio.download(ApiEndpoints.publicShareDownload(token), savePath);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

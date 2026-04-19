@@ -16,9 +16,7 @@ class ConnectivityService {
   Stream<bool> get onConnectivityChanged => _controller.stream;
 
   void _onChanged(List<ConnectivityResult> results) {
-    final online = results.any(
-      (r) => r != ConnectivityResult.none,
-    );
+    final online = results.any((r) => r != ConnectivityResult.none);
     if (online != _isOnline) {
       _isOnline = online;
       _controller.add(online);

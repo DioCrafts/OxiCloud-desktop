@@ -60,8 +60,7 @@ class OidcRemoteDatasource {
   Future<OidcProviderInfo> getProviders() async {
     try {
       final response = await _dio.get(ApiEndpoints.oidcProviders);
-      return OidcProviderInfo.fromJson(
-          response.data as Map<String, dynamic>);
+      return OidcProviderInfo.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -99,8 +98,7 @@ class OidcRemoteDatasource {
         ApiEndpoints.oidcExchange,
         data: {'code': code},
       );
-      return OidcTokenResult.fromJson(
-          response.data as Map<String, dynamic>);
+      return OidcTokenResult.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

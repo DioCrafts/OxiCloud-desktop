@@ -16,12 +16,7 @@ enum SyncOperationType {
   restore,
 }
 
-enum SyncOperationStatus {
-  pending,
-  inProgress,
-  completed,
-  failed,
-}
+enum SyncOperationStatus { pending, inProgress, completed, failed }
 
 class SyncQueueTable extends Table {
   @override

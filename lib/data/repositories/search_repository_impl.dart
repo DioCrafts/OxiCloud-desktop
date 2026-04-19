@@ -7,7 +7,7 @@ class SearchRepositoryImpl implements SearchRepository {
   final SearchRemoteDatasource _remote;
 
   SearchRepositoryImpl({required SearchRemoteDatasource remote})
-      : _remote = remote;
+    : _remote = remote;
 
   @override
   Future<List<SearchResultEntity>> search(String query) async {
@@ -17,7 +17,8 @@ class SearchRepositoryImpl implements SearchRepository {
 
   @override
   Future<List<SearchResultEntity>> advancedSearch(
-      SearchCriteria criteria) async {
+    SearchCriteria criteria,
+  ) async {
     final dtos = await _remote.advancedSearch(criteria);
     return SearchMapper.fromDtoList(dtos);
   }

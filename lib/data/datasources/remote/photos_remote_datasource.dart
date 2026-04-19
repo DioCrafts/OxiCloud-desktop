@@ -18,10 +18,7 @@ class PhotosRemoteDatasource {
     try {
       final response = await _dio.get(
         ApiEndpoints.photos,
-        queryParameters: {
-          'limit': limit,
-          if (before != null) 'before': before,
-        },
+        queryParameters: {'limit': limit, if (before != null) 'before': before},
       );
       final list = response.data as List<dynamic>;
       final photos = list

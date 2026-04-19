@@ -76,8 +76,7 @@ class DedupRemoteDatasource {
   Future<DedupCheckResult> check(String hash) async {
     try {
       final response = await _dio.get(ApiEndpoints.dedupCheck(hash));
-      return DedupCheckResult.fromJson(
-          response.data as Map<String, dynamic>);
+      return DedupCheckResult.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -103,10 +102,11 @@ class DedupRemoteDatasource {
         'hash': hash,
         'folder_id': folderId,
       });
-      final response =
-          await _dio.post(ApiEndpoints.dedupUpload, data: formData);
-      return DedupUploadResult.fromJson(
-          response.data as Map<String, dynamic>);
+      final response = await _dio.post(
+        ApiEndpoints.dedupUpload,
+        data: formData,
+      );
+      return DedupUploadResult.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

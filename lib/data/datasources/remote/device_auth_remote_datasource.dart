@@ -26,8 +26,7 @@ class DeviceAuthResponse {
       deviceCode: json['device_code'] as String,
       userCode: json['user_code'] as String,
       verificationUri: json['verification_uri'] as String,
-      verificationUriComplete:
-          json['verification_uri_complete'] as String?,
+      verificationUriComplete: json['verification_uri_complete'] as String?,
       expiresIn: json['expires_in'] as int,
       interval: json['interval'] as int? ?? 5,
     );
@@ -39,7 +38,8 @@ class DeviceTokenResult {
   final String? accessToken;
   final String? refreshToken;
   final int? expiresIn;
-  final String? error; // "authorization_pending", "slow_down", "expired_token", "access_denied"
+  final String?
+  error; // "authorization_pending", "slow_down", "expired_token", "access_denied"
 
   bool get isPending => error == 'authorization_pending';
   bool get isSlowDown => error == 'slow_down';
@@ -101,12 +101,9 @@ class DeviceAuthRemoteDatasource {
     try {
       final response = await _dio.post(
         ApiEndpoints.deviceAuthorize,
-        data: {
-          if (deviceName != null) 'device_name': deviceName,
-        },
+        data: {if (deviceName != null) 'device_name': deviceName},
       );
-      return DeviceAuthResponse.fromJson(
-          response.data as Map<String, dynamic>);
+      return DeviceAuthResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -122,13 +119,13 @@ class DeviceAuthRemoteDatasource {
           'device_code': deviceCode,
         },
       );
-      return DeviceTokenResult.fromJson(
-          response.data as Map<String, dynamic>);
+      return DeviceTokenResult.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       // 400 with error field is expected during polling
       if (e.response?.statusCode == 400 && e.response?.data is Map) {
         return DeviceTokenResult.fromJson(
-            e.response!.data as Map<String, dynamic>);
+          e.response!.data as Map<String, dynamic>,
+        );
       }
       throw ErrorHandler.mapDioToServerException(e);
     }

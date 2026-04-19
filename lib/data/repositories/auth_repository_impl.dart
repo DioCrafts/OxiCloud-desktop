@@ -13,8 +13,8 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDatasource remote,
     required SecureStorage secureStorage,
-  })  : _remote = remote,
-        _secureStorage = secureStorage;
+  }) : _remote = remote,
+       _secureStorage = secureStorage;
 
   @override
   Future<({bool adminExists, bool registrationEnabled})> getStatus() async {

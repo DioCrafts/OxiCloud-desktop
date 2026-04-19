@@ -7,12 +7,7 @@ class FileIcon extends StatelessWidget {
   final String? extension;
   final double size;
 
-  const FileIcon({
-    super.key,
-    this.mimeType,
-    this.extension,
-    this.size = 40,
-  });
+  const FileIcon({super.key, this.mimeType, this.extension, this.size = 40});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +19,12 @@ class FileIcon extends StatelessWidget {
     final mime = mimeType ?? '';
 
     if (mime.startsWith('image/')) return (Icons.image, AppColors.fileImage);
-    if (mime.startsWith('video/')) return (Icons.video_file, AppColors.fileVideo);
-    if (mime.startsWith('audio/')) return (Icons.audio_file, AppColors.fileAudio);
-    if (mime.contains('pdf')) return (Icons.picture_as_pdf, Colors.red.shade700);
+    if (mime.startsWith('video/'))
+      return (Icons.video_file, AppColors.fileVideo);
+    if (mime.startsWith('audio/'))
+      return (Icons.audio_file, AppColors.fileAudio);
+    if (mime.contains('pdf'))
+      return (Icons.picture_as_pdf, Colors.red.shade700);
     if (mime.contains('zip') || mime.contains('tar') || mime.contains('rar')) {
       return (Icons.folder_zip, AppColors.fileArchive);
     }
@@ -43,12 +41,22 @@ class FileIcon extends StatelessWidget {
     }
 
     final ext = extension?.toLowerCase() ?? '';
-    if ({'dart', 'py', 'js', 'ts', 'go', 'rs', 'java', 'kt', 'c', 'cpp', 'h'}
-        .contains(ext)) {
+    if ({
+      'dart',
+      'py',
+      'js',
+      'ts',
+      'go',
+      'rs',
+      'java',
+      'kt',
+      'c',
+      'cpp',
+      'h',
+    }.contains(ext)) {
       return (Icons.code, AppColors.fileCode);
     }
-    if ({'json', 'yaml', 'yml', 'toml', 'xml', 'html', 'css'}
-        .contains(ext)) {
+    if ({'json', 'yaml', 'yml', 'toml', 'xml', 'html', 'css'}.contains(ext)) {
       return (Icons.data_object, AppColors.fileCode);
     }
 

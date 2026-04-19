@@ -50,8 +50,11 @@ class _DragDropOverlayState extends State<DragDropOverlay> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.cloud_upload,
-                          size: 48, color: theme.colorScheme.primary),
+                      Icon(
+                        Icons.cloud_upload,
+                        size: 48,
+                        color: theme.colorScheme.primary,
+                      ),
                       const SizedBox(height: 8),
                       Text(
                         'Drop files to upload',

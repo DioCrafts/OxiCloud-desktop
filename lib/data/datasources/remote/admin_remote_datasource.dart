@@ -141,8 +141,7 @@ class MigrationStatus {
       totalFiles: json['total_files'] as int? ?? 0,
       migratedFiles: json['migrated_files'] as int? ?? 0,
       failedFiles: json['failed_files'] as int? ?? 0,
-      progressPercent:
-          (json['progress_percent'] as num?)?.toDouble() ?? 0.0,
+      progressPercent: (json['progress_percent'] as num?)?.toDouble() ?? 0.0,
       error: json['error'] as String?,
     );
   }
@@ -159,8 +158,7 @@ class AdminRemoteDatasource {
   Future<AdminDashboard> getDashboard() async {
     try {
       final response = await _dio.get(ApiEndpoints.adminDashboard);
-      return AdminDashboard.fromJson(
-          response.data as Map<String, dynamic>);
+      return AdminDashboard.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -194,12 +192,15 @@ class AdminRemoteDatasource {
     String role = 'user',
   }) async {
     try {
-      final response = await _dio.post(ApiEndpoints.adminUsers, data: {
-        'username': username,
-        'password': password,
-        if (email != null) 'email': email,
-        'role': role,
-      });
+      final response = await _dio.post(
+        ApiEndpoints.adminUsers,
+        data: {
+          'username': username,
+          'password': password,
+          if (email != null) 'email': email,
+          'role': role,
+        },
+      );
       return AdminUser.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -224,8 +225,10 @@ class AdminRemoteDatasource {
 
   Future<void> setUserActive(String id, bool active) async {
     try {
-      await _dio.put(ApiEndpoints.adminUserActive(id),
-          data: {'active': active});
+      await _dio.put(
+        ApiEndpoints.adminUserActive(id),
+        data: {'active': active},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -233,8 +236,10 @@ class AdminRemoteDatasource {
 
   Future<void> setUserQuota(String id, int? quotaBytes) async {
     try {
-      await _dio.put(ApiEndpoints.adminUserQuota(id),
-          data: {'quota_bytes': quotaBytes});
+      await _dio.put(
+        ApiEndpoints.adminUserQuota(id),
+        data: {'quota_bytes': quotaBytes},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -242,8 +247,10 @@ class AdminRemoteDatasource {
 
   Future<void> setUserPassword(String id, String password) async {
     try {
-      await _dio.put(ApiEndpoints.adminUserPassword(id),
-          data: {'password': password});
+      await _dio.put(
+        ApiEndpoints.adminUserPassword(id),
+        data: {'password': password},
+      );
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -259,8 +266,7 @@ class AdminRemoteDatasource {
     }
   }
 
-  Future<void> updateRegistrationSettings(
-      Map<String, dynamic> settings) async {
+  Future<void> updateRegistrationSettings(Map<String, dynamic> settings) async {
     try {
       await _dio.put(ApiEndpoints.adminRegistration, data: settings);
     } on DioException catch (e) {
@@ -299,8 +305,7 @@ class AdminRemoteDatasource {
   Future<StorageSettings> getStorageSettings() async {
     try {
       final response = await _dio.get(ApiEndpoints.adminStorage);
-      return StorageSettings.fromJson(
-          response.data as Map<String, dynamic>);
+      return StorageSettings.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -325,8 +330,7 @@ class AdminRemoteDatasource {
 
   Future<String> generateEncryptionKey() async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.adminStorageGenerateKey);
+      final response = await _dio.post(ApiEndpoints.adminStorageGenerateKey);
       return response.data['key'] as String;
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -337,8 +341,7 @@ class AdminRemoteDatasource {
   Future<MigrationStatus> getMigrationStatus() async {
     try {
       final response = await _dio.get(ApiEndpoints.adminMigration);
-      return MigrationStatus.fromJson(
-          response.data as Map<String, dynamic>);
+      return MigrationStatus.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }

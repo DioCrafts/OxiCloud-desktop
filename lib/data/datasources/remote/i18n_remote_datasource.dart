@@ -67,13 +67,9 @@ class I18nRemoteDatasource {
     try {
       final response = await _dio.get(
         ApiEndpoints.i18nTranslate,
-        queryParameters: {
-          'key': key,
-          if (locale != null) 'locale': locale,
-        },
+        queryParameters: {'key': key, if (locale != null) 'locale': locale},
       );
-      return TranslationResult.fromJson(
-          response.data as Map<String, dynamic>);
+      return TranslationResult.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
     }
@@ -81,10 +77,10 @@ class I18nRemoteDatasource {
 
   /// Get all translations for a specific locale.
   Future<Map<String, dynamic>> getTranslationsByLocale(
-      String localeCode) async {
+    String localeCode,
+  ) async {
     try {
-      final response =
-          await _dio.get(ApiEndpoints.i18nLocale(localeCode));
+      final response = await _dio.get(ApiEndpoints.i18nLocale(localeCode));
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);

@@ -37,7 +37,9 @@ class _SetupPageState extends ConsumerState<SetupPage> {
     });
 
     try {
-      await ref.read(authRepositoryProvider).setup(
+      await ref
+          .read(authRepositoryProvider)
+          .setup(
             username: _usernameCtrl.text.trim(),
             email: _emailCtrl.text.trim(),
             password: _passwordCtrl.text,
@@ -67,14 +69,18 @@ class _SetupPageState extends ConsumerState<SetupPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.cloud_outlined,
-                        size: 64, color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.cloud_outlined,
+                      size: 64,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(height: 16),
-                    Text('Setup Admin',
-                        style: theme.textTheme.headlineMedium),
+                    Text('Setup Admin', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 8),
-                    Text('Create the first administrator account',
-                        style: theme.textTheme.bodyMedium),
+                    Text(
+                      'Create the first administrator account',
+                      style: theme.textTheme.bodyMedium,
+                    ),
                     const SizedBox(height: 32),
                     TextFormField(
                       controller: _usernameCtrl,
@@ -135,8 +141,10 @@ class _SetupPageState extends ConsumerState<SetupPage> {
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
-                      Text(_error!,
-                          style: TextStyle(color: theme.colorScheme.error)),
+                      Text(
+                        _error!,
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
                     ],
                     const SizedBox(height: 24),
                     SizedBox(
@@ -147,8 +155,9 @@ class _SetupPageState extends ConsumerState<SetupPage> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('Create Admin & Start'),
                       ),

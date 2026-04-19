@@ -22,10 +22,7 @@ class MobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: actions,
-      ),
+      appBar: AppBar(title: Text(title), actions: actions),
       drawer: const MobileDrawer(),
       body: child,
       bottomNavigationBar: MobileBottomNav(currentPath: currentPath),

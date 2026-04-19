@@ -54,9 +54,7 @@ class FileRemoteDatasource {
       final response = await _dio.post(
         ApiEndpoints.fileUpload,
         data: formData,
-        options: Options(
-          headers: {'Content-Type': 'multipart/form-data'},
-        ),
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
       return FileResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

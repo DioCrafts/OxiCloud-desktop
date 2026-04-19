@@ -30,8 +30,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _loadOidcInfo() async {
     try {
-      final info =
-          await ref.read(oidcRemoteDatasourceProvider).getProviders();
+      final info = await ref.read(oidcRemoteDatasourceProvider).getProviders();
       if (mounted) setState(() => _oidcInfo = info);
     } catch (_) {
       // OIDC not available — ignore
@@ -53,7 +52,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
 
     try {
-      await ref.read(authRepositoryProvider).login(
+      await ref
+          .read(authRepositoryProvider)
+          .login(
             username: _usernameCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
@@ -71,8 +72,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _error = null;
     });
     try {
-      final url =
-          await ref.read(oidcRemoteDatasourceProvider).getAuthorizeUrl();
+      final url = await ref
+          .read(oidcRemoteDatasourceProvider)
+          .getAuthorizeUrl();
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -101,8 +103,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.cloud_outlined,
-                        size: 64, color: theme.colorScheme.primary),
+                    Icon(
+                      Icons.cloud_outlined,
+                      size: 64,
+                      color: theme.colorScheme.primary,
+                    ),
                     const SizedBox(height: 16),
                     Text('OxiCloud', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 32),
@@ -123,11 +128,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscure
-                              ? Icons.visibility_off
-                              : Icons.visibility),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          icon: Icon(
+                            _obscure ? Icons.visibility_off : Icons.visibility,
+                          ),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
                       obscureText: _obscure,
@@ -138,8 +142,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     if (_error != null) ...[
                       const SizedBox(height: 16),
-                      Text(_error!,
-                          style: TextStyle(color: theme.colorScheme.error)),
+                      Text(
+                        _error!,
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
                     ],
                     const SizedBox(height: 24),
                     SizedBox(
@@ -150,8 +156,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ? const SizedBox(
                                 height: 20,
                                 width: 20,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Text('Login'),
                       ),
@@ -176,7 +183,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPressed: _loading ? null : _oidcLogin,
                           icon: const Icon(Icons.login),
                           label: Text(
-                              'Login with ${_oidcInfo!.providerName ?? 'SSO'}'),
+                            'Login with ${_oidcInfo!.providerName ?? 'SSO'}',
+                          ),
                         ),
                       ),
                     ],

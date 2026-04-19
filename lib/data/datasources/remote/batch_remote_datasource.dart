@@ -63,7 +63,9 @@ class BatchRemoteDatasource {
   // --- Files ---
 
   Future<BatchResult<FileResponseDto>> moveFiles(
-      List<String> fileIds, String targetFolderId) async {
+    List<String> fileIds,
+    String targetFolderId,
+  ) async {
     return _postFileBatch(ApiEndpoints.batchFilesMove, {
       'file_ids': fileIds,
       'target_folder_id': targetFolderId,
@@ -71,52 +73,53 @@ class BatchRemoteDatasource {
   }
 
   Future<BatchResult<FileResponseDto>> copyFiles(
-      List<String> fileIds, String targetFolderId) async {
+    List<String> fileIds,
+    String targetFolderId,
+  ) async {
     return _postFileBatch(ApiEndpoints.batchFilesCopy, {
       'file_ids': fileIds,
       'target_folder_id': targetFolderId,
     });
   }
 
-  Future<BatchResult<FileResponseDto>> deleteFiles(
-      List<String> fileIds) async {
-    return _postFileBatch(ApiEndpoints.batchFilesDelete, {
-      'file_ids': fileIds,
-    });
+  Future<BatchResult<FileResponseDto>> deleteFiles(List<String> fileIds) async {
+    return _postFileBatch(ApiEndpoints.batchFilesDelete, {'file_ids': fileIds});
   }
 
-  Future<BatchResult<FileResponseDto>> getFiles(
-      List<String> fileIds) async {
-    return _postFileBatch(ApiEndpoints.batchFilesGet, {
-      'file_ids': fileIds,
-    });
+  Future<BatchResult<FileResponseDto>> getFiles(List<String> fileIds) async {
+    return _postFileBatch(ApiEndpoints.batchFilesGet, {'file_ids': fileIds});
   }
 
   // --- Folders ---
 
   Future<BatchResult<FolderResponseDto>> deleteFolders(
-      List<String> folderIds) async {
+    List<String> folderIds,
+  ) async {
     return _postFolderBatch(ApiEndpoints.batchFoldersDelete, {
       'folder_ids': folderIds,
     });
   }
 
   Future<BatchResult<FolderResponseDto>> createFolders(
-      List<Map<String, dynamic>> folders) async {
+    List<Map<String, dynamic>> folders,
+  ) async {
     return _postFolderBatch(ApiEndpoints.batchFoldersCreate, {
       'folders': folders,
     });
   }
 
   Future<BatchResult<FolderResponseDto>> getFolders(
-      List<String> folderIds) async {
+    List<String> folderIds,
+  ) async {
     return _postFolderBatch(ApiEndpoints.batchFoldersGet, {
       'folder_ids': folderIds,
     });
   }
 
   Future<BatchResult<FolderResponseDto>> moveFolders(
-      List<String> folderIds, String? targetParentId) async {
+    List<String> folderIds,
+    String? targetParentId,
+  ) async {
     return _postFolderBatch(ApiEndpoints.batchFoldersMove, {
       'folder_ids': folderIds,
       if (targetParentId != null) 'target_folder_id': targetParentId,
@@ -130,10 +133,13 @@ class BatchRemoteDatasource {
     List<String>? folderIds,
   }) async {
     try {
-      final response = await _dio.post(ApiEndpoints.batchTrash, data: {
-        if (fileIds != null) 'file_ids': fileIds,
-        if (folderIds != null) 'folder_ids': folderIds,
-      });
+      final response = await _dio.post(
+        ApiEndpoints.batchTrash,
+        data: {
+          if (fileIds != null) 'file_ids': fileIds,
+          if (folderIds != null) 'folder_ids': folderIds,
+        },
+      );
       final data = response.data as Map<String, dynamic>;
       return BatchResult<void>(
         successful: [],
@@ -166,7 +172,9 @@ class BatchRemoteDatasource {
   // --- Helpers ---
 
   Future<BatchResult<FileResponseDto>> _postFileBatch(
-      String endpoint, Map<String, dynamic> body) async {
+    String endpoint,
+    Map<String, dynamic> body,
+  ) async {
     try {
       final response = await _dio.post(endpoint, data: body);
       final data = response.data as Map<String, dynamic>;
@@ -184,7 +192,9 @@ class BatchRemoteDatasource {
   }
 
   Future<BatchResult<FolderResponseDto>> _postFolderBatch(
-      String endpoint, Map<String, dynamic> body) async {
+    String endpoint,
+    Map<String, dynamic> body,
+  ) async {
     try {
       final response = await _dio.post(endpoint, data: body);
       final data = response.data as Map<String, dynamic>;

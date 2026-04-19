@@ -38,8 +38,10 @@ class AuthRemoteDatasource {
 
   Future<AuthResponseDto> register(RegisterRequestDto dto) async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.register, data: dto.toJson());
+      final response = await _dio.post(
+        ApiEndpoints.register,
+        data: dto.toJson(),
+      );
       return AuthResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);
@@ -48,8 +50,10 @@ class AuthRemoteDatasource {
 
   Future<AuthResponseDto> refreshToken(RefreshTokenRequestDto dto) async {
     try {
-      final response =
-          await _dio.post(ApiEndpoints.refresh, data: dto.toJson());
+      final response = await _dio.post(
+        ApiEndpoints.refresh,
+        data: dto.toJson(),
+      );
       return AuthResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ErrorHandler.mapDioToServerException(e);

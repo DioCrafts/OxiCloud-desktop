@@ -46,10 +46,7 @@ class FolderContentsResponseDto {
   final List<FolderResponseDto> folders;
   final List<dynamic> files; // uses FileResponseDto
 
-  const FolderContentsResponseDto({
-    required this.folders,
-    required this.files,
-  });
+  const FolderContentsResponseDto({required this.folders, required this.files});
 
   factory FolderContentsResponseDto.fromJson(Map<String, dynamic> json) =>
       _$FolderContentsResponseDtoFromJson(json);

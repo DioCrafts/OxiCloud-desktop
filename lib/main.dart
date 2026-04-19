@@ -22,9 +22,6 @@ void main() async {
   }
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const OxiCloudApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const OxiCloudApp()),
   );
 }

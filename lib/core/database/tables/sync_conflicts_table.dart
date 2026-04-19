@@ -12,7 +12,8 @@ class SyncConflictsTable extends Table {
       text().withDefault(const Constant('retry_exhausted'))();
   TextColumn get payload => text()(); // JSON original payload
   TextColumn get errorMessage => text().nullable()();
-  TextColumn get resolution => text().nullable()(); // 'local', 'remote', 'manual'
+  TextColumn get resolution =>
+      text().nullable()(); // 'local', 'remote', 'manual'
   DateTimeColumn get resolvedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 }

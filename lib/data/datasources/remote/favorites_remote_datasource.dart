@@ -38,7 +38,8 @@ class FavoritesRemoteDatasource {
   }
 
   Future<void> batchAddFavorites(
-      List<({String itemType, String itemId})> items) async {
+    List<({String itemType, String itemId})> items,
+  ) async {
     try {
       await _dio.post(
         ApiEndpoints.favoritesBatch,
