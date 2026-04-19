@@ -105,7 +105,7 @@ The client persists the server URL and auth tokens in secure storage. There is n
 
 Requirements:
 
-- Flutter 3.38.0+
+- Flutter 3.41.0+
 - Dart 3.11.4+
 - Platform toolchains for the targets you want to build
 - A running OxiCloud server for real end-to-end usage

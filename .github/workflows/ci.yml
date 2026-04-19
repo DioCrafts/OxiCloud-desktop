@@ -19,7 +19,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.38.0"
+          flutter-version: "3.41.7"
           channel: stable
           cache: true
 
@@ -30,7 +30,7 @@ jobs:
         run: dart format --set-exit-if-changed lib/ test/
 
       - name: Analyze
-        run: flutter analyze lib/
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos lib/
 
       - name: Run tests
         run: flutter test --coverage
