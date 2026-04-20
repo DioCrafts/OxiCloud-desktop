@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -38,7 +38,7 @@ jobs:
       - name: Build AAB
         run: flutter build appbundle --release
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-android
           path: |
@@ -69,7 +69,7 @@ jobs:
           cp -R build/ios/iphoneos/Runner.app Payload/
           zip -r OxiCloud-ios-${{ github.ref_name }}.zip Payload
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-ios
           path: OxiCloud-ios-${{ github.ref_name }}.zip
@@ -95,7 +95,7 @@ jobs:
           cd build/macos/Build/Products/Release
           zip -r "$GITHUB_WORKSPACE/OxiCloud-macos-${{ github.ref_name }}.zip" oxicloud.app
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-macos
           path: OxiCloud-macos-${{ github.ref_name }}.zip
@@ -129,7 +129,7 @@ jobs:
           cd build/linux/x64/release/bundle
           tar czf "$GITHUB_WORKSPACE/OxiCloud-linux-x64-${{ github.ref_name }}.tar.gz" .
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-linux
           path: OxiCloud-linux-x64-${{ github.ref_name }}.tar.gz
@@ -157,7 +157,7 @@ jobs:
             -Path "build\windows\x64\runner\Release\*" `
             -DestinationPath "OxiCloud-windows-x64-${{ github.ref_name }}.zip"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: release-windows
           path: OxiCloud-windows-x64-${{ github.ref_name }}.zip
@@ -168,7 +168,7 @@ jobs:
     needs: [release-android, release-ios, release-macos, release-linux, release-windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
           merge-multiple: true
