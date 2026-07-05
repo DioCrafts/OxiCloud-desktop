@@ -1,0 +1,59 @@
+{
+  "@@locale": "it",
+  "appTitle": "OxiCloud",
+  "login": "Accedi",
+  "register": "Registrati",
+  "username": "Nome utente",
+  "password": "Password",
+  "email": "Email",
+  "logout": "Disconnetti",
+  "files": "File",
+  "photos": "Foto",
+  "favorites": "Preferiti",
+  "recent": "Recenti",
+  "trash": "Cestino",
+  "shares": "Condivisioni",
+  "settings": "Impostazioni",
+  "search": "Cerca",
+  "upload": "Carica",
+  "download": "Scarica",
+  "delete": "Elimina",
+  "rename": "Rinomina",
+  "move": "Sposta",
+  "copy": "Copia",
+  "createFolder": "Crea cartella",
+  "emptyTrash": "Svuota cestino",
+  "restore": "Ripristina",
+  "cancel": "Annulla",
+  "confirm": "Conferma",
+  "error": "Errore",
+  "retry": "Riprova",
+  "offline": "Offline",
+  "syncing": "Sincronizzazione in corso…",
+  "syncComplete": "Sincronizzazione completata",
+  "noFiles": "Nessun file qui",
+  "storageUsed": "{used} di {total} utilizzati",
+  "@storageUsed": {
+    "placeholders": {
+      "used": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "uploadProgress": "Caricamento di {name} in corso… {percent}%",
+  "@uploadProgress": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "percent": { "type": "int" }
+    }
+  },
+  "itemCount": "{count, plural, =0{Nessun elemento} =1{1 elemento} other{{count} elementi}}",
+  "@itemCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "serverUrl": "URL del server",
+  "connectToServer": "Connetti al server",
+  "welcomeTitle": "Benvenuto su OxiCloud",
+  "welcomeSubtitle": "Il tuo cloud self-hosted"
+}
